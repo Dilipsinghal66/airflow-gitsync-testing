@@ -138,12 +138,12 @@ workers:
   ##
   ## Custom resource configuration
   resources: {}
-    # limits:
-    #   cpu: "1"
-    #   memory: "2G"
-    # requests:
-    #   cpu: "0.5"
-    #   memory: "512Mi"
+     limits:
+       cpu: 200m
+       memory: 512Mi
+     requests:
+       cpu: 100m
+       memory: 128Mi
   ##
   ## Annotations for the Worker pods
   pod:
