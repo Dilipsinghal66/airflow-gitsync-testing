@@ -392,7 +392,7 @@ postgresql:
   ## PostgreSQL port
   service:
     port: 5432
-  postgresHost: postgres
+  postgresHost: postgres.db.cluster.svc.local
   ## PostgreSQL User to create.
   postgresUser: postgres
   ##
