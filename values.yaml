@@ -137,7 +137,7 @@ workers:
   replicas: 1
   ##
   ## Custom resource configuration
-  resources: {}
+  resources:
      limits:
        cpu: 200m
        memory: 512Mi
