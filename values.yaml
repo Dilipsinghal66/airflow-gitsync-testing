@@ -171,7 +171,7 @@ ingress:
   ## enable ingress
   ## Note: If you want to change url prefix for web ui or flower even if you do not use ingress,
   ## you can still change ingress.web.path and ingress.flower.path
-  enabled: false
+  enabled: true
   ##
   ## Configure the webserver endpoint
   web:
@@ -186,7 +186,7 @@ ingress:
     ##  - Healthcheck is at 'http://mycompany.com/airflow/health'
     ##  - api is at 'http://mycompany.com/airflow/api'
     ## NOTE: do NOT keep trailing slash. For root configuration, set and empty string
-    path: ""
+    path: "/airflow"
     ##
     ## hostname for the webserver
     host: ""
@@ -217,7 +217,7 @@ ingress:
     ## request to have been be at the root.
     ## That's why we need a reverse proxy/load balancer that is able to strip the path
     ## NOTE: do NOT keep trailing slash. For root configuration, set and empty string
-    path: ""
+    path: "/airflow/flower"
     ##
     ## Configure the liveness path. Keep to "/" for Flower >= jan 2018.
     ## For previous version, enter the same path than in the 'path' key
@@ -383,7 +383,7 @@ postgresql:
   ##
   ## Use the PostgreSQL chart dependency.
   ## Set to false if bringing your own PostgreSQL.
-  enabled: true
+  enabled: false
   ##
   ## If you are bringing your own PostgreSQL, you should set postgresHost and
   ## also probably service.port, postgresUser, postgresPassword, and postgresDatabase
@@ -392,6 +392,7 @@ postgresql:
   ## PostgreSQL port
   service:
     port: 5432
+  postgresHost: postgres
   ## PostgreSQL User to create.
   postgresUser: postgres
   ##
@@ -407,7 +408,7 @@ postgresql:
   persistence:
     ##
     ## Enable PostgreSQL persistence using Persistent Volume Claims.
-    enabled: true
+    enabled: false
     ##
     ## Persistant class
     # storageClass: classname
@@ -422,35 +423,37 @@ redis:
   ##
   ## Use the redis chart dependency.
   ## Set to false if bringing your own redis.
-  enabled: true
+  enabled: false
+
   ##
   ## If you are bringing your own redis, you can set the host in redisHost.
   ## redisHost:
   ##
   ## Redis password
   ##
-  password: airflow
-  ##
-  ## Master configuration
-  master:
-    ##
-    ## Image configuration
-    # image:
-      ##
-      ## docker registry secret names (list)
-      # pullSecrets: nil
-    ##
-    ## Configure persistance
-    persistence:
-      ##
-      ## Use a PVC to persist data.
-      enabled: false
-      ##
-      ## Persistant class
-      # storageClass: classname
-      ##
-      ## Access mode:
-      accessMode: ReadWriteOnce
+  redisHost: redis
+#  password: airflow
+#  ##
+#  ## Master configuration
+#  master:
+#    ##
+#    ## Image configuration
+#    # image:
+#      ##
+#      ## docker registry secret names (list)
+#      # pullSecrets: nil
+#    ##
+#    ## Configure persistance
+#    persistence:
+#      ##
+#      ## Use a PVC to persist data.
+#      enabled: false
+#      ##
+#      ## Persistant class
+#      # storageClass: classname
+#      ##
+#      ## Access mode:
+#      accessMode: ReadWriteOnce
   ##
   ## Disable cluster management by default.
   cluster:
