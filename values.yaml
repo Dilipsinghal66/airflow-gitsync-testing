@@ -392,7 +392,7 @@ postgresql:
   ## PostgreSQL port
   service:
     port: 5432
-  postgresHost: postgres.db.cluster.svc.local
+  postgresHost: postgres
   ## PostgreSQL User to create.
   postgresUser: airflow
   ##
