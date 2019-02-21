@@ -49,7 +49,7 @@ def run_task(**kwargs):
 
 
 dag = DAG("custom-notifications", default_args=default_args,
-          schedule_interval='*/30 * * * * *', max_active_runs=5)
+          schedule_interval='0 */5 * * * *', max_active_runs=5)
 run_this_first = DummyOperator(
     task_id='run_this_first',
     dag=dag,pool="test"
