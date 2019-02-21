@@ -431,7 +431,7 @@ redis:
   ##
   ## Redis password
   ##
-  redisHost: redis
+  redisHost: redis.cache.svc.cluster.local
 #  password: airflow
 #  ##
 #  ## Master configuration
