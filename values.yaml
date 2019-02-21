@@ -34,9 +34,9 @@ airflow:
   ## a secret will be created with a default name and the following mapping.
   defaultSecretsMapping:
   - envVar: POSTGRES_USER
-    secretKey: airflow
+    secretKey: postgresUser
   - envVar: POSTGRES_PASSWORD
-    secretKey: airflow
+    secretKey: postgresPassword
   - envVar: REDIS_PASSWORD
     secretKey: redisPassword
 
