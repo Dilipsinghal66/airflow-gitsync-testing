@@ -33,7 +33,7 @@ def run_task(**kwargs):
     return a
 
 def get_task(**kwargs):
-    data = task_2.xcom_pull(task_ids='task_1')
+    data = kwargs['task_instance'].xcom_pull(task_ids='task_1')
     print(data)
     return
 
@@ -54,7 +54,8 @@ task_2 = PythonOperator(
  provide_context=True,
  python_callable=get_task,
  dag=dag,
- pool="test"
+ pool="test",
+ depends_on_past=True
 )
 
 task_2.set_upstream(task_1)
