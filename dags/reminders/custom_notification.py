@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
 
 from airflow import DAG
+from airflow.contrib.operators import
 from airflow.contrib.hooks.mongo_hook import MongoHook
+
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import (
     BranchPythonOperator,
@@ -29,33 +31,17 @@ default_args = {
  # 'end_date': datetime(2016, 1, 1),
 }
 
-def python_task(*args, **kwargs):
-    print(args)
-    print(kwargs)
-    return "finished"
-
-task_even = None
-task_odd = None
 
 def run_task(**kwargs):
-    for d in kwargs:
-        user_id: int = d.get("userId", None)
-        if user_id:
-            if user_id % 2 == 0:
-                print("even")
-            else:
-                print("odd")
-    return "finished"
+    a={"done": True}
+    return a
 
 
-dag = DAG("custom-notifications", default_args=default_args,
+dag = DAG("test-notification", default_args=default_args,
           schedule_interval='0 */5 * * * *', max_active_runs=5)
-run_this_first = DummyOperator(
-    task_id='run_this_first',
-    dag=dag,pool="test"
-)
 
-cond_op = BranchPythonOperator(
+
+task_1 = PythonOperator(
  task_id="task_condition",
  provide_context=True,
  python_callable=run_task,
@@ -63,18 +49,4 @@ cond_op = BranchPythonOperator(
  pool="test"
 )
 
-run_this_first >> cond_op
 
-join = DummyOperator(
-    task_id='join',
-    trigger_rule='one_success',
-    dag=dag,
-    pool="test"
-)
-
-for user in users:
-    user_id = user.get("userId")
-    t = PythonOperator(task_id=str(user_id)+"_follow", dag=dag,
-                       python_callable=run_task, op_kwargs=user, pool="test")
-
-    cond_op >> t >> join
