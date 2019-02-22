@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.contrib.hooks.mongo_hook import MongoHook
+from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.python_operator import (
     PythonOperator
 )
@@ -30,13 +31,13 @@ default_args = {
 
 def run_task(**kwargs):
     a = {"done": True}
-    kwargs['task_instance'].xcom_push("mrigesh","pokhrel")
+    kwargs['task_instance'].xcom_push("mrigesh", "pokhrel")
     return a
 
 def get_task(**kwargs):
     data = kwargs['task_instance'].xcom_pull(task_ids='task_1')
     print(data)
-    return
+    return True
 
 
 dag = DAG("test-notification", default_args=default_args,
@@ -58,4 +59,13 @@ task_2 = PythonOperator(
  pool="test"
 )
 
+delete_xcom = PostgresOperator(
+ task_id="delete_old_xcom",
+ sql="delete from xcom where dag_id=dag.dag_id and task_id='task_1' and "
+     "execution_date={{ ds }} and key = 'return_value'",
+ dag=dag,
+ depends_on_past=True
+)
+
 task_2.set_upstream(task_1)
+delete_xcom.set_upstream(task_2)
