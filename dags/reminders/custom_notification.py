@@ -30,6 +30,7 @@ default_args = {
 
 def run_task(**kwargs):
     a = {"done": True}
+    kwargs['task_instance'].xcom_push("mrigesh","pokhrel")
     return a
 
 def get_task(**kwargs):
