@@ -1,12 +1,8 @@
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.contrib.operators import
 from airflow.contrib.hooks.mongo_hook import MongoHook
-
-from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import (
-    BranchPythonOperator,
     PythonOperator
 )
 
@@ -33,13 +29,12 @@ default_args = {
 
 
 def run_task(**kwargs):
-    a={"done": True}
+    a = {"done": True}
     return a
 
 
 dag = DAG("test-notification", default_args=default_args,
           schedule_interval='0 */5 * * * *', max_active_runs=5)
-
 
 task_1 = PythonOperator(
  task_id="task_condition",
@@ -48,5 +43,3 @@ task_1 = PythonOperator(
  dag=dag,
  pool="test"
 )
-
-
