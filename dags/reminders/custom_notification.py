@@ -32,14 +32,29 @@ def run_task(**kwargs):
     a = {"done": True}
     return a
 
+def get_task(**kwargs):
+    data = task_2.xcom_pull(task_ids='task_1')
+    print(data)
+    return
+
 
 dag = DAG("test-notification", default_args=default_args,
           schedule_interval='0 */5 * * * *', max_active_runs=5)
 
 task_1 = PythonOperator(
- task_id="task_condition",
+ task_id="task_1",
  provide_context=True,
  python_callable=run_task,
  dag=dag,
  pool="test"
 )
+
+task_2 = PythonOperator(
+ task_id="task_2",
+ provide_context=True,
+ python_callable=get_task,
+ dag=dag,
+ pool="test"
+)
+
+task_2.set_upstream(task_1)
