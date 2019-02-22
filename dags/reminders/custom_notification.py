@@ -54,8 +54,7 @@ task_2 = PythonOperator(
  provide_context=True,
  python_callable=get_task,
  dag=dag,
- pool="test",
- depends_on_past=True
+ pool="test"
 )
 
 task_2.set_upstream(task_1)
