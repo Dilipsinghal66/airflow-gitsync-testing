@@ -21,7 +21,8 @@ payload = {
 
 headers = {
  "client":"service",
- "access_token":"lKKqOArIvHczgW5w4r9NMF1y41kpXs2v"
+ "access_token":"lKKqOArIvHczgW5w4r9NMF1y41kpXs2v",
+ "content-type": "application/json"
 }
 
 
