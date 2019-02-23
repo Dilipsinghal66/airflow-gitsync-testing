@@ -22,5 +22,6 @@ reminder_7_30 = SimpleHttpOperator(
  endpoint="/api/v1/chat/396/message",
  data={},
  headers={},
- log_response=True
+ log_response=True,
+ http_conn_id="zyla_feature"
 )
