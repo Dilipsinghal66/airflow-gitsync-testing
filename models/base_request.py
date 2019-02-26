@@ -3,7 +3,7 @@ from urllib3.poolmanager import PoolManager
 
 class BaseRequestModel(PoolManager):
 
-    ## Standard requests.
+    # Standard requests.
     def get(self):
         raise NotImplementedError()
 
@@ -16,8 +16,6 @@ class BaseRequestModel(PoolManager):
     def put(self):
         raise NotImplementedError()
 
-
-    ## parsed requests
+    # parsed requests
     def get_parsed_data(self):
         raise NotImplementedError()
-
