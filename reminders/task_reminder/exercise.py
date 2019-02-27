@@ -54,7 +54,7 @@ def send_reminder(**kwargs):
     print(patient_id_list)
     user_filter = {
         "patientId": {"$nin": patient_id_list},
-        "userStatus": {"$neq": 3}
+        "userStatus": {"$ne": 3}
     }
     user_data = user_db.find(user_filter, {"userId": 1})
     user_id_list = []
