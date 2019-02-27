@@ -1,6 +1,7 @@
 import json
 from copy import deepcopy
 from datetime import datetime, timedelta
+from time import sleep
 
 import urllib3
 from airflow import DAG
@@ -64,6 +65,7 @@ def send_reminder(**kwargs):
         http_conn_id="zyla_feature"
     )
     for user_id in user_id_list:
+        sleep(1)
         print("send message for user id ", user_id)
         try:
             http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=payload,
