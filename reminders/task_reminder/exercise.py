@@ -1,7 +1,7 @@
-import json
 from copy import deepcopy
 from datetime import datetime, timedelta
 from time import sleep
+import json
 
 import urllib3
 from airflow import DAG
@@ -24,11 +24,11 @@ dag = DAG(
     schedule_interval="@once",
 )
 
-payload = json.dumps({
+payload = {
     "action": "tasks_reporting_14_00",
     "is_notification": False,
     "message": "I am proud of your determination! Please also share the tasks you completed today"
-})
+}
 
 headers = {
     "client": "service",
@@ -72,7 +72,7 @@ def send_reminder(**kwargs):
         sleep(1)
         print("send message for user id ", user_id)
         try:
-            http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=payload,
+            http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
                           headers=headers)
         except Exception as e:
             print(str(e))
