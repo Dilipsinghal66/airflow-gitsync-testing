@@ -67,7 +67,7 @@ def send_reminder(**kwargs):
         http_conn_id="zyla_feature"
     )
     for user_id in user_id_list:
-        if int(user_id) != 670:
+        if int(user_id) != 393:
             continue
         print("send message")
         #http_hook.run(endpoint="/api/v1/chat/user/" + user_id + "/message", data=payload,
