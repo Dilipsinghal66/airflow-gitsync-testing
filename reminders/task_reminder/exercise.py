@@ -26,8 +26,8 @@ dag = DAG(
 
 payload = json.dumps({
     "action": "tasks_reporting_14_00",
-    "is_notification": True,
-    "message": "test"
+    "is_notification": False,
+    "message": "I am proud of your determination! Please also share the tasks you completed today"
 })
 
 headers = {
@@ -41,10 +41,12 @@ def send_reminder(**kwargs):
     hook = MongoHook(
         mongo_conn_id="mongo_user_db",
     )
+    message = "Report the number of total minutes spent on walking or exercising today."
+    payload["message"] = message
     today = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0) - timedelta(days=1)
     task_filter_payload = deepcopy(kwargs)
     task_filter_payload["_created"] = {"$gt": today}
-    user_db = hook.get_collection("user", "userService")
+    user_db = hook.get_collection("user", "api_service_user")
     tasks = hook.get_collection("tasks", "goal_service")
     tasks_data = tasks.find(task_filter_payload, {"patientId": 1})
     patient_id_list = []
@@ -65,6 +67,8 @@ def send_reminder(**kwargs):
         http_conn_id="zyla_feature"
     )
     for user_id in user_id_list:
+        if int(user_id) != 670:
+            continue
         sleep(1)
         print("send message for user id ", user_id)
         try:
