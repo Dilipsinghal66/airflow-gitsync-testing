@@ -43,7 +43,6 @@ def send_reminder(**kwargs):
     today = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0) - timedelta(days=1)
     task_filter_payload = deepcopy(kwargs)
     task_filter_payload["_created"] = {"$gt": today}
-    print(task_filter_payload)
     user_db = hook.get_collection("user", "userService")
     tasks = hook.get_collection("tasks", "goal_service")
     tasks_data = tasks.find(task_filter_payload, {"patientId": 1})
@@ -51,7 +50,6 @@ def send_reminder(**kwargs):
     for tasks in tasks_data:
         patient_id = tasks.get("patientId")
         patient_id_list.append(patient_id)
-    print(patient_id_list)
     user_filter = {
         "patientId": {"$nin": patient_id_list},
         "userStatus": {"$ne": 3}
@@ -59,7 +57,6 @@ def send_reminder(**kwargs):
     user_data = user_db.find(user_filter, {"userId": 1})
     user_id_list = []
     for user in user_data:
-        print(user)
         user_id = user.get("userId")
         user_id_list.append(user_id)
     http_hook = HttpHook(
@@ -68,9 +65,13 @@ def send_reminder(**kwargs):
     )
     for user_id in user_id_list:
         print("send message for user id ", user_id)
-        http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=payload,
-                     headers=headers)
+        try:
+            http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=payload,
+                          headers=headers)
+        except Exception as e:
+            print(str(e))
     pass
+
 
 reminder_7_30 = PythonOperator(
     task_id="reminder_07_30",
