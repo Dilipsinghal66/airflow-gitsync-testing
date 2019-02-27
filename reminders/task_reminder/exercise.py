@@ -43,6 +43,7 @@ def send_reminder(**kwargs):
     today = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0) - timedelta(days=1)
     task_filter_payload = deepcopy(kwargs)
     task_filter_payload["_created"] = {"$gt": today}
+    print(task_filter_payload)
     user_db = hook.get_collection("user", "api_service_user")
     tasks = hook.get_collection("tasks", "api_service_goals")
     tasks_data = tasks.find(task_filter_payload, {"patientId": 1})
@@ -50,13 +51,14 @@ def send_reminder(**kwargs):
     for tasks in tasks_data:
         patient_id = tasks.get("patientId")
         patient_id_list.append(patient_id)
-
+    print(patient_id_list)
     user_filter = {
         "patientId": {"$in": patient_id_list}
     }
     user_data = user_db.find(user_filter, {"userId": 1})
     user_id_list = []
     for user in user_data:
+        print(user)
         user_id = user.get("userId")
         user_id_list.append(user_id)
     http_hook = HttpHook(
