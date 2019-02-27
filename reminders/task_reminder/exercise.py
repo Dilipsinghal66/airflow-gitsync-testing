@@ -44,8 +44,8 @@ def send_reminder(**kwargs):
     task_filter_payload = deepcopy(kwargs)
     task_filter_payload["_created"] = {"$gt": today}
     print(task_filter_payload)
-    user_db = hook.get_collection("user", "api_service_user")
-    tasks = hook.get_collection("tasks", "api_service_goals")
+    user_db = hook.get_collection("user", "userService")
+    tasks = hook.get_collection("tasks", "goal_service")
     tasks_data = tasks.find(task_filter_payload, {"patientId": 1})
     patient_id_list = []
     for tasks in tasks_data:
