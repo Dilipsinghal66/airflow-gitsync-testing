@@ -1,7 +1,7 @@
+import json
 from copy import deepcopy
 from datetime import datetime, timedelta
 from time import sleep
-import json
 
 import urllib3
 from airflow import DAG
@@ -55,27 +55,23 @@ def send_reminder(**kwargs):
         patient_id_list.append(patient_id)
     user_filter = {
         "patientId": {"$nin": patient_id_list},
-        "userStatus": {"$ne": 3}
+        "userStatus": {"$in": [11, 12, 13]}
     }
-    user_data = user_db.find(user_filter, {"userId": 1})
-    user_id_list = []
-    for user in user_data:
-        user_id = user.get("userId")
-        user_id_list.append(user_id)
+    user_data = user_db.find(user_filter, {"userId": 1}).batch_size(100)
     http_hook = HttpHook(
         method="POST",
         http_conn_id="zyla_feature"
     )
-    for user_id in user_id_list:
-        if int(user_id) != 670:
-            continue
-        sleep(1)
-        print("send message for user id ", user_id)
-        try:
-            http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
-                          headers=headers)
-        except Exception as e:
-            print(str(e))
+    while user_data.alive:
+        for user in user_data:
+            sleep(1)
+            user_id = user.get("userId")
+            print("send message for user id ", user_id)
+            try:
+                http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
+                              headers=headers)
+            except Exception as e:
+                print(str(e))
     pass
 
 
