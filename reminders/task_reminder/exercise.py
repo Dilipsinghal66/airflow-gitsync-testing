@@ -60,11 +60,12 @@ def send_reminder(**kwargs):
     task_filter_payload["_created"] = {"$gt": today}
     user = user_db.get_collection("user")
     tasks = goal_db.get_collection("goal")
-    tasks_data = tasks.find(task_filter_payload, {"patientId": 1})
+    tasks_data = tasks.find(task_filter_payload, {"patientId": 1}).batch_size(100)
     patient_id_list = []
-    for tasks in tasks_data:
-        patient_id = tasks.get("patientId")
-        patient_id_list.append(patient_id)
+    while tasks_data.alive:
+        for tasks in tasks_data:
+            patient_id = tasks.get("patientId")
+            patient_id_list.append(patient_id)
     user_filter = {
         "patientId": {"$nin": patient_id_list},
         "userStatus": {"$in": [11, 12, 13]}
