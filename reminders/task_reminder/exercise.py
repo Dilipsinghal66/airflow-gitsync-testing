@@ -15,13 +15,21 @@ urllib3.disable_warnings(InsecureRequestWarning)
 
 default_args = {
     'owner': 'airflow',
-    'start_date': dates.days_ago(2)
+    'start_date': dates.days_ago(2),
+    'depends_on_past': False,
+    'email': 'mrigesh@zyla.in',
+    'email_on_failure': True,
+    'email_on_retry': True,
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5)
+
 }
 
 dag = DAG(
     dag_id='exercise_reminder',
     default_args=default_args,
-    schedule_interval="@once",
+    schedule_interval="30 19 * * *",
+    catchup=False
 )
 
 payload = {
@@ -75,6 +83,7 @@ def send_reminder(**kwargs):
                               headers=headers)
             except Exception as e:
                 dag.log.error(e)
+                raise ValueError("Task failed")
     return True
 
 
