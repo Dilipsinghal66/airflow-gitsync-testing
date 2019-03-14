@@ -38,6 +38,7 @@ headers = {
 
 
 def send_reminder(**kwargs):
+    print("started task")
     hook = MongoHook(
         mongo_conn_id="mongo_user_db",
     )
@@ -53,11 +54,14 @@ def send_reminder(**kwargs):
     for tasks in tasks_data:
         patient_id = tasks.get("patientId")
         patient_id_list.append(patient_id)
+    print("patient id list"+str(patient_id_list))
     user_filter = {
         "patientId": {"$nin": patient_id_list},
         "userStatus": {"$in": [11, 12, 13]}
     }
+    print(user_filter)
     user_data = user_db.find(user_filter, {"userId": 1}).batch_size(100)
+    print("fetched user data")
     http_hook = HttpHook(
         method="POST",
         http_conn_id="zyla_feature"
