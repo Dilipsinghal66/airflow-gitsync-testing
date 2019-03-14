@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 from datetime import datetime, timedelta
 from time import sleep
@@ -39,46 +38,52 @@ headers = {
 
 def send_reminder(**kwargs):
     print("started task")
-    hook = MongoHook(
-        mongo_conn_id="mongo_user_db",
-    )
+    user_db = MongoHook(
+        conn_id="mongo_user_db"
+    ).get_conn().get_default_database()
+    goal_db = MongoHook(
+        conn_id="mongo_goal_db"
+    ).get_conn().get_default_database()
     message = "Report the number of total minutes spent on walking or exercising today."
     payload["message"] = message
     today = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0) - timedelta(days=1)
     task_filter_payload = deepcopy(kwargs)
     task_filter_payload["_created"] = {"$gt": today}
-    user_db = hook.get_collection("user", "api_service_user")
-    tasks = hook.get_collection("tasks", "goal_service")
+    user = user_db.get_collection("user")
+    tasks = goal_db.get_collection("goal")
     tasks_data = tasks.find(task_filter_payload, {"patientId": 1})
     patient_id_list = []
     for tasks in tasks_data:
         patient_id = tasks.get("patientId")
         patient_id_list.append(patient_id)
-    print("patient id list"+str(patient_id_list))
+    print("patient id list" + str(patient_id_list))
     user_filter = {
         "patientId": {"$nin": patient_id_list},
         "userStatus": {"$in": [11, 12, 13]}
     }
     print(user_filter)
-    user_data = user_db.find(user_filter, {"userId": 1}).batch_size(100)
+    user_data = user.find(user_filter, {"userId": 1}).batch_size(100)
     print("fetched user data")
     http_hook = HttpHook(
         method="POST",
-        http_conn_id="zyla_feature"
+        http_conn_id="chat_service_url"
     )
+    print(http_hook.__dict__)
     print("start sending messages")
     while user_data.alive:
         print("in while loop")
         for user in user_data:
+            print(user)
             sleep(1)
             user_id = user.get("userId")
             print("send message for user id ", user_id)
             try:
-                http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
-                              headers=headers)
+                pass
+                # http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
+                #             headers=headers)
             except Exception as e:
                 print(str(e))
-    pass
+    return True
 
 
 reminder_7_30 = PythonOperator(
