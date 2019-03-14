@@ -28,7 +28,7 @@ default_args = {
 dag = DAG(
     dag_id='exercise_reminder',
     default_args=default_args,
-    schedule_interval="30 19 * * *",
+    schedule_interval="30 7 * * *",
     catchup=False
 )
 
