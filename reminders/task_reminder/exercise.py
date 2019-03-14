@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from datetime import datetime, timedelta
 from time import sleep
@@ -37,7 +38,7 @@ headers = {
 
 
 def send_reminder(**kwargs):
-    print("started task")
+    dag.log.info("Starting task")
     user_db = MongoHook(
         conn_id="mongo_user_db"
     ).get_conn().get_default_database()
@@ -56,33 +57,24 @@ def send_reminder(**kwargs):
     for tasks in tasks_data:
         patient_id = tasks.get("patientId")
         patient_id_list.append(patient_id)
-    print("patient id list" + str(patient_id_list))
     user_filter = {
         "patientId": {"$nin": patient_id_list},
         "userStatus": {"$in": [11, 12, 13]}
     }
-    print(user_filter)
     user_data = user.find(user_filter, {"userId": 1}).batch_size(100)
-    print("fetched user data")
     http_hook = HttpHook(
         method="POST",
         http_conn_id="chat_service_url"
     )
-    print(http_hook.__dict__)
-    print("start sending messages")
     while user_data.alive:
-        print("in while loop")
         for user in user_data:
-            print(user)
             sleep(1)
             user_id = user.get("userId")
-            print("send message for user id ", user_id)
             try:
-                pass
-                # http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
-                #             headers=headers)
+                http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload),
+                              headers=headers)
             except Exception as e:
-                print(str(e))
+                dag.log.error(e)
     return True
 
 
@@ -91,5 +83,6 @@ reminder_7_30 = PythonOperator(
     task_concurrency=1,
     python_callable=send_reminder,
     dag=dag,
-    op_kwargs={"taskId": 4180}
+    op_kwargs={"taskId": 4180},
+    pool="task_reminder_pool"
 )
