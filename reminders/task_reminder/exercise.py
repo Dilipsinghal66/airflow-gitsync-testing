@@ -66,7 +66,9 @@ def send_reminder(**kwargs):
         method="POST",
         http_conn_id="zyla_feature"
     )
+    print("start sending messages")
     while user_data.alive:
+        print("in while loop")
         for user in user_data:
             sleep(1)
             user_id = user.get("userId")
