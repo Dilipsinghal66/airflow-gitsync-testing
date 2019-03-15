@@ -6,6 +6,8 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 
+test_user_id = int(Variable.get("test_user_id", '0'))
+
 user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
 goal_db = MongoHook(conn_id="mongo_goal_db").get_conn().get_default_database()
 
@@ -43,6 +45,8 @@ def send_reminder(**kwargs):
         for user in user_data:
             sleep(0.5)
             user_id = user.get("userId")
+            if test_user_id and int(user_id) != test_user_id:
+                continue
             try:
                 http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload))
             except Exception as e:
