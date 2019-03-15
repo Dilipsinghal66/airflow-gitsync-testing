@@ -6,13 +6,9 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 
-test_user_id = int(Variable.get("test_user_id", '0'))
-
-user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
-goal_db = MongoHook(conn_id="mongo_goal_db").get_conn().get_default_database()
-
 
 def get_patient_id_for_incomplete_task(task_lookup):
+    goal_db = MongoHook(conn_id="mongo_goal_db").get_conn().get_default_database()
     today = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0) - timedelta(days=1)
     task_lookup["_created"] = {"$gt": today}
     tasks = goal_db.get_collection("tasks_report")
@@ -28,6 +24,8 @@ def get_patient_id_for_incomplete_task(task_lookup):
 
 
 def send_reminder(**kwargs):
+    user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
+    test_user_id = int(Variable.get("test_user_id", '0'))
     payload_var = kwargs.pop("payload_var")
     payload = Variable.get(payload_var, deserialize_json=True)
     user = user_db.get_collection("user")
