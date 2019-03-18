@@ -9,7 +9,7 @@ from airflow.models import Variable
 
 def get_patient_id_for_incomplete_task(task_lookup):
     health_plan_lookup = {
-        "current_level": "Level "+str(task_lookup.get("level"))
+        "current_level": "Level " + str(task_lookup.get("level"))
     }
     goal_db = MongoHook(conn_id="mongo_goal_db").get_conn().get_default_database()
     health_plan = goal_db.get_collection("health-plan")
@@ -62,7 +62,7 @@ def send_reminder(**kwargs):
             user_id_list.append(user_id)
 
     for i in range(0, len(user_id_list) + 1, processing_batch_size):
-        _id_list = user_id_list[i:i+processing_batch_size]
+        _id_list = user_id_list[i:i + processing_batch_size]
         sleep(1)
         for user_id in _id_list:
             try:
