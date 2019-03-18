@@ -11,7 +11,7 @@ def get_patient_id_for_incomplete_task(task_lookup):
     health_plan_lookup = {
         "current_level": "Level "+str(task_lookup.get("level"))
     }
-    goal_db = MongoHook(conn_id="mongo_default").get_conn().get_default_database()
+    goal_db = MongoHook(conn_id="mongo_goal_db").get_conn().get_default_database()
     health_plan = goal_db.get_collection("health-plan")
     health_plan_data = health_plan.find(health_plan_lookup, {"patientId": 1}).batch_size(100)
     level_patient_id_list = []
