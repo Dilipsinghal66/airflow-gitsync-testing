@@ -39,6 +39,7 @@ def get_patient_id_for_incomplete_task(task_lookup):
 def send_reminder(**kwargs):
     user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
+    processing_batch_size = int(Variable.get("processing_batch_size", 100))
     payload = kwargs.pop("payload")
     task_lookup = kwargs.pop("task_details")
     user = user_db.get_collection("user")
@@ -52,12 +53,18 @@ def send_reminder(**kwargs):
         method="POST",
         http_conn_id="chat_service_url"
     )
+    user_id_list = []
     while user_data.alive:
         for user in user_data:
-            sleep(0.5)
             user_id = user.get("userId")
             if test_user_id and int(user_id) != test_user_id:
                 continue
+            user_id_list.append(user_id)
+
+    for i in range(0, len(user_id_list) + 1, processing_batch_size):
+        _id_list = user_id_list[i:i+processing_batch_size]
+        sleep(1)
+        for user_id in _id_list:
             try:
                 http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload))
             except Exception as e:
