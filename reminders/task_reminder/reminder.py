@@ -8,9 +8,22 @@ from airflow.models import Variable
 
 
 def get_patient_id_for_incomplete_task(task_lookup):
-    goal_db = MongoHook(conn_id="mongo_goal_db").get_conn().get_default_database()
+    health_plan_lookup = {
+        "current_level": "Level "+str(task_lookup.get("level"))
+    }
+    goal_db = MongoHook(conn_id="mongo_default").get_conn().get_default_database()
+    health_plan = goal_db.get_collection("health-plan")
+    health_plan_data = health_plan.find(health_plan_lookup, {"patientId": 1}).batch_size(100)
+    level_patient_id_list = []
+    while health_plan_data.alive:
+        for health_plan in health_plan_data:
+            patient_id = health_plan.get("patientId")
+            if patient_id in level_patient_id_list:
+                continue
+            level_patient_id_list.append(patient_id)
     today = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0) - timedelta(days=1)
     task_lookup["_created"] = {"$gt": today}
+    task_lookup["patientId"] = {"$in": level_patient_id_list}
     tasks = goal_db.get_collection("tasks_report")
     tasks_data = tasks.find(task_lookup, {"patientId": 1}).batch_size(100)
     patient_id_list = []
@@ -26,10 +39,10 @@ def get_patient_id_for_incomplete_task(task_lookup):
 def send_reminder(**kwargs):
     user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
-    payload_var = kwargs.pop("payload_var")
-    payload = Variable.get(payload_var, deserialize_json=True)
+    payload = kwargs.pop("payload")
+    task_lookup = kwargs.pop("task_details")
     user = user_db.get_collection("user")
-    patient_id_list = get_patient_id_for_incomplete_task(kwargs)
+    patient_id_list = get_patient_id_for_incomplete_task(task_lookup=task_lookup)
     user_filter = {
         "patientId": {"$nin": patient_id_list},
         "userStatus": {"$in": [11, 12, 13]}
