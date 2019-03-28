@@ -1,5 +1,6 @@
 import json
 from time import sleep
+from random import randint
 
 import requests
 from airflow.contrib.hooks.mongo_hook import MongoHook
@@ -21,7 +22,10 @@ def get_parsed_resource_data(resource_url: str):
 def send_reminder(**kwargs):
   time_data_url = "https://services.zyla.in/statemachine/scheduler/19:00/messages/1"
   time_data = get_parsed_resource_data(time_data_url)
-  message = time_data.get("messages")[0]
+  messages = time_data.get("messages")[0]
+  m_len = len(messages) - 1
+  m_idx = randint(0, m_len)
+  message = messages[m_idx]
   action = time_data.get("action")
   user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
   test_user_id = int(Variable.get("test_user_id", '0'))
