@@ -7,7 +7,7 @@ from config import local_tz, default_args
 reporting_reminder_19_00_dag = DAG(
   dag_id="reporting_reminder_19_00",
   default_args=default_args,
-  schedule_interval="45 21 * * *",
+  schedule_interval="00 19 * * *",
   catchup=False,
   start_date=dates.days_ago(0).replace(tzinfo=local_tz)
 )
