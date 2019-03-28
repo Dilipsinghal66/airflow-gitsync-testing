@@ -1,28 +1,10 @@
-from datetime import timedelta
-
-import pendulum
-import urllib3
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils import dates
-from urllib3.exceptions import InsecureRequestWarning
 
-local_tz = pendulum.timezone("Asia/Kolkata")
-
+from config import local_tz, default_args
 from reminders.task_reminder.reminder import send_reminder
-
-urllib3.disable_warnings(InsecureRequestWarning)
-
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email': 'mrigesh@zyla.in',
-    'email_on_failure': True,
-    'email_on_retry': True,
-    'retries': 3,
-    'retry_delay': timedelta(minutes=5)
-}
 
 auto_dag_def = Variable.get("auto_dag", deserialize_json=True)
 for dag_def in auto_dag_def:
@@ -32,7 +14,7 @@ for dag_def in auto_dag_def:
         default_args=default_args,
         schedule_interval=dag_def.get("schedule_interval"),
         catchup=False,
-        start_date=dates.days_ago(2).replace(tzinfo=local_tz)
+        start_date=dates.days_ago(0).replace(tzinfo=local_tz)
     )
     task_name = dag_def.get("task_name")
     locals()[task_name] = PythonOperator(
@@ -41,5 +23,7 @@ for dag_def in auto_dag_def:
         python_callable=send_reminder,
         dag=locals().get(dag_name),
         op_kwargs=dag_def.get("op_kwargs"),
-        pool="task_reminder_pool"
+        pool="task_reminder_pool",
+        retry_exponential_backoff=True,
+        provide_context=True
     )
