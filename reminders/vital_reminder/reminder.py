@@ -22,7 +22,7 @@ def get_parsed_resource_data(resource_url: str):
 def send_reminder(**kwargs):
   time_data_url = "https://services.zyla.in/statemachine/scheduler/21:00/messages/2"
   time_data = get_parsed_resource_data(time_data_url)
-  messages = time_data.get("messages")[0]
+  messages = time_data.get("messages")
   m_len = len(messages) - 1
   m_idx = randint(0, m_len)
   message = messages[m_idx]
