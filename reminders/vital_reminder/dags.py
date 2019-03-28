@@ -7,7 +7,7 @@ from config import local_tz, default_args
 vital_reminder_21_00_dag = DAG(
   dag_id="vital_reminder_21_00",
   default_args=default_args,
-  schedule_interval="45 21 * * *",
+  schedule_interval="00 21 * * *",
   catchup=False,
   start_date=dates.days_ago(0).replace(tzinfo=local_tz)
 )
