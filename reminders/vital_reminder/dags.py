@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils import dates
+from reminders.vital_reminder.reminder import send_reminder
 
 from config import local_tz, default_args
 
@@ -15,7 +16,7 @@ vital_reminder_21_00_dag = DAG(
 vital_reminder_21_00_task = PythonOperator(
   task_id="vital_reminder_21_00_task",
   task_concurrency=1,
-  python_callable=print,
+  python_callable=send_reminder,
   dag=vital_reminder_21_00_dag,
   op_kwargs={},
   pool="task_reminder_pool",
