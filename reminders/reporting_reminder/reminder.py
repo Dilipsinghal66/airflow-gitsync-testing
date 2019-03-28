@@ -57,6 +57,6 @@ def send_reminder(**kwargs):
     sleep(1)
     for user_id in _id_list:
       try:
-        http_hook.run(endpoint="/api/v1/chat/user/" + str(user_id) + "/message", data=json.dumps(payload))
+        http_hook.run(endpoint="/api/v1/chat/user/" + str(round(user_id)) + "/message", data=json.dumps(payload))
       except Exception as e:
         raise ValueError(str(e))
