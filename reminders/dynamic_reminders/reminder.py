@@ -58,7 +58,6 @@ def send_reminder(**kwargs):
   action = time_data.get("action")
   user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
   test_user_id = int(Variable.get("test_user_id", '0'))
-  processing_batch_size = int(Variable.get("processing_batch_size", 100))
   payload = {
     "action": action,
     "message": message,
@@ -73,7 +72,6 @@ def send_reminder(**kwargs):
     method="POST",
     http_conn_id="chat_service_url"
   )
-  user_id_list = []
   while user_data.alive:
     for user in user_data:
       patient_days = get_patient_days(patient=user)
@@ -95,12 +93,3 @@ def send_reminder(**kwargs):
         http_hook.run(endpoint="/api/v1/chat/user/" + str(round(user_id)) + "/message", data=json.dumps(payload))
       except Exception as e:
         raise ValueError(str(e))
-
-  # for i in range(0, len(user_id_list) + 1, processing_batch_size):
-  #   _id_list = user_id_list[i:i + processing_batch_size]
-  #   sleep(1)
-  #   for user_id in _id_list:
-  #     try:
-  #       http_hook.run(endpoint="/api/v1/chat/user/" + str(round(user_id)) + "/message", data=json.dumps(payload))
-  #     except Exception as e:
-  #       raise ValueError(str(e))
