@@ -1,16 +1,17 @@
+from datetime import datetime
+
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.utils import dates
-from reminders.vital_reminder.reminder import send_reminder
 
 from config import local_tz, default_args
+from reminders.vital_reminder.reminder import send_reminder
 
 vital_reminder_21_00_dag = DAG(
   dag_id="vital_reminder_21_00",
   default_args=default_args,
   schedule_interval="00 21 * * *",
   catchup=False,
-  start_date=dates.days_ago(0).replace(tzinfo=local_tz)
+  start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0, microsecond=0, tzinfo=local_tz)
 )
 
 vital_reminder_21_00_task = PythonOperator(
