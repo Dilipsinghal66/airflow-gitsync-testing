@@ -38,4 +38,4 @@ level_jump_task = PythonOperator(
     provide_context=True
 )
 
-level_jump_task.set_upstream(activated_patients_task)
+activated_patients_task.set_upstream(level_jump_task)
