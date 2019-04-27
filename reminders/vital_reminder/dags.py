@@ -9,7 +9,7 @@ from reminders.vital_reminder.reminder import send_reminder
 vital_reminder_21_00_dag = DAG(
   dag_id="vital_reminder_21_00",
   default_args=default_args,
-  schedule_interval="00 21 * * *",
+  schedule_interval="0 21 * * 0,2,4,6",
   catchup=False,
   start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0, microsecond=0, tzinfo=local_tz)
 )
