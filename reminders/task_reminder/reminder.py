@@ -6,6 +6,8 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 
+exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "").split(",")))
+
 
 def get_patient_id_for_incomplete_task(task_lookup):
     health_plan_lookup = {
@@ -59,6 +61,8 @@ def send_reminder(**kwargs):
             user_id = user.get("userId")
             if test_user_id and int(user_id) != test_user_id:
                 continue
+            if int(user_id) in exclude_user_list:
+                continue
             user_id_list.append(user_id)
 
     for i in range(0, len(user_id_list) + 1, processing_batch_size):
@@ -66,6 +70,7 @@ def send_reminder(**kwargs):
         sleep(1)
         for user_id in _id_list:
             try:
-                http_hook.run(endpoint="/api/v1/chat/user/" + str(round(user_id)) + "/message", data=json.dumps(payload))
+                http_hook.run(endpoint="/api/v1/chat/user/" + str(round(user_id)) + "/message",
+                              data=json.dumps(payload))
             except Exception as e:
                 raise ValueError(str(e))
