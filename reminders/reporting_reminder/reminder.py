@@ -29,7 +29,7 @@ def send_reminder(**kwargs):
     action = time_data.get("action")
     user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
-    exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "").split(",")))
+    exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "0").split(",")))
     processing_batch_size = int(Variable.get("processing_batch_size", 100))
     payload = {
         "action": action,

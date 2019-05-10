@@ -7,9 +7,6 @@ from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 from dateutil import parser
 
-exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "").split(",")))
-
-
 def get_patient_days(patient):
     days = None
     user_flags = patient.get("userFlags", None)
@@ -60,6 +57,7 @@ def send_reminder(**kwargs):
     action = time_data.get("action")
     user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
+    exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "0").split(",")))
     payload = {
         "action": action,
         "message": message,

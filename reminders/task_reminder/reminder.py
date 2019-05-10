@@ -6,9 +6,6 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 
-exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "").split(",")))
-
-
 def get_patient_id_for_incomplete_task(task_lookup):
     health_plan_lookup = {
         "current_level": "Level " + str(task_lookup.get("level"))
@@ -41,6 +38,7 @@ def get_patient_id_for_incomplete_task(task_lookup):
 def send_reminder(**kwargs):
     user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
+    exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "0").split(",")))
     processing_batch_size = int(Variable.get("processing_batch_size", 100))
     payload = kwargs.pop("payload")
     task_lookup = kwargs.pop("task_details")
