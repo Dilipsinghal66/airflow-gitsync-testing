@@ -23,6 +23,6 @@ default_args = {
     'email': 'mrigesh@zyla.in',
     'email_on_failure': True,
     'email_on_retry': True,
-    'retries': 3,
+    'retries': 0,
     'retry_delay': timedelta(minutes=1)
 }
