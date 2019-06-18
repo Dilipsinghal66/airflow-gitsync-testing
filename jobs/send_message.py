@@ -9,7 +9,7 @@ from config import local_tz, default_args
 send_message_dag = DAG(
     dag_id="send_message",
     default_args=default_args,
-    schedule_interval=timedelta(seconds=5),
+    schedule_interval=timedelta(seconds=30),
     catchup=False,
     start_date=datetime(year=2019, month=6, day=18, hour=0, minute=0, second=0, microsecond=0, tzinfo=local_tz)
 
