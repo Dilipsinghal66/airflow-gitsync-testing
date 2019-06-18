@@ -4,6 +4,7 @@ from common.functions import get_python_object
 
 
 def sendStateMachineMessage(callback_data: str):
+    print("sending statemachine message")
     callback_message = get_python_object(data_str=callback_data)
     callback_message.Attributes = get_python_object(data_str=callback_message.Attributes)
     channel_sid = callback_message.ChannelSid

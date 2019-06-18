@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.contrib.hooks.redis_hook import RedisHook
 from redis import StrictRedis
+from common.statemachine import sendStateMachineMessage
 
 from config import local_tz
 
@@ -53,7 +54,6 @@ def send_pending_callback_messages():
         redis_conn_callback.delete(callback_key)
     callback_data = callback_cached_data.decode()
     try:
-        print(callback_data)
-        # sendStateMachineMessage(callback_data)
+        sendStateMachineMessage(callback_data)
     except Exception as e:
         redis_conn_callback.lpush(callback_key, callback_cached_data)
