@@ -31,3 +31,6 @@ def get_activated_patients(**kwargs):
         if _id:
             patient_id_list.append(_id)
     return patient_id_list
+
+def send_twilio_message():
+    print("message sent")
