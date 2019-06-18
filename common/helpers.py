@@ -2,10 +2,11 @@ from datetime import datetime, timedelta
 
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.contrib.hooks.redis_hook import RedisHook
+from redis import StrictRedis
 
 from config import local_tz
 
-redis_conn_callback = RedisHook(redis_conn_id="redis_callback").get_conn().client
+redis_conn_callback: StrictRedis = RedisHook(redis_conn_id="redis_callback").get_conn()
 
 
 def create_health_plan():
