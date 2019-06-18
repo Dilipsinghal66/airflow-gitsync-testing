@@ -6,8 +6,8 @@ from airflow.operators.python_operator import PythonOperator
 from common.helpers import send_twilio_message
 from config import local_tz, twilio_args
 
-send_message_dag = DAG(
-    dag_id="send_message",
+send_twilio_message_dag = DAG(
+    dag_id="send_twilio_message",
     default_args=twilio_args,
     #schedule_interval=timedelta(seconds=30),
     schedule_interval="@once",
@@ -17,10 +17,10 @@ send_message_dag = DAG(
 )
 
 twilio_send_message_task = PythonOperator(
-    task_id="patients_activated",
+    task_id="send_twilio_message",
     task_concurrency=1,
     python_callable=send_twilio_message,
-    dag=send_message_dag,
+    dag=send_twilio_message_dag,
     pool="send_message_pool",
     retry_exponential_backoff=True
 )
