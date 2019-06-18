@@ -7,7 +7,7 @@ from common.helpers import send_twilio_message
 from config import local_tz, default_args
 
 send_message_dag = DAG(
-    dag_id="Send Message",
+    dag_id="send_message",
     default_args=default_args,
     schedule_interval=timedelta(seconds=5),
     catchup=False,
