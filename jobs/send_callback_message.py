@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from common.helpers import send_pending_callback_messages
+from common.helpers import send_pending_callback_messages, check_redis_keys_exist
 from config import local_tz, twilio_args
 
 send_callback_message_dag = DAG(
@@ -13,6 +13,15 @@ send_callback_message_dag = DAG(
     catchup=False,
     start_date=datetime(year=2019, month=6, day=18, hour=0, minute=0, second=0, microsecond=0, tzinfo=local_tz)
 
+)
+
+twilio_check_message_task = PythonOperator(
+    task_id="check_callback_message",
+    task_concurrency=1,
+    python_callable=check_redis_keys_exist,
+    op_kwargs={"pattern": "*_send_twilio_message"},
+    dag=send_callback_message_dag,
+    pool="send_message_pool"
 )
 
 send_callback_message_task = PythonOperator(
