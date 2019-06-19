@@ -73,8 +73,8 @@ def check_redis_key(redis_obj, key):
     return True if redis_len else False
 
 
-def check_message_keys():
-    keys = redis_conn_twilio_message.keys(pattern="*_send_twilio_message")
+def check_redis_keys_exist(pattern=""):
+    keys = redis_conn_twilio_message.keys(pattern=pattern)
     if not keys:
         return False
     return True
