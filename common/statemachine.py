@@ -49,59 +49,7 @@ def sendStateMachineMessage(callback_data: str):
                 }
                 update_user_activity(endpoint=endpoint, payload=payload)
         return True
-
-
-    # user.userId = phone_data.userId
-    # lock_text_box = True
-    # patient_status = None
-    # patient_id = None
-    # userId = None
-    # user_id = None
-    # hide_health_plan = True
-    # logger.debug("initialize health plan as true")
-    #
-    # if status_code == HTTPStatus.OK:
-    #     if phone_data.isCm:
-    #         # add notification message for user
-    #         #
-    #         user_all_url = USER_API_URL + "/all"
-    #         where_clause = '?where={' \
-    #                        '"chatInformation.providerData.channelSid":"' \
-    #                        + \
-    #                        channel_sid \
-    #                        + '"}'
-    #         channel_sid_url = user_all_url + where_clause
-    #         channel_user_data = get_parsed_resource_data(channel_sid_url)
-    #         items = channel_user_data.get("items", [])
-    #         if not len(items):
-    #             return True, 200
-    #         user_data = items[0]
-    #         userId = user_data.get("userId", None)
-    #         if not userId:
-    #             return True, 200
-    #         from functions import send_chat_notification
-    #         try:
-    #             data = attributes.__dict__
-    #             data["message"]["index"] = callback_message.Index
-    #             send_chat_notification(userId=userId,
-    #                                    data=data,
-    #                                    message=attributes.message.content.en)  # noqa E501
-    #         except Exception as e:
-    #             logger.error(e)
-    #         # from settings import NOTIFY_URL
-    #         #
-    #         # add_message_data(user_id=userId,
-    #         #                  attributes=attributes.__dict__)
-    #         return True, 200
-    #     if current_state == "chatbox" and not phone_data.isCm:
-    #         # remove notification message of user
-    #         #
-    #         logger.info("update last seen of the user")
-    #         return True, 200
-    #     patient_status = phone_data.userStatus
-    #     patient_id = phone_data.patientId
-    #     user_id = phone_data._id
-    #     userId = phone_data.userId
+    
     # try:
     #     if current_action in list(PATIENT_STATUS_SM_MAP.keys()):
     #         update_patient_status_on_sm(user_id=user_id,
