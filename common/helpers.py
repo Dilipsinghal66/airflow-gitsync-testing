@@ -15,7 +15,7 @@ from models.twilio import ChatService
 redis_conn_callback: StrictRedis = RedisHook(redis_conn_id="redis_callback").get_conn()
 redis_conn_twilio_message: StrictRedis = RedisHook(redis_conn_id="redis_twilio_message").get_conn()
 twilio_cred_connections: Connection = BaseHook(source=None).get_connection(conn_id="twilio_credentials")
-patient_status_mapping = Variable(key="patient_status_config").get(deserialize_json=True)
+patient_status_mapping = Variable().get(key="patient_status_config", deserialize_json=True)
 
 
 def create_health_plan():
@@ -140,10 +140,9 @@ def send_pending_callback_messages():
 
 
 def update_patient_status_on_sm(user_id, sm_action):
-    message = "User id " + str(user_id) + " action " + str(sm_action)
-    print(message)
+    if not user_id or not sm_action:
+        return False
     patient_status_sm_map = patient_status_mapping.get("patient_status_sm_map")
-    print(patient_status_sm_map)
     patient_status_codes = patient_status_mapping.get("patient_status_codes")
     patient_status = patient_status_sm_map.get(sm_action, None)
     if not patient_status:

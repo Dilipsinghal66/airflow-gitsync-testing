@@ -20,12 +20,10 @@ def sendStateMachineMessage(callback_data: str):
         "phoneNo": int(phone_number)
     }
     phone_data = get_user_by_filter(user_filter=user_filter, single=True)
-    print(phone_data)
 
     if phone_data:  # noqa E125
         if current_state == "chatbox":
             isCm = phone_data.get("isCm")
-            print("is cm "+ str(isCm))
             if isCm:
                 channel_filter = {
                     "chatInformation.providerData.channelSid": channel_sid
@@ -41,14 +39,19 @@ def sendStateMachineMessage(callback_data: str):
                     send_chat_notification(userId=user_id, data=data, message=attributes.message.content.en)
                 except Exception as e:
                     print(str(e))
-                    pass
             else:
                 endpoint = "activity/" + str(phone_data.get("_id"))
                 payload = {
                     "lastActivity": True
                 }
                 update_user_activity(endpoint=endpoint, payload=payload)
-        return True
+            return True
+    user_id = phone_data.get("userId")
+    try:
+        from common.helpers import update_patient_status_on_sm
+        update_patient_status_on_sm(user_id=user_id, sm_action=current_action)
+    except Exception as e:
+        print(e)
 
     # try:
     #     if current_action in list(PATIENT_STATUS_SM_MAP.keys()):
