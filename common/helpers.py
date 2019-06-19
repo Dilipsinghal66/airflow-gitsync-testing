@@ -47,7 +47,7 @@ def get_user_by_filter(user_filter, projection=None, single=False):
 
 
 def update_user_activity(endpoint=None, payload=None):
-    activity_http_hook = HttpHook(method="PATCH", http_conn_id="http_services_url")
+    activity_http_hook = HttpHook(method="PATCH", http_conn_id="http_user_url")
     activity_http_hook.run(endpoint=endpoint, data=json.dumps(payload), extra_options=extra_http_options)
 
 

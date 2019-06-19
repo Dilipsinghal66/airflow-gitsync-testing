@@ -43,13 +43,13 @@ def sendStateMachineMessage(callback_data: str):
                     print(str(e))
                     pass
             else:
-                endpoint = "api/v1/user/activity/" + str(phone_data.get("_id"))
+                endpoint = "activity/" + str(phone_data.get("_id"))
                 payload = {
                     "lastActivity": True
                 }
                 update_user_activity(endpoint=endpoint, payload=payload)
         return True
-    
+
     # try:
     #     if current_action in list(PATIENT_STATUS_SM_MAP.keys()):
     #         update_patient_status_on_sm(user_id=user_id,
