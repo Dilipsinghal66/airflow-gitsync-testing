@@ -117,17 +117,21 @@ def send_twilio_message():
 
 def send_pending_callback_messages():
     keys = redis_conn_callback.keys(pattern="*_callback")
-    callback_key = None
-    if len(keys):
-        callback_key = keys[0].decode()
-    if not callback_key:
+    if not keys:
+        print("no callbacks to be processed")
         return True
-    callback_cached_data = redis_conn_callback.lindex(callback_key, 0)
-    if not callback_cached_data:
-        redis_conn_callback.delete(callback_key)
-    callback_data = callback_cached_data.decode()
-    try:
-        from common.statemachine import sendStateMachineMessage
-        sendStateMachineMessage(callback_data)
-    except Exception as e:
-        redis_conn_callback.lpush(callback_key, callback_cached_data)
+    for key in keys:
+        key = key.decode()
+        callback_max_counter = 20
+        while check_redis_key(redis_conn_callback, key) and callback_max_counter:
+            print("processing callback for key "+key)
+            callback_cached_data = redis_conn_callback.lindex(key, 0)
+            callback_data = callback_cached_data.decode()
+            try:
+                from common.statemachine import sendStateMachineMessage
+                sendStateMachineMessage(callback_data)
+                redis_conn_callback.lpop(key)
+            except Exception as e:
+                print(str(e))
+                redis_conn_callback.lpush(key, callback_cached_data)
+            callback_max_counter -= 1
