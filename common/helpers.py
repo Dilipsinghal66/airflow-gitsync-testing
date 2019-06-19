@@ -73,6 +73,13 @@ def check_redis_key(redis_obj, key):
     return True if redis_len else False
 
 
+def check_message_keys():
+    keys = redis_conn_twilio_message.keys(pattern="*_send_twilio_message")
+    if not keys:
+        return False
+    return True
+
+
 def send_twilio_message():
     extra_args = twilio_cred_connections.extra_dejson
     chat_obj = ChatService(**extra_args)
@@ -82,7 +89,7 @@ def send_twilio_message():
         return True
     for key in keys:
         key = key.decode()
-        message_max_counter=15
+        message_max_counter = 15
         while check_redis_key(redis_conn_twilio_message, key) and message_max_counter:
             print("processing data for key " + key)
             redis_data = redis_conn_twilio_message.lindex(key, 0)
