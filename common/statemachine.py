@@ -1,10 +1,11 @@
 from http import HTTPStatus
 
 from common.functions import get_python_object
+from common.helpers import get_user_by_filter, update_user_activity
+from json import dumps
 
 
 def sendStateMachineMessage(callback_data: str):
-    print("sending statemachine message")
     callback_message = get_python_object(data_str=callback_data)
     callback_message.Attributes = get_python_object(data_str=callback_message.Attributes)
     channel_sid = callback_message.ChannelSid
@@ -13,32 +14,29 @@ def sendStateMachineMessage(callback_data: str):
     state_obj = attributes.state
     current_state = state_obj.currentState
     current_action = state_obj.currentAction
-    user_details = {"phoneNo": callback_message.ClientIdentity}
     phone_number = callback_message.ClientIdentity
-    user_phone_url = "" + "/phone/" + str(phone_number)
-    phone_data = get_python_object(resource_url=user_phone_url)
-    phone_data = get_python_object(data_str=phone_data)
+    user_filter= {
+        "phoneNo": int(phone_number)
+    }
+    phone_data = get_user_by_filter(user_filter=user_filter, single=True)
 
-    if current_state == "chatbox" and not phone_data.isCm:  # noqa E125
-        # logger.info("update user activity")
-        #     if is_duplicate:
-        #         return "Duplicate message already sent.Not sending again. Not updating last seen of user.", HTTPStatus.CONFLICT
-        #     logger.info("update last seen of the user")
-        #     try:
-        #         status_code = user_model.update_user_activity(phone_data._id)
-        #     except Exception as e:
-        #         try:
-        #             logger.error(e)
-        #         except Exception as e:
-        #             logger.error(str(e))
-        #     logger.debug("user Activity executed with parameter", )
-        #     if status_code != HTTPStatus.OK:
-        #         logger.info("Activity update failed " + str(status_code))
-        #     # send notification
-        #     return True, 200
-        # if is_duplicate:
-        #     return "Duplicate message already sent not sending again.", HTTPStatus.CONFLICT
-        return True, HTTPStatus.OK
+    if phone_data and current_state == "chatbox" and not phone_data.get("isCm"):  # noqa E125
+        if current_state == "chatbox":
+            isCm = phone_data.get("isCm")
+            if isCm:
+                channel_filter = {
+                    "chatInformation.providerData.channelSid": channel_sid
+                }
+                user_data = get_user_by_filter(user_filter=channel_filter, single=True)
+                pass
+            else:
+                endpoint = "api/v1/user/activity/" + str(phone_data.get("_id"))
+                payload = {
+                    "lastActivity": True
+                }
+                update_user_activity(endpoint=endpoint, payload=dumps(payload))
+        return True
+
     # user.userId = phone_data.userId
     # lock_text_box = True
     # patient_status = None
