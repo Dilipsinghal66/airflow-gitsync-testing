@@ -6,6 +6,7 @@ from airflow.contrib.hooks.redis_hook import RedisHook
 from airflow.hooks.base_hook import BaseHook
 from airflow.hooks.http_hook import HttpHook
 from airflow.models import Connection
+from airflow.models import Variable
 from redis import StrictRedis
 
 from config import local_tz, extra_http_options
@@ -14,6 +15,7 @@ from models.twilio import ChatService
 redis_conn_callback: StrictRedis = RedisHook(redis_conn_id="redis_callback").get_conn()
 redis_conn_twilio_message: StrictRedis = RedisHook(redis_conn_id="redis_twilio_message").get_conn()
 twilio_cred_connections: Connection = BaseHook(source=None).get_connection(conn_id="twilio_credentials")
+patient_status_mapping = Variable(key="patient_status_config").get(deserialize_json=True)
 
 
 def create_health_plan():
@@ -124,7 +126,7 @@ def send_pending_callback_messages():
         key = key.decode()
         callback_max_counter = 20
         while check_redis_key(redis_conn_callback, key) and callback_max_counter:
-            print("processing callback for key "+key)
+            print("processing callback for key " + key)
             callback_cached_data = redis_conn_callback.lindex(key, 0)
             callback_data = callback_cached_data.decode()
             try:
@@ -135,3 +137,23 @@ def send_pending_callback_messages():
                 print(str(e))
                 redis_conn_callback.lpush(key, callback_cached_data)
             callback_max_counter -= 1
+
+
+def update_patient_status_on_sm(user_id, sm_action):
+    message = "User id " + str(user_id) + " action " + str(sm_action)
+    print(message)
+    patient_status_sm_map = patient_status_mapping.get("patient_status_sm_map")
+    print(patient_status_sm_map)
+    patient_status_codes = patient_status_mapping.get("patient_status_codes")
+    patient_status = patient_status_sm_map.get(sm_action, None)
+    if not patient_status:
+        return False
+    status_code = patient_status_codes.get(patient_status, None)
+    if not status_code:
+        return False
+    payload = {
+        "userStatus": status_code
+    }
+    user_endpoint = str(round(user_id))
+    status_update_hook = HttpHook(method="PATCH", http_conn_id="http_user_url")
+    status_update_hook.run(endpoint=user_endpoint, data=json.dumps(payload), extra_options=extra_http_options)
