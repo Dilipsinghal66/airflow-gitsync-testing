@@ -8,7 +8,7 @@ from airflow.hooks.http_hook import HttpHook
 from airflow.models import Connection
 from redis import StrictRedis
 
-from config import local_tz
+from config import local_tz, extra_http_options
 from models.twilio import ChatService
 
 redis_conn_callback: StrictRedis = RedisHook(redis_conn_id="redis_callback").get_conn()
@@ -24,6 +24,18 @@ def do_level_jump():
     pass
 
 
+def send_chat_notification(userId, data, message):
+    notify_http_hook = HttpHook(method="POST", http_conn_id="http_notification_endpoint")
+
+    notify_endpoint = "/" + str(userId)
+    payload = {
+        "title": message,
+        "description": json.dumps(data),
+        "action": "CHAT"
+    }
+    notify_http_hook.run(endpoint=notify_endpoint, data=json.dumps(payload), extra_options=extra_http_options)
+
+
 def get_user_by_filter(user_filter, projection=None, single=False):
     user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
     user_coll = user_db.get_collection("user")
@@ -35,11 +47,8 @@ def get_user_by_filter(user_filter, projection=None, single=False):
 
 
 def update_user_activity(endpoint=None, payload=None):
-    extra_options = {
-        "check_response": True
-    }
     activity_http_hook = HttpHook(method="PATCH", http_conn_id="http_services_url")
-    activity_http_hook.run(endpoint=endpoint, data=payload, extra_options=extra_options)
+    activity_http_hook.run(endpoint=endpoint, data=json.dumps(payload), extra_options=extra_http_options)
 
 
 def get_activated_patients(**kwargs):

@@ -36,3 +36,7 @@ twilio_args = {
     'retries': 0,
     'retry_delay': timedelta(minutes=1)
 }
+
+extra_http_options = {
+        "check_response": True
+    }

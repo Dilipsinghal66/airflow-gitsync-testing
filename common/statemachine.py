@@ -34,7 +34,7 @@ def sendStateMachineMessage(callback_data: str):
                 payload = {
                     "lastActivity": True
                 }
-                update_user_activity(endpoint=endpoint, payload=dumps(payload))
+                update_user_activity(endpoint=endpoint, payload=payload)
         return True
 
     # user.userId = phone_data.userId
