@@ -1,15 +1,15 @@
+import json
 from datetime import datetime, timedelta
 
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.contrib.hooks.redis_hook import RedisHook
-from airflow.hooks.http_hook import HttpHook
 from airflow.hooks.base_hook import BaseHook
+from airflow.hooks.http_hook import HttpHook
 from airflow.models import Connection
-from models.twilio import ChatService
 from redis import StrictRedis
 
-
 from config import local_tz
+from models.twilio import ChatService
 
 redis_conn_callback: StrictRedis = RedisHook(redis_conn_id="redis_callback").get_conn()
 redis_conn_twilio_message: StrictRedis = RedisHook(redis_conn_id="redis_twilio_message").get_conn()
@@ -62,31 +62,41 @@ def get_activated_patients(**kwargs):
     return patient_id_list
 
 
+def delete_redis_key(redis_obj, key):
+    redis_obj.delete(key)
+
+
+def check_redis_key(redis_obj, key):
+    redis_len = redis_obj.llen(key)
+    if not redis_len:
+        delete_redis_key(redis_obj, key)
+    return True if redis_len else False
+
+
 def send_twilio_message():
     extra_args = twilio_cred_connections.extra_dejson
     chat_obj = ChatService(**extra_args)
-    process_num_messages = 10
-    twilio_message_redis_key = "twilio_message_list"
-    while process_num_messages:
-        print("processing messages")
-        if not redis_conn_twilio_message.exists(twilio_message_redis_key):
-            print("redis key doesn't exist. Exiting silently")
-            process_num_messages = 0
-            continue
-        if not redis_conn_twilio_message.llen(twilio_message_redis_key):
-            print("redis key has no data. Exiting silently")
-            process_num_messages = 0
-            continue
-        print("get message from redis ")
-        redis_data = redis_conn_twilio_message.lpop(twilio_message_redis_key)
-        send_message_data = redis_data.decode()
-        print("sending message")
-        try:
-            chat_obj.send_message(send_message_data)
-        except Exception as e:
-            print(str(e))
-            print("messge sending failed. Requeued for next run ")
-            redis_conn_twilio_message.lpush(twilio_message_redis_key, redis_data)
+    keys = redis_conn_twilio_message.keys(pattern="*_send_twilio_message")
+    if not keys:
+        print("no message to be sent")
+        return True
+    for key in keys:
+        key = key.decode()
+        message_max_counter=15
+        while check_redis_key(redis_conn_twilio_message, key) and message_max_counter:
+            print("processing data for key " + key)
+            redis_data = redis_conn_twilio_message.lindex(key, 0)
+            twilio_message = json.loads(redis_data.decode())
+            channel_sid = twilio_message.get("channelSid")
+            attributes = twilio_message.get("attributes")
+            try:
+                chat_obj.set_channel(channel_sid=channel_sid)
+                chat_obj.send_message(attributes=attributes)
+                redis_conn_twilio_message.lpop(key)
+            except Exception as e:
+                print(str(e))
+                print("Message sending failed")
+            message_max_counter -= 1
 
 
 def send_pending_callback_messages():

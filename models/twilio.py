@@ -25,6 +25,7 @@ class ChatService():
                 cm_id = member.identity
         return cm_id
 
-    def send_message(self, message):
-        print(message)
-        # self.channel.messages.create()
+    def send_message(self, attributes):
+        from_ = self.get_sender()
+        attributes = json.dumps(attributes)
+        self.channel.messages.create(from_=from_, attributes=attributes)
