@@ -1,13 +1,14 @@
 from http import HTTPStatus
 
-from common.functions import get_python_object
+from common.functions import PyJSON
 from common.helpers import get_user_by_filter, update_user_activity
+import logging
 from json import dumps
 
 
 def sendStateMachineMessage(callback_data: str):
-    callback_message = get_python_object(data_str=callback_data)
-    callback_message.Attributes = get_python_object(data_str=callback_message.Attributes)
+    callback_message = PyJSON(callback_data)
+    callback_message.Attributes = PyJSON(callback_message.Attributes)
     channel_sid = callback_message.ChannelSid
     attributes = callback_message.Attributes
     state_info = {}
@@ -19,16 +20,28 @@ def sendStateMachineMessage(callback_data: str):
         "phoneNo": int(phone_number)
     }
     phone_data = get_user_by_filter(user_filter=user_filter, single=True)
+    print(phone_data)
 
-    if phone_data and current_state == "chatbox" and not phone_data.get("isCm"):  # noqa E125
+    if phone_data:  # noqa E125
         if current_state == "chatbox":
             isCm = phone_data.get("isCm")
+            print("is cm "+ str(isCm))
             if isCm:
                 channel_filter = {
                     "chatInformation.providerData.channelSid": channel_sid
                 }
                 user_data = get_user_by_filter(user_filter=channel_filter, single=True)
-                pass
+                user_id = user_data.get("userId")
+                if not user_id:
+                    return True
+                from common.helpers import send_chat_notification
+                try:
+                    data = attributes.to_dict()
+                    data["message"]["index"] = callback_message.Index
+                    send_chat_notification(userId=user_id, data=data, message=attributes.message.content.en)
+                except Exception as e:
+                    print(str(e))
+                    pass
             else:
                 endpoint = "api/v1/user/activity/" + str(phone_data.get("_id"))
                 payload = {
@@ -36,6 +49,7 @@ def sendStateMachineMessage(callback_data: str):
                 }
                 update_user_activity(endpoint=endpoint, payload=payload)
         return True
+
 
     # user.userId = phone_data.userId
     # lock_text_box = True
