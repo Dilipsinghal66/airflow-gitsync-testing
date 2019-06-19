@@ -68,14 +68,25 @@ def send_twilio_message():
     process_num_messages = 10
     twilio_message_redis_key = "twilio_message_list"
     while process_num_messages:
+        print("processing messages")
         if not redis_conn_twilio_message.exists(twilio_message_redis_key):
+            print("redis key doesn't exist. Exiting silently")
             process_num_messages = 0
             continue
         if not redis_conn_twilio_message.llen(twilio_message_redis_key):
+            print("redis key has no data. Exiting silently")
             process_num_messages = 0
             continue
-        send_message_data = redis_conn_twilio_message.lpop(twilio_message_redis_key)
-        chat_obj.send_message(send_message_data)
+        print("get message from redis ")
+        redis_data = redis_conn_twilio_message.lpop(twilio_message_redis_key)
+        send_message_data = redis_data.decode()
+        print("sending message")
+        try:
+            chat_obj.send_message(send_message_data)
+        except Exception as e:
+            print(str(e))
+            print("messge sending failed. Requeued for next run ")
+            redis_conn_twilio_message.lpush(twilio_message_redis_key, redis_data)
 
 
 def send_pending_callback_messages():
