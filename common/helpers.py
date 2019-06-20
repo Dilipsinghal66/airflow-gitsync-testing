@@ -129,6 +129,8 @@ def send_pending_callback_messages():
             callback_data = callback_cached_data.decode()
             try:
                 from common.statemachine import sendStateMachineMessage
+                if isinstance(callback_data, str):
+                    callback_data = json.loads(callback_data)
                 sendStateMachineMessage(callback_data)
                 redis_conn_callback.lpop(key)
             except Exception as e:
