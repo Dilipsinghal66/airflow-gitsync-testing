@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta
+from http import HTTPStatus
 
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from airflow.contrib.hooks.redis_hook import RedisHook
@@ -40,17 +41,14 @@ def get_user_by_filter(user_filter, projection=None, single=False):
 
 
 def make_http_request(http_conn_id, method="GET", endpoint="", payload=None):
+    if not isinstance(endpoint, str):
+        endpoint = str(endpoint)
     http_hook = HttpHook(method=method, http_conn_id=http_conn_id)
     if method in ["POST", "PATCH"]:
         response = http_hook.run(endpoint=endpoint, data=json.dumps(payload), extra_options=extra_http_options)
     else:
         response = http_hook.run(endpoint=endpoint, extra_options=extra_http_options)
     return response.status_code, response.json()
-
-
-def update_user_activity(endpoint=None, payload=None):
-    activity_http_hook = HttpHook(method="PATCH", http_conn_id="http_user_url")
-    activity_http_hook.run(endpoint=endpoint, data=json.dumps(payload), extra_options=extra_http_options)
 
 
 def get_activated_patients(**kwargs):
@@ -138,8 +136,8 @@ def send_pending_callback_messages():
             callback_max_counter -= 1
 
 
-def update_patient_status_on_sm(user_id, sm_action):
-    if not user_id or not sm_action:
+def update_patient_status_on_sm(_id, sm_action):
+    if not _id or not sm_action:
         return False
     patient_status_sm_map = patient_status_mapping.get("patient_status_sm_map")
     patient_status_codes = patient_status_mapping.get("patient_status_codes")
@@ -152,21 +150,22 @@ def update_patient_status_on_sm(user_id, sm_action):
     payload = {
         "userStatus": status_code
     }
-    user_endpoint = str(round(user_id))
-    status, data = make_http_request(http_conn_id="http_user_url", method="PATCH", endpoint=user_endpoint,
+    status, data = make_http_request(http_conn_id="http_user_url", method="PATCH", endpoint=_id,
                                      payload=payload)
 
 
-def create_health_plan(patient_id):
+def process_new_health_plan(patient_id, _id):
     payload = {
         "patientId": patient_id
     }
-    print(payload)
     status, response_data = make_http_request(http_conn_id="http_healthplan_url", method="POST", payload=payload)
-    print(status, response_data)
 
+    payload = {
+        "userFlags.hideHealthPlan": False
+    }
+    status, response_data = make_http_request(http_conn_id="http_user_url", method="PATCH", endpoint=_id,
+                                              payload=payload)
 
-def process_new_health_plan(patient_id):
-    create_health_plan(patient_id=patient_id)
-
-    pass
+    progress_endpoint = "api/v1/progress" + str(patient_id)
+    status, response_data = make_http_request(http_conn_id="http_services_url", method="GET",
+                                              endpoint=progress_endpoint)
