@@ -29,5 +29,4 @@ machine = Machine(
     transitions=TRANSITIONS,
     initial="new",
     ignore_invalid_triggers=True,
-    auto_transitions=False,
-    after_state_change="transition_callback")
+    auto_transitions=False)
