@@ -76,41 +76,23 @@ def sendStateMachineMessage(callback_data: str):
     allowed_actions = machine.get_triggers(machine.state)
     for action in allowed_actions:
         possible_actions[action] = ACTION_MESSAGES.get(action)
+    message_type = ACTION_MESSAGES.get(current_action).get("type")
+    try:
+        payload = {
+            "action": current_action
+        }
+        status, data = make_http_request(http_conn_id="http_statemachine_url", method="POST", endpoint="transition",
+                                         payload=payload)
+    except Exception as e:
+        print(e)
+        raise e
+    message_config = data.get("message_config")
+    message_config.append("lockTextBox")
+    message_config.append("hideHealthPlan")
+    config_values = {}
+    for k in message_config:
+        config_values.update({k: True})
     
-    # machine.set_state(current_state)
-    # possible_actions = {}
-    # try:
-    #     logger.debug("get patient flags for userid " + user_id)
-    #     hide_health_plan = get_patient_flags(userId=user_id)
-    # except Exception as e:
-    #     logger.warn("Couldnt get health plan flag value")
-    # machine.trigger(current_action)
-    # state = machine.state
-    # logger.info("Current state: " + state)
-    # for i in TRANSITIONS:
-    #     if i[1] != state:
-    #         continue
-    #     if not len(possible_actions):
-    #         possible_actions = {}
-    #     possible_actions.update({i[0]: ACTION_MESSAGES[i[0]]})
-    #
-    # message_type = ACTION_MESSAGES.get(current_action).get("type")
-    # payload_data = {
-    #     "action": current_action
-    # }
-    # response_data = post_resource_data(
-    #     STATE_MACHINE_URL, data=payload_data)
-    # data = response_data.text
-    # data = json.loads(data)
-    # logger.debug("State machine data:" + response_data.text)
-    # if response_data.status_code != HTTPStatus.OK:
-    #     return data, response_data.status_code
-    # message_config = data.get("message_config")
-    # config_values = {"lockTextBox": lock_text_box}
-    # config_values["hideHealthPlan"] = hide_health_plan
-    #
-    # for k in message_config:
-    #     config_values.update({k: True})
     # state_info["current_state"] = data.get("current_state")
     # state_info["previous_state"] = data.get("previous_state")
     # state_info["current_action"] = current_action
