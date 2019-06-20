@@ -1,9 +1,6 @@
-from http import HTTPStatus
-
 from common.functions import PyJSON
-from common.helpers import get_user_by_filter, update_user_activity
-import logging
-from json import dumps
+from common.helpers import get_user_by_filter, make_http_request, process_new_health_plan
+from common.transitions import machine
 
 
 def sendStateMachineMessage(callback_data: str):
@@ -14,9 +11,11 @@ def sendStateMachineMessage(callback_data: str):
     state_info = {}
     state_obj = attributes.state
     current_state = state_obj.currentState
+    if not current_state:
+        return False
     current_action = state_obj.currentAction
     phone_number = callback_message.ClientIdentity
-    user_filter= {
+    user_filter = {
         "phoneNo": int(phone_number)
     }
     phone_data = get_user_by_filter(user_filter=user_filter, single=True)
@@ -44,50 +43,26 @@ def sendStateMachineMessage(callback_data: str):
                 payload = {
                     "lastActivity": True
                 }
-                update_user_activity(endpoint=endpoint, payload=payload)
+                make_http_request(http_conn_id="http_user_url", method="PATCH", endpoint=endpoint, payload=payload)
             return True
     user_id = phone_data.get("userId")
+    patient_id = phone_data.get("patientId")
     try:
         from common.helpers import update_patient_status_on_sm
         update_patient_status_on_sm(user_id=user_id, sm_action=current_action)
     except Exception as e:
         print(e)
+    machine.set_state(current_state)
+    allowed_actions = machine.get_triggers(machine.state)
+    if machine.state == "new":
+        current_action = allowed_actions[0]
+    if not current_action:
+        return False
+    if current_action not in allowed_actions:
+        return False
+    if current_action == "onboard":
+        process_new_health_plan(patient_id=patient_id)
 
-    # try:
-    #     if current_action in list(PATIENT_STATUS_SM_MAP.keys()):
-    #         update_patient_status_on_sm(user_id=user_id,
-    #                                     sm_action=current_action)
-    # except Exception as e:
-    #     logger.info("status update failed.")
-    # if current_action == "chatbox" and current_state == "chatbox":
-    #     return True, 200
-    # allowed_actions = []
-    # for i in TRANSITIONS:
-    #     if current_state == i[1]:
-    #         allowed_actions.append(i[0])
-    # if current_state == "chatbox" and not phone_data.isCm:  # noqa E125
-    #     logger.info("update last seen of the user")
-    #     return True, 200
-    # if not current_action and current_state == "new":
-    #     current_action = "onboard"
-    # if not state_obj:
-    #     message = "State object not found."
-    #     logger.error(message)
-    #     raise UnprocessableEntity(description=message)
-    # if not current_state:
-    #     message = "Current state value doesn't exist."
-    #     logger.error(message)
-    #     raise UnprocessableEntity(description=message)
-    # if not current_action:
-    #     message = "Current action value doesn't exist. "
-    #     logger.error("message")
-    #     raise UnprocessableEntity(description=message)
-    # if current_action not in allowed_actions:
-    #     message = "Current action: " + current_action + \
-    #               " is not allowed for the state mentioned " + \
-    #               current_state
-    #     logger.error(message)
-    #     raise UnprocessableEntity(description=message)
     # if current_action == PA_ACTION:
     #     level_url = HEALTH_PLAN_URL
     #     patient_data = {"patientId": patient_id}
