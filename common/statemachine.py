@@ -1,6 +1,6 @@
 from common.functions import PyJSON
 from common.helpers import get_user_by_filter, make_http_request, process_new_health_plan
-from common.transitions import machine
+from common.transitions import machine, ACTION_MESSAGES
 
 
 def sendStateMachineMessage(callback_data: str):
@@ -19,6 +19,9 @@ def sendStateMachineMessage(callback_data: str):
         "phoneNo": int(phone_number)
     }
     phone_data = get_user_by_filter(user_filter=user_filter, single=True)
+    user_id = phone_data.get("userId")
+    patient_id = phone_data.get("patientId")
+    _id = str(phone_data.get("_id"))
 
     if phone_data:  # noqa E125
         if current_state == "chatbox":
@@ -39,17 +42,15 @@ def sendStateMachineMessage(callback_data: str):
                 except Exception as e:
                     print(str(e))
             else:
-                endpoint = "activity/" + str(phone_data.get("_id"))
+                endpoint = "activity/" + _id
                 payload = {
                     "lastActivity": True
                 }
                 make_http_request(http_conn_id="http_user_url", method="PATCH", endpoint=endpoint, payload=payload)
             return True
-    user_id = phone_data.get("userId")
-    patient_id = phone_data.get("patientId")
     try:
         from common.helpers import update_patient_status_on_sm
-        update_patient_status_on_sm(user_id=user_id, sm_action=current_action)
+        update_patient_status_on_sm(_id=_id, sm_action=current_action)
     except Exception as e:
         print(e)
     machine.set_state(current_state)
@@ -61,57 +62,21 @@ def sendStateMachineMessage(callback_data: str):
     if current_action not in allowed_actions:
         return False
     if current_action == "onboard":
-        process_new_health_plan(patient_id=patient_id)
+        try:
+            process_new_health_plan(patient_id=patient_id, _id=_id)
+        except Exception as e:
+            print(e)
 
-    # if current_action == PA_ACTION:
-    #     level_url = HEALTH_PLAN_URL
-    #     patient_data = {"patientId": patient_id}
-    #     try:
-    #         response = requests.post(level_url, json=patient_data)
-    #
-    #         if response.status_code == HTTPStatus.CREATED:  # noqa E125
-    #             logger.info(
-    #                 "health plan for patient " + str(
-    #                     patient_id) + " created")
-    #             user_payload = {
-    #                 "userFlags.hideHealthPlan": False
-    #             }
-    #             logger.info(
-    #                 "updating hideHealthPlan for patient to false for "
-    #                 "patient " + str(patient_id))
-    #             status_code = None
-    #             try:
-    #                 flag_update_response, status_code = \
-    #                     user_model.update_user_details(
-    #                         user_object=user,
-    #                         payload=user_payload)
-    #             except Exception as e:
-    #                 try:
-    #                     logger.warn(e)
-    #                 except Exception as e:
-    #                     pass
-    #                 logger.warn("Failed in setting hideHealthPlan to "
-    #                             "false for patient" + str(patient_id))
-    #             if not status_code or (status_code != HTTPStatus.OK):
-    #                 logger.warn("Failed in setting hideHealthPlan to "
-    #                             "false for patient" + str(patient_id))
-    #             logger.debug(flag_update_response)
-    #         else:
-    #             logger.info(
-    #                 "health plan for patient " + str(
-    #                     patient_id) + " unsuccessful")
-    #     except Exception as e:
-    #         logger.exception("Health Plan creation failed", exc_info=True)
-    #     try:
-    #         pa_progress_url = PROGRESS_URL + "/pa/" + str(patient_id)
-    #         progress_response = requests.get(pa_progress_url)
-    #         logger.debug("Progess response " + str(
-    #             progress_response.status_code) + " with body "
-    #                                              "" +
-    #                      progress_response.text)
-    #     except Exception as e:
-    #         logger.exception("PA progress failed")
-    #
+    try:
+        hide_health_plan = ""
+    except Exception as e:
+        print(e)
+    machine.trigger(current_action)
+    possible_actions = {}
+    allowed_actions = machine.get_triggers(machine.state)
+    for action in allowed_actions:
+        possible_actions[action] = ACTION_MESSAGES.get(action)
+    
     # machine.set_state(current_state)
     # possible_actions = {}
     # try:
