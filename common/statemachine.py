@@ -60,6 +60,7 @@ def sendStateMachineMessage(callback_data: str):
     if not current_action:
         return False
     if current_action not in allowed_actions:
+        print(current_action, current_state, allowed_actions)
         return False
     if current_action == "onboard":
         try:
@@ -71,28 +72,42 @@ def sendStateMachineMessage(callback_data: str):
         hide_health_plan = ""
     except Exception as e:
         print(e)
-    machine.trigger(current_action)
-    possible_actions = {}
-    allowed_actions = machine.get_triggers(machine.state)
-    for action in allowed_actions:
-        possible_actions[action] = ACTION_MESSAGES.get(action)
-    message_type = ACTION_MESSAGES.get(current_action).get("type")
-    try:
-        payload = {
-            "action": current_action
-        }
-        status, data = make_http_request(http_conn_id="http_statemachine_url", method="POST", endpoint="transition",
-                                         payload=payload)
-    except Exception as e:
-        print(e)
-        raise e
-    message_config = data.get("message_config")
-    message_config.append("lockTextBox")
-    message_config.append("hideHealthPlan")
-    config_values = {}
-    for k in message_config:
-        config_values.update({k: True})
-    
+
+    auto_transition = True
+    execution = 10
+    while auto_transition and execution:
+        try:
+            payload = {
+                "action": current_action
+            }
+            status, data = make_http_request(http_conn_id="http_statemachine_url", method="POST", endpoint="transition",
+                                             payload=payload)
+        except Exception as e:
+            print(e)
+            raise e
+        try:
+            machine.trigger(current_action)
+        except Exception as e:
+            print(e)
+            break
+        possible_actions = {}
+        allowed_actions = machine.get_triggers(machine.state)
+        for action in allowed_actions:
+            possible_actions[action] = ACTION_MESSAGES.get(action)
+        message_type = ACTION_MESSAGES.get(current_action).get("type")
+
+        message_config = data.get("message_config")
+        message_config.append("lockTextBox")
+        message_config.append("hideHealthPlan")
+        config_values = {}
+        for k in message_config:
+            config_values.update({k: True})
+        print(config_values)
+        auto_transition = data.get("auto_transition", False)
+        if auto_transition:
+            current_action = auto_transition
+        execution -= 1
+
     # state_info["current_state"] = data.get("current_state")
     # state_info["previous_state"] = data.get("previous_state")
     # state_info["current_action"] = current_action
