@@ -1,26 +1,26 @@
 from common.functions import PyJSON
+from models.callback import CallbackMessage
 from common.helpers import get_user_by_filter, make_http_request, process_new_health_plan
 from common.transitions import machine, ACTION_MESSAGES
+from models.twilio import generate_twilio_message
 
 
-def sendStateMachineMessage(callback_data: str):
-    callback_message = PyJSON(callback_data)
-    callback_message.Attributes = PyJSON(callback_message.Attributes)
-    channel_sid = callback_message.ChannelSid
-    attributes = callback_message.Attributes
+def sendStateMachineMessage(callback_data: dict):
+    callback_message: CallbackMessage = CallbackMessage()
+    callback_message.init_data(request_data=callback_data)
     state_info = {}
-    state_obj = attributes.state
+    state_obj = callback_message.Attributes.state
     current_state = state_obj.currentState
     if not current_state:
         return False
     current_action = state_obj.currentAction
-    phone_number = callback_message.ClientIdentity
     user_filter = {
-        "phoneNo": int(phone_number)
+        "phoneNo": int(callback_message.ClientIdentity)
     }
     phone_data = get_user_by_filter(user_filter=user_filter, single=True)
     user_id = phone_data.get("userId")
     patient_id = phone_data.get("patientId")
+    patient_status = phone_data.get("userStatus")
     _id = str(phone_data.get("_id"))
 
     if phone_data:  # noqa E125
@@ -28,7 +28,7 @@ def sendStateMachineMessage(callback_data: str):
             isCm = phone_data.get("isCm")
             if isCm:
                 channel_filter = {
-                    "chatInformation.providerData.channelSid": channel_sid
+                    "chatInformation.providerData.channelSid": callback_message.ChannelSid
                 }
                 user_data = get_user_by_filter(user_filter=channel_filter, single=True)
                 user_id = user_data.get("userId")
@@ -36,9 +36,10 @@ def sendStateMachineMessage(callback_data: str):
                     return True
                 from common.helpers import send_chat_notification
                 try:
-                    data = attributes.to_dict()
+                    data = callback_message.Attributes.__dict__
                     data["message"]["index"] = callback_message.Index
-                    send_chat_notification(userId=user_id, data=data, message=attributes.message.content.en)
+                    send_chat_notification(userId=user_id, data=data,
+                                           message=callback_message.Attributes.message.content.en)
                 except Exception as e:
                     print(str(e))
             else:
@@ -102,7 +103,20 @@ def sendStateMachineMessage(callback_data: str):
         config_values = {}
         for k in message_config:
             config_values.update({k: True})
-        print(config_values)
+        state_info["current_state"] = machine.state
+        state_info["previous_state"] = data.get("previous_state")
+        state_info["current_action"] = current_action
+        state_info["possible_actions"] = possible_actions
+        state_info["ui_config"] = config_values
+        state_info["message_type"] = message_type
+        message = data.get("state_message")
+        generate_twilio_message(
+            message=message,
+            channel_sid=callback_message.ChannelSid,
+            state_info=state_info,
+            patient_status=patient_status,
+            user_id=user_id
+        )
         auto_transition = data.get("auto_transition", False)
         if auto_transition:
             current_action = auto_transition
