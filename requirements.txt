@@ -3,3 +3,4 @@ eventlet==0.24.1
 psycopg2-binary==2.8.3
 redis==3.2.1
 twilio==6.28.0
+transitions==0.6.9
