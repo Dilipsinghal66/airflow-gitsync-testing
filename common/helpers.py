@@ -18,24 +18,15 @@ twilio_cred_connections: Connection = BaseHook(source=None).get_connection(conn_
 patient_status_mapping = Variable().get(key="patient_status_config", deserialize_json=True)
 
 
-def create_health_plan():
-    pass
-
-
-def do_level_jump():
-    pass
-
-
 def send_chat_notification(userId, data, message):
-    notify_http_hook = HttpHook(method="POST", http_conn_id="http_notification_endpoint")
-
     notify_endpoint = "/" + str(userId)
     payload = {
         "title": message,
         "description": json.dumps(data),
         "action": "CHAT"
     }
-    notify_http_hook.run(endpoint=notify_endpoint, data=json.dumps(payload), extra_options=extra_http_options)
+    make_http_request(http_conn_id="http_notification_endpoint", method="POST", endpoint=notify_endpoint,
+                      payload=payload)
 
 
 def get_user_by_filter(user_filter, projection=None, single=False):
@@ -46,6 +37,15 @@ def get_user_by_filter(user_filter, projection=None, single=False):
     else:
         user_data = user_coll.find(user_filter)
     return user_data
+
+
+def make_http_request(http_conn_id, method="GET", endpoint="", payload=None):
+    http_hook = HttpHook(method=method, http_conn_id=http_conn_id)
+    if method in ["POST", "PATCH"]:
+        response = http_hook.run(endpoint=endpoint, data=json.dumps(payload), extra_options=extra_http_options)
+    else:
+        response = http_hook.run(endpoint=endpoint, extra_options=extra_http_options)
+    return response.status_code, response.json()
 
 
 def update_user_activity(endpoint=None, payload=None):
@@ -135,7 +135,6 @@ def send_pending_callback_messages():
                 redis_conn_callback.lpop(key)
             except Exception as e:
                 print(str(e))
-                redis_conn_callback.lpush(key, callback_cached_data)
             callback_max_counter -= 1
 
 
@@ -154,5 +153,20 @@ def update_patient_status_on_sm(user_id, sm_action):
         "userStatus": status_code
     }
     user_endpoint = str(round(user_id))
-    status_update_hook = HttpHook(method="PATCH", http_conn_id="http_user_url")
-    status_update_hook.run(endpoint=user_endpoint, data=json.dumps(payload), extra_options=extra_http_options)
+    status, data = make_http_request(http_conn_id="http_user_url", method="PATCH", endpoint=user_endpoint,
+                                     payload=payload)
+
+
+def create_health_plan(patient_id):
+    payload = {
+        "patientId": patient_id
+    }
+    print(payload)
+    status, response_data = make_http_request(http_conn_id="http_healthplan_url", method="POST", payload=payload)
+    print(status, response_data)
+
+
+def process_new_health_plan(patient_id):
+    create_health_plan(patient_id=patient_id)
+
+    pass
