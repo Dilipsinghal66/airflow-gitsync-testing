@@ -7,18 +7,11 @@ from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 from dateutil import parser
 
+
 def get_patient_days(patient):
     days = None
-    user_flags = patient.get("userFlags", None)
-    if not user_flags:
-        return days
-    activation = user_flags.get("active", None)
-    if not activation:
-        return days
-    is_activated = activation.get("activated", False)
-    if not is_activated:
-        return days
-    activated_on = activation.get("activatedOn", None)
+    activated_on = patient.get("userFlags", {}).get("active", {}).get(
+        "activatedOn", None)
     if not activated_on:
         return days
     if isinstance(activated_on, str):
@@ -55,9 +48,11 @@ def send_reminder(**kwargs):
     dynamic_messages = refresh_daily_message()
     message = None
     action = time_data.get("action")
-    user_db = MongoHook(conn_id="mongo_user_db").get_conn().get_default_database()
+    user_db = MongoHook(
+        conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
-    exclude_user_list = list(map(int, Variable.get("exclude_user_ids", "0").split(",")))
+    exclude_user_list = list(
+        map(int, Variable.get("exclude_user_ids", "0").split(",")))
     payload = {
         "action": action,
         "message": message,
@@ -92,7 +87,8 @@ def send_reminder(**kwargs):
                 continue
             try:
                 print(payload)
-                http_hook.run(endpoint="/api/v1/chat/user/" + str(round(user_id)) + "/message",
+                http_hook.run(endpoint="/api/v1/chat/user/" + str(
+                    round(user_id)) + "/message",
                               data=json.dumps(payload))
             except Exception as e:
                 raise ValueError(str(e))
