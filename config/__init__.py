@@ -27,16 +27,6 @@ default_args = {
     'retry_delay': timedelta(minutes=1)
 }
 
-twilio_args = {
-    'owner': 'twilio',
-    'depends_on_past': False,
-    'email': 'mrigesh@zyla.in',
-    'email_on_failure': True,
-    'email_on_retry': True,
-    'retries': 0,
-    'retry_delay': timedelta(minutes=1)
-}
-
 extra_http_options = {
         "check_response": True
     }
