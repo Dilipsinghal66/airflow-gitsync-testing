@@ -1,5 +1,5 @@
 from airflow import DAG
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 
 from config import local_tz, default_args
@@ -11,7 +11,7 @@ dynamic_reminder_21_45_dag = DAG(
   schedule_interval="45 21 * * *",
   catchup=False,
   start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0, microsecond=0, tzinfo=local_tz),
-  dagrun_timeout=60,
+  dagrun_timeout=timedelta(minutes=1),
 )
 
 dynamic_reminder_21_45_task = PythonOperator(

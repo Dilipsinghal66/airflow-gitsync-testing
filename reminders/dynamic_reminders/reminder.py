@@ -39,18 +39,16 @@ def get_parsed_resource_data(resource_url: str):
 def refresh_daily_message():
     dynamic_message_endpoint = "dynamic/message/today"
     status, dynamic_message_list = make_http_request(
-        conn_id="statemachine_url", endpoint=dynamic_message_endpoint,
+        conn_id="http_statemachine_url", endpoint=dynamic_message_endpoint,
         method="GET")
-    print(dynamic_message_endpoint, status, dynamic_message_list)
     return dynamic_message_list
 
 
 def send_reminder(**kwargs):
     time_data_endpoint = "21:45/messages/4"
-    status, time_data = make_http_request(conn_id="statemachine_url",
+    status, time_data = make_http_request(conn_id="http_statemachine_url",
                                           endpoint=time_data_endpoint,
                                           method="GET")
-    print(time_data_endpoint, status, time_data)
     messages = time_data.get("messages")
     dynamic_messages = refresh_daily_message()
     message = None
@@ -66,10 +64,13 @@ def send_reminder(**kwargs):
     user_filter = {
         "userStatus": {"$in": [4]}
     }
+    if test_user_id:
+        user_filter["userId"] = test_user_id
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=user_filter, batch_size=100)
     while user_data.alive:
         for user in user_data:
+            user_id = user.get("userId")
             if test_user_id and int(user_id) != test_user_id:
                 continue
             if int(user_id) in exclude_user_list:
@@ -85,12 +86,13 @@ def send_reminder(**kwargs):
                     continue
                 message = dynamic_messages[0]
             payload["message"] = message
-            user_id = user.get("userId")
             try:
                 endpoint = "user/" + str(
                     round(user_id)) + "/message"
                 print(endpoint)
-                make_http_request(conn_id="chat_service_url",
-                                  endpoint=endpoint, method="POST")
+                status, body = make_http_request(
+                    conn_id="http_chat_service_url",
+                    endpoint=endpoint, method="POST", payload=payload)
+                print(status, body)
             except Exception as e:
                 raise ValueError(str(e))
