@@ -5,7 +5,7 @@ from airflow.hooks.http_hook import HttpHook
 from config import payload_required_methods, extra_http_options
 
 
-def make_http_request(conn_id=None, method=None, payload=None, endpoint=None):
+def make_http_request(conn_id=None, method=None, payload=None, endpoint=""):
     if not conn_id:
         return False
     if not method:
