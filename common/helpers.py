@@ -64,14 +64,14 @@ def level_jump_patient():
     patient_list = get_patients_activated_today()
     print("Activated patients ", patient_list)
     process_health_plan_not_created(patient_list=patient_list)
-    patient_list=find_patients_not_level_jumped(patient_list=patient_list)
+    patient_list = find_patients_not_level_jumped(patient_list=patient_list)
     payload = {
         "level": "Level 3"
     }
     for patient in patient_list:
         endpoint = str(patient) + "/level"
         print("Level jump for ", endpoint)
-        # status, data = make_http_request(conn_id="http_healthplan_url",
-        #                                  method="PATCH",
-        #                                  payload=payload, endpoint=endpoint)
-        # print(status, data)
+        status, data = make_http_request(conn_id="http_healthplan_url",
+                                         method="PATCH",
+                                         payload=payload, endpoint=endpoint)
+        print(status, data)
