@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from common.helpers import get_patients_activated_today
+from common.helpers import level_jump_patient
 from config import local_tz, default_args
 
 level_jump_dag = DAG(
@@ -19,7 +19,7 @@ level_jump_dag = DAG(
 level_jump_task = PythonOperator(
     task_id="level_jump_task",
     task_concurrency=1,
-    python_callable=get_patients_activated_today,
+    python_callable=level_jump_patient,
     dag=level_jump_dag,
     op_kwargs={},
     pool="task_reminder_pool",
