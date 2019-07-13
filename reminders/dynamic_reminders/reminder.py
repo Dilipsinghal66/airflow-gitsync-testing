@@ -1,7 +1,5 @@
-import json
 from datetime import date
 
-import requests
 from airflow.models import Variable
 from dateutil import parser
 
@@ -23,17 +21,6 @@ def get_patient_days(patient):
     days = date_diff.days
     days = days + 1
     return days
-
-
-def get_parsed_resource_data(resource_url: str):
-    data = None
-    try:
-        response = requests.get(resource_url)
-        data = response.text
-        data = json.loads(data)
-    except Exception as e:
-        print(str(e))
-    return data
 
 
 def refresh_daily_message():

@@ -6,7 +6,6 @@ from config import payload_required_methods, extra_http_options
 
 
 def make_http_request(conn_id=None, method=None, payload=None, endpoint=None):
-    response = None
     if not conn_id:
         return False
     if not method:
