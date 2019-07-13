@@ -41,6 +41,7 @@ def refresh_daily_message():
     status, dynamic_message_list = make_http_request(
         conn_id="statemachine_url", endpoint=dynamic_message_endpoint,
         method="GET")
+    print(dynamic_message_endpoint, status, dynamic_message_list)
     return dynamic_message_list
 
 
@@ -49,6 +50,7 @@ def send_reminder(**kwargs):
     status, time_data = make_http_request(conn_id="statemachine_url",
                                           endpoint=time_data_endpoint,
                                           method="GET")
+    print(time_data_endpoint, status, time_data)
     messages = time_data.get("messages")
     dynamic_messages = refresh_daily_message()
     message = None
