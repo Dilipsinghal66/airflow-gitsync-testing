@@ -30,3 +30,5 @@ default_args = {
 extra_http_options = {
         "check_response": True
     }
+
+payload_required_methods = ["POST", "PATCH", "PUTs"]

@@ -2,10 +2,11 @@ import json
 from datetime import date
 
 import requests
-from airflow.contrib.hooks.mongo_hook import MongoHook
-from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
 from dateutil import parser
+
+from common.db_functions import get_data_from_db
+from common.http_functions import make_http_request
 
 
 def get_patient_days(patient):
@@ -36,20 +37,22 @@ def get_parsed_resource_data(resource_url: str):
 
 
 def refresh_daily_message():
-    dynamic_message_url = "https://services.zyla.in/statemachine/scheduler/dynamic/message/today"
-    dynamic_message_list = get_parsed_resource_data(dynamic_message_url)
+    dynamic_message_endpoint = "dynamic/message/today"
+    status, dynamic_message_list = make_http_request(
+        conn_id="statemachine_url", endpoint=dynamic_message_endpoint,
+        method="GET")
     return dynamic_message_list
 
 
 def send_reminder(**kwargs):
-    time_data_url = "https://services.zyla.in/statemachine/scheduler/21:45/messages/4"
-    time_data = get_parsed_resource_data(time_data_url)
+    time_data_endpoint = "21:45/messages/4"
+    status, time_data = make_http_request(conn_id="statemachine_url",
+                                          endpoint=time_data_endpoint,
+                                          method="GET")
     messages = time_data.get("messages")
     dynamic_messages = refresh_daily_message()
     message = None
     action = time_data.get("action")
-    user_db = MongoHook(
-        conn_id="mongo_user_db").get_conn().get_default_database()
     test_user_id = int(Variable.get("test_user_id", '0'))
     exclude_user_list = list(
         map(int, Variable.get("exclude_user_ids", "0").split(",")))
@@ -58,17 +61,17 @@ def send_reminder(**kwargs):
         "message": message,
         "is_notification": False
     }
-    user = user_db.get_collection("user")
     user_filter = {
         "userStatus": {"$in": [4]}
     }
-    user_data = user.find(user_filter).batch_size(100)
-    http_hook = HttpHook(
-        method="POST",
-        http_conn_id="chat_service_url"
-    )
+    user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                                 filter=user_filter, batch_size=100)
     while user_data.alive:
         for user in user_data:
+            if test_user_id and int(user_id) != test_user_id:
+                continue
+            if int(user_id) in exclude_user_list:
+                continue
             patient_days = get_patient_days(patient=user)
             if not patient_days:
                 continue
@@ -81,14 +84,10 @@ def send_reminder(**kwargs):
                 message = dynamic_messages[0]
             payload["message"] = message
             user_id = user.get("userId")
-            if test_user_id and int(user_id) != test_user_id:
-                continue
-            if int(user_id) in exclude_user_list:
-                continue
             try:
-                print(payload)
-                http_hook.run(endpoint="/api/v1/chat/user/" + str(
-                    round(user_id)) + "/message",
-                              data=json.dumps(payload))
+                endpoint = "user/" + str(
+                    round(user_id)) + "/message"
+                make_http_request(conn_id="chat_service_url",
+                                  endpoint=endpoint, method="POST")
             except Exception as e:
                 raise ValueError(str(e))
