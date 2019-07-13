@@ -89,6 +89,7 @@ def send_reminder(**kwargs):
             try:
                 endpoint = "user/" + str(
                     round(user_id)) + "/message"
+                print(endpoint)
                 make_http_request(conn_id="chat_service_url",
                                   endpoint=endpoint, method="POST")
             except Exception as e:
