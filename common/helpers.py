@@ -11,7 +11,7 @@ def process_health_plan_not_created(patient_list):
     projection = {
         "patientId": 1, "_id": 0
     }
-    health_plan_data = get_data_from_db(conn_id="mongo_goals_db",
+    health_plan_data = get_data_from_db(conn_id="mongo_goal_db",
                                         collection="health_plan",
                                         filter=_filter, projection=projection)
     p_list = []
@@ -35,7 +35,7 @@ def find_patients_not_level_jumped(patient_list):
     projection = {
         "patientId": 1, "_id": 0
     }
-    health_plan_data = get_data_from_db(conn_id="mongo_goals_db",
+    health_plan_data = get_data_from_db(conn_id="mongo_goal_db",
                                         collection="health-plan",
                                         filter=_filter, projection=projection)
     patient_list = []
