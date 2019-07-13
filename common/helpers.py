@@ -41,6 +41,7 @@ def find_patients_not_level_jumped(patient_list):
     patient_list = []
     for data in health_plan_data:
         patient_list.append(data.get("patientId"))
+    return patient_list
 
 
 def get_patients_activated_today():
@@ -63,7 +64,7 @@ def level_jump_patient():
     patient_list = get_patients_activated_today()
     print("Activated patients ", patient_list)
     process_health_plan_not_created(patient_list=patient_list)
-    find_patients_not_level_jumped(patient_list=patient_list)
+    patient_list=find_patients_not_level_jumped(patient_list=patient_list)
     payload = {
         "level": "Level 3"
     }
