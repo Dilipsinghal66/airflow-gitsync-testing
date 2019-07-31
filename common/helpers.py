@@ -24,7 +24,8 @@ def process_dynamic_task(**kwargs):
             old = "#" + str(id) + "#"
             new = str(patient[id])
             print(old, new)
-            message.replace(old, new)
+            message = message.replace(old, new)
+            print(message)
         patient_id = patient[0]
         patient_id_list.append(patient_id)
     _filter = {
