@@ -44,7 +44,7 @@ def process_dynamic_task(**kwargs):
         for i in range(0,len(patient_data)):
             old = "#"+str(i)+"#"
             new = patient_data[i]
-            message.replace(old=old, new=new)
+            message.replace(old, new)
         payload["message"] = message
         try:
             endpoint = "user/" + str(round(user_id)) + "/message"
