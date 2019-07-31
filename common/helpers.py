@@ -34,7 +34,7 @@ def process_dynamic_task(**kwargs):
                                  filter=_filter, projection=projection)
     payload = {
         "action": action,
-        "message": message,
+        "message": "",
         "is_notification": False
     }
     for user in user_data:
@@ -44,8 +44,8 @@ def process_dynamic_task(**kwargs):
         for i in range(0,len(patient_data)):
             old = "#"+str(i)+"#"
             new = str(patient_data[i])
-            message = message.replace(old, new)
-        payload["message"] = message
+            patient_message = message.replace(old, new)
+        payload["message"] = patient_message
         try:
             endpoint = "user/" + str(round(user_id)) + "/message"
             print(endpoint)
