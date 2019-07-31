@@ -17,7 +17,7 @@ for job in scheduled_jobs:
         job_name = "random_unnamed_job"
     job_name_dag = job_name + "_dag"
     job_name_task = job_name + "_task"
-    globals()[job_name] = DAG(
+    dag = DAG(
         dag_id=job_name_dag,
         default_args=default_args,
         schedule_interval="@every_5_minutes",
@@ -31,7 +31,7 @@ for job in scheduled_jobs:
         task_id=job_name_task,
         task_concurrency=1,
         python_callable="",
-        dag=job_name_dag,
+        dag=dag,
         op_kwargs=job,
         pool="dynamic_tasks",
         retry_exponential_backoff=True
