@@ -19,20 +19,16 @@ def process_dynamic_task(**kwargs):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query)
     patient_id_list = []
+    message_replace_data = {}
     for patient in sql_data:
-        for id in range(0, len(patient)):
-            old = "#" + str(id) + "#"
-            new = str(patient[id])
-            print(old, new)
-            message = message.replace(old, new)
-            print(message)
         patient_id = patient[0]
         patient_id_list.append(patient_id)
+        message_replace_data[patient_id] = patient
     _filter = {
         "patientId": {"$in": patient_id_list}
     }
     projection = {
-        "userId": 1, "_id": 0
+        "userId": 1, "patientId": 1, "_id": 0
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter, projection=projection)
@@ -43,6 +39,13 @@ def process_dynamic_task(**kwargs):
     }
     for user in user_data:
         user_id = user.get("userId")
+        patient_id = user.get("patientId")
+        patient_data = message_replace_data.get(patient_id)
+        for i in range(0,len(patient_data)):
+            old = "#"+str(i)+"#"
+            new = patient_data[i]
+            message.replace(old=old, new=new)
+        payload["message"] = message
         try:
             endpoint = "user/" + str(round(user_id)) + "/message"
             print(endpoint)
