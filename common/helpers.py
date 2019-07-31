@@ -15,18 +15,17 @@ def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
     sql_query = kwargs.get("query", {}).get("sql", None)
-    message = kwargs.get("message")
+    message: str = kwargs.get("message")
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query)
-    payload = {
-        "action": action,
-        "message": message,
-        "is_notification": False
-    }
     patient_id_list = []
     for patient in sql_data:
-        patien_id = patient[0]
-        patient_id_list.append(patien_id)
+        for id in range(0, len(patient)):
+            old = "#" + str(id) + "#"
+            new = patient[id]
+            message.replace(old, new)
+        patient_id = patient[0]
+        patient_id_list.append(patient_id)
     _filter = {
         "patientId": {"$in": patient_id_list}
     }
@@ -35,6 +34,11 @@ def process_dynamic_task(**kwargs):
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter, projection=projection)
+    payload = {
+        "action": action,
+        "message": message,
+        "is_notification": False
+    }
     for user in user_data:
         user_id = user.get("userId")
         try:
