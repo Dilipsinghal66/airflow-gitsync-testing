@@ -35,17 +35,17 @@ def process_dynamic_task(**kwargs):
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter, projection=projection)
-    print(user_data)
-    # try:
-    #   endpoint = "user/" + str(
-    #        round(user_id)) + "/message"
-    #    print(endpoint)
-    #    status, body = make_http_request(
-    #        conn_id="http_chat_service_url",
-    #        endpoint=endpoint, method="POST", payload=payload)
-    #    print(status, body)
-    #except Exception as e:
-    #    raise ValueError(str(e))
+    for user in user_data:
+        user_id = user.get("userId")
+        try:
+            endpoint = "user/" + str(round(user_id)) + "/message"
+            print(endpoint)
+            status, body = make_http_request(
+                conn_id="http_chat_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            print(status, body)
+        except Exception as e:
+            raise ValueError(str(e))
     print(sql_data)
 
 
