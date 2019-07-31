@@ -23,6 +23,7 @@ def process_dynamic_task(**kwargs):
         for id in range(0, len(patient)):
             old = "#" + str(id) + "#"
             new = str(patient[id])
+            print(old, new)
             message.replace(old, new)
         patient_id = patient[0]
         patient_id_list.append(patient_id)
