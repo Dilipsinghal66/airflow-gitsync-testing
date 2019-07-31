@@ -30,7 +30,7 @@ for job in scheduled_jobs:
     globals()[job_name_task] = PythonOperator(
         task_id=job_name_task,
         task_concurrency=1,
-        python_callable="",
+        python_callable=print,
         dag=dag,
         op_kwargs=job,
         pool="dynamic_tasks",
