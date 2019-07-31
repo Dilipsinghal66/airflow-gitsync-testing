@@ -12,7 +12,8 @@ scheduled_jobs = get_data_from_db(conn_id="mongo_user_db",
 
 for job in scheduled_jobs:
     job_name = job.get("jobName", "")
-    job_time = "@once" #job.get("scheduledTime", "@once")
+    job_time = job.get("scheduledTime", None)
+    job_time = "@once"
     if job_name:
         job_name = job_name.lower().replace(" ", "_")
     else:
