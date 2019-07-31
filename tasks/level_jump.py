@@ -22,6 +22,6 @@ level_jump_task = PythonOperator(
     python_callable=level_jump_patient,
     dag=level_jump_dag,
     op_kwargs={},
-    pool="task_reminder_pool",
+    pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
 )
