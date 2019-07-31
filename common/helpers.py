@@ -33,10 +33,13 @@ def process_health_plan_not_created(patient_list):
             }
             make_http_request(conn_id="http_healthplan_url", method="POST",
                               payload=payload)
+    else:
+        print("Health plan created for all patients. Nothing to do. ")
     return patient_list
 
 
 def find_patients_not_level_jumped(patient_list):
+    print("Starting level jump of patients. ")
     _filter = {"current_level": {"$in": ["Level 1", "Level 2"]},
                "patientId": {"$in": patient_list}}
     projection = {
@@ -47,7 +50,12 @@ def find_patients_not_level_jumped(patient_list):
                                         filter=_filter, projection=projection)
     patient_list = []
     for data in health_plan_data:
-        patient_list.append(data.get("patientId"))
+        patient_id = data.get("patientId")
+        if patient_id:
+            print("Adding patient id  "+str(patient_id) + " for level jump")
+            patient_list.append(patient_id)
+    if not patient_list:
+        print("No level jump required. All done. ")
     return patient_list
 
 
@@ -75,6 +83,8 @@ def level_jump_patient():
     payload = {
         "level": "Level 3"
     }
+    if not patient_list:
+        print("No patients received for level jump")
     for patient in patient_list:
         endpoint = str(patient) + "/level"
         print("Level jump for ", endpoint)
