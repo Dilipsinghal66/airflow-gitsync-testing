@@ -11,6 +11,15 @@ from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 
 
+def process_dynamic_task(**kwargs):
+    mongo_query = kwargs.get("query", {}).get("mongo", None)
+    sql_query = kwargs.get("query", {}).get("sql", None)
+    message = kwargs.get("message")
+    data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                            sql_query=sql_query)
+    print(data)
+
+
 def process_health_plan_not_created(patient_list):
     _filter = {
         "patientId": {"$in": patient_list}
@@ -52,7 +61,7 @@ def find_patients_not_level_jumped(patient_list):
     for data in health_plan_data:
         patient_id = data.get("patientId")
         if patient_id:
-            print("Adding patient id  "+str(patient_id) + " for level jump")
+            print("Adding patient id  " + str(patient_id) + " for level jump")
             patient_list.append(patient_id)
     if not patient_list:
         print("No level jump required. All done. ")
