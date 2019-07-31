@@ -12,6 +12,7 @@ scheduled_jobs = get_data_from_db(conn_id="mongo_user_db",
 
 for job in scheduled_jobs:
     job_name = job.get("jobName", "")
+    job_time = job.get("scheduledTime", "@once")
     if job_name:
         job_name = job_name.lower().replace(" ", "_")
     else:
@@ -21,7 +22,7 @@ for job in scheduled_jobs:
     dag = DAG(
         dag_id=job_name_dag,
         default_args=default_args,
-        schedule_interval="@every_5_minutes",
+        schedule_interval=job_time,
         catchup=False,
         start_date=datetime(year=2019, month=7, day=31, hour=0, minute=0,
                             second=0,

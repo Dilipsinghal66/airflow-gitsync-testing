@@ -12,12 +12,41 @@ from common.http_functions import make_http_request
 
 
 def process_dynamic_task(**kwargs):
+    action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message = kwargs.get("message")
-    data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                            sql_query=sql_query)
-    print(data)
+    sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                                sql_query=sql_query)
+    payload = {
+        "action": action,
+        "message": message,
+        "is_notification": False
+    }
+    patient_id_list = []
+    for patient in sql_data:
+        patien_id = patient[0]
+        patient_id_list.append(patien_id)
+    _filter = {
+        "patientId": {"$in": patient_id_list}
+    }
+    projection = {
+        "userId": 1, "_id": 0
+    }
+    user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                                 filter=_filter, projection=projection)
+    print(user_data)
+    # try:
+    #   endpoint = "user/" + str(
+    #        round(user_id)) + "/message"
+    #    print(endpoint)
+    #    status, body = make_http_request(
+    #        conn_id="http_chat_service_url",
+    #        endpoint=endpoint, method="POST", payload=payload)
+    #    print(status, body)
+    #except Exception as e:
+    #    raise ValueError(str(e))
+    print(sql_data)
 
 
 def process_health_plan_not_created(patient_list):
