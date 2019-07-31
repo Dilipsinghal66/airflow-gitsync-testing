@@ -22,7 +22,7 @@ def process_dynamic_task(**kwargs):
     for patient in sql_data:
         for id in range(0, len(patient)):
             old = "#" + str(id) + "#"
-            new = patient[id]
+            new = str(patient[id])
             message.replace(old, new)
         patient_id = patient[0]
         patient_id_list.append(patient_id)
