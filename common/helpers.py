@@ -89,6 +89,7 @@ def find_patients_not_level_jumped(patient_list):
     print("Starting level jump of patients. ")
     _filter = {"current_level": {"$in": ["Level 1", "Level 2"]},
                "patientId": {"$in": patient_list}}
+    print(_filter)
     projection = {
         "patientId": 1, "_id": 0
     }
