@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from random import choice
 from time import sleep
 
@@ -109,6 +109,7 @@ def find_patients_not_level_jumped(patient_list):
 def get_patients_activated_today():
     today = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                       microsecond=0)
+    today = today - timedelta(days=30)
     _filter = {"userStatus": 4,
                "userFlags.active.activatedOn": {"$gt": today}}
     projection = {"patientId": 1, "_id": 0}
