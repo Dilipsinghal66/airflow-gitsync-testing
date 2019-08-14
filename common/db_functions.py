@@ -9,7 +9,7 @@ def get_data_from_db(db_type="mongo", conn_id=None, collection=None, **kwargs):
             collection)
         data = coll.find(**kwargs)
     if db_type == "mysql":
-        sql = kwargs.get("sql_query")
-        db = MySqlHook(mysql_conn_id=conn_id)
-        data = db.get_records(sql=sql)
+        #sql = kwargs.get("sql_query")
+        data = MySqlHook(mysql_conn_id=conn_id)
+        #data = db.get_records(sql=sql)
     return data
