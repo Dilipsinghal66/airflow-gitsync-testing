@@ -42,7 +42,9 @@ def create_vitals():
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         print("got db connection from environmen")
         connection = engine.connect()
+        print("created connection from engine")
         result = connection.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
+        print(result)
         totalcount = result.fetchone()[0]
         print(totalcount)
         numberofPage = int(totalcount/PAGE_SIZE) + 1
