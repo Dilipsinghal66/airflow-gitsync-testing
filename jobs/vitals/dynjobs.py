@@ -13,7 +13,7 @@ def send_dyn():
             "unlock_vitals": True
         }
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')
-        engine = get_data_from_db(conn_id="mysql")
+        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.connect()
         result = connection.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id in (select distinct(patientId) from zylaapi.patientTestReadings where forDate=CURDATE() and isRecommended = 1))")
         patientIdList = []

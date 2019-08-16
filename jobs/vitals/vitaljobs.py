@@ -38,7 +38,9 @@ def create_vitals():
     try:
 
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')
-        engine = get_data_from_db(conn_id="mysql")
+        print("starting create vitals job")
+        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+        print("got db connection from environmen")
         connection = engine.connect()
         result = connection.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
         totalcount = result.fetchone()[0]
