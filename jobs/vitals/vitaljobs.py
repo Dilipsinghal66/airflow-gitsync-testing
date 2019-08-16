@@ -40,21 +40,22 @@ def create_vitals():
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')
         print("starting create vitals job")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
-        print("got db connection from environmen")
+        print("got db connection from environment")
         connection = engine.get_conn()
+        cursor = connection.cursor()
         print("created connection from engine")
-        result = connection.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
-        print(result)
-        totalcount = result.fetchone()[0]
+
+        cursor.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
+        totalcount = cursor.fetchone()[0]
         print(totalcount)
-        numberofPage = int(totalcount/PAGE_SIZE) + 1
+        numberofPage = int(totalcount / PAGE_SIZE) + 1
         print(numberofPage)
         for i in range(numberofPage):
-            patientIdSqlQuerry = "select id from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(i*PAGE_SIZE) + ", " + str(PAGE_SIZE)
-            result = connection.execute(patientIdSqlQuerry)
+            patientIdSqlQuerry = "select id from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
+            cursor.execute(patientIdSqlQuerry)
             patientIdList = []
             patientIdDict = {}
-            for row in result.fetchall():
+            for row in cursor.fetchall():
                 for id in row:
                     patientIdList.append(id)
 
@@ -62,28 +63,26 @@ def create_vitals():
 
             for patientid in patientIdList:
                 paramGroupSqlQuery = "select distinct(paramGroupId) from zylaapi.testReadings where patientid = " + str(patientid)
-                result = connection.execute(paramGroupSqlQuery)
+                cursor.execute(paramGroupSqlQuery)
                 patientIdParamGroupList = []
                 patientIdParamList = []
 
-                for row in result.fetchall():
+                for row in cursor.fetchall():
                     for id in row:
                         patientIdParamGroupList.append(id)
 
-                #print(patientIdParamGroupList)
+                # print(patientIdParamGroupList)
 
                 for paramGroupId in patientIdParamGroupList:
                     paramSqlQuery = "select distinct(paramId) from zylaapi.paramGroupParams where paramGroupId = " + str(paramGroupId)
-                    result = connection.execute(paramSqlQuery)
+                    cursor.execute(paramSqlQuery)
 
-
-
-                    for row in result.fetchall():
+                    for row in cursor.fetchall():
                         for id in row:
                             patientIdParamList.append(id)
 
-                #print("Patient Id " + str(patientid))
-                #print(patientIdParamList)
+                # print("Patient Id " + str(patientid))
+                # print(patientIdParamList)
 
                 patientIdDict[str(patientid)] = patientIdParamList;
 
@@ -91,9 +90,9 @@ def create_vitals():
 
             for key, value in patientIdDict.items():
                 checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=CURDATE() and patientid = " + str(key)
-                result = connection.execute(checkSqlQuery)
+                cursor.execute(checkSqlQuery)
                 paramInsertedToday = []
-                for row in result.fetchall():
+                for row in cursor.fetchall():
                     for id in row:
                         paramInsertedToday.append(id)
 
@@ -101,22 +100,22 @@ def create_vitals():
                     recommend = isRecommended(param, True)
                     if param in paramInsertedToday:
                         print("Run Update Query for param " + str(param))
-                        #updateSqlQuery = "UPDATE TABLE zylaapi.patientTestReadings SET isRecommended = b'"+ str(recommend) + "' WHERE forDate = CURDATE() and patientid = " + str(key) + " and paramId = " + str(param)
-                        #print(updateSqlQuery)
-                        #cursor.execute(updateSqlQuery)
+                        # updateSqlQuery = "UPDATE TABLE zylaapi.patientTestReadings SET isRecommended = b'"+ str(recommend) + "' WHERE forDate = CURDATE() and patientid = " + str(key) + " and paramId = " + str(param)
+                        # print(updateSqlQuery)
+                        # cursor.execute(updateSqlQuery)
                         print(recommend)
                     else:
                         print("Run insert Query for param " + str(param))
                         insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(key) + ", " + str(param) + ", CURDATE(), b'" + str(recommend) + "')"
                         print(insertSqlQuery)
-                        connection.execute(insertSqlQuery)
+                        cursor.execute(insertSqlQuery)
                         print(recommend)
 
             for key, value in patientIdDict.items():
                 checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(key)
-                result = connection.execute(checkSqlQuery)
+                cursor.execute(checkSqlQuery)
                 paramInsertedTom = []
-                for row in result.fetchall():
+                for row in cursor.fetchall():
                     for id in row:
                         paramInsertedTom.append(id)
 
@@ -124,19 +123,16 @@ def create_vitals():
                     recommend = isRecommended(param, False)
                     if param in paramInsertedTom:
                         print("Run Update Query for param " + str(param))
-                        #updateSqlQuery = "UPDATE TABLE zylaapi.patientTestReadings SET isRecommended = b'" + str(recommend) + "' WHERE forDate = DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(key) + " and paramId = " + str(param)
-                        #print(updateSqlQuery)
-                        #cursor.execute(updateSqlQuery)
+                        # updateSqlQuery = "UPDATE TABLE zylaapi.patientTestReadings SET isRecommended = b'" + str(recommend) + "' WHERE forDate = DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(key) + " and paramId = " + str(param)
+                        # print(updateSqlQuery)
+                        # cursor.execute(updateSqlQuery)
                         print(recommend)
                     else:
                         print("Run insert Query for param " + str(param))
                         insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(key) + ", " + str(param) + ", DATE_ADD(CURDATE(), INTERVAL +1 DAY), b'" + str(recommend) + "')"
                         print(insertSqlQuery)
-                        connection.execute(insertSqlQuery)
+                        cursor.execute(insertSqlQuery)
                         print(recommend)
-
-            #connection.commit()
-
 
 
     except:
