@@ -42,8 +42,9 @@ def create_vitals():
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         print("got db connection from environment")
         connection = engine.get_conn()
+        print("got the connection no looking for cursor")
         cursor = connection.cursor()
-        print("created connection from engine")
+        print("got the cursor")
 
         cursor.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
         totalcount = cursor.fetchone()[0]
