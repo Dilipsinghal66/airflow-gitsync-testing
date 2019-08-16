@@ -14,10 +14,14 @@ def send_dyn():
         }
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
-        connection = engine.connect()
-        result = connection.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id in (select distinct(patientId) from zylaapi.patientTestReadings where forDate=CURDATE() and isRecommended = 1))")
+        print("got db connection from environment")
+        connection = engine.get_conn()
+        cursor = connection.cursor()
+        print("created connection from engine")
+
+        cursor.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id in (select distinct(patientId) from zylaapi.patientTestReadings where forDate=CURDATE() and isRecommended = 1))")
         patientIdList = []
-        for row in result.fetchall():
+        for row in cursor.fetchall():
             for id in row:
                 patientIdList.append(id)
 
