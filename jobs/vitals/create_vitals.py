@@ -9,7 +9,7 @@ from config import local_tz, default_args
 create_vitals_dag = DAG(
     dag_id="create_vitals",
     default_args=default_args,
-    schedule_interval="@hourly",
+    schedule_interval="@once",
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
