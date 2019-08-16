@@ -1,7 +1,6 @@
-from sqlalchemy.engine import create_engine
 from common.db_functions import get_data_from_db
 import datetime
-PAGE_SIZE = 4
+PAGE_SIZE = 1000
 
 def isRecommended(param, fortoday):
     ret = 0
