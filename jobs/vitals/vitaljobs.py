@@ -135,6 +135,8 @@ def create_vitals():
                         cursor.execute(insertSqlQuery)
                         print(recommend)
 
+            connection.commit()
+
 
     except:
         print("Error Exception raised")
