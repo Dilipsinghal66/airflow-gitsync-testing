@@ -41,7 +41,7 @@ def create_vitals():
         print("starting create vitals job")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         print("got db connection from environmen")
-        connection = engine.connect()
+        connection = engine.get_conn()
         print("created connection from engine")
         result = connection.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
         print(result)
