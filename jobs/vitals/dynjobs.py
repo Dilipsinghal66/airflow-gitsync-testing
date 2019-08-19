@@ -26,7 +26,7 @@ def send_dyn():
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         print(numberofPage)
         for i in range(numberofPage):
-            patientIdSqlQuerry = "select id countDidYouKnow from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
+            patientIdSqlQuerry = "select id, countDidYouKnow from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
             patientIdList = []
             patientIdDict = {}
