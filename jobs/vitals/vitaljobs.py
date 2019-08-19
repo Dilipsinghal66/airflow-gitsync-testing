@@ -1,3 +1,4 @@
+from airflow.models import Variable
 from common.db_functions import get_data_from_db
 import datetime
 PAGE_SIZE = 1000
@@ -37,6 +38,9 @@ def isRecommended(param, fortoday):
 def create_vitals_func():
     try:
 
+        vital_create_flag = int(Variable.get("vital_create_flag", '0'))
+        if vital_create_flag == 1:
+            return
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')
         print("starting create vitals job")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
