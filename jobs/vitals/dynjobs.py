@@ -2,7 +2,7 @@ from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 PAGE_SIZE = 1000
 
-def send_dyn():
+def send_dyn_func():
     try:
 
         payload = {
@@ -38,6 +38,7 @@ def send_dyn():
             for key, value in patientIdDict.items():
                 informationCardSqlQuery = "select id from zylaapi.information_cards where status = 4 and id > " + str(
                     value) + " order by id LIMIT 1"
+                print(informationCardSqlQuery)
                 number_of_rows = cursor.execute(informationCardSqlQuery)
                 print(number_of_rows)
                 if number_of_rows != 0:

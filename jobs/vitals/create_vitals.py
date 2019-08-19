@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.vitals.vitaljobs import create_vitals
+from jobs.vitals.vitaljobs import create_vitals_func
 from config import local_tz, default_args
 
 create_vitals_dag = DAG(
@@ -19,7 +19,7 @@ create_vitals_dag = DAG(
 switch_active_cm_task = PythonOperator(
     task_id="create_vitals",
     task_concurrency=1,
-    python_callable=create_vitals,
+    python_callable=create_vitals_func,
     dag=create_vitals_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",

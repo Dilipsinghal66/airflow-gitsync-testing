@@ -34,7 +34,7 @@ def isRecommended(param, fortoday):
     return ret
 
 
-def create_vitals():
+def create_vitals_func():
     try:
 
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')

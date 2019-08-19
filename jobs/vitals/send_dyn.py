@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.vitals.dynjobs import send_dyn
+from jobs.vitals.dynjobs import send_dyn_func
 from config import local_tz, default_args
 
 send_dyn_dag = DAG(
@@ -19,7 +19,7 @@ send_dyn_dag = DAG(
 switch_active_cm_task = PythonOperator(
     task_id="send_dyn",
     task_concurrency=1,
-    python_callable=send_dyn,
+    python_callable=send_dyn_func,
     dag=send_dyn_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",

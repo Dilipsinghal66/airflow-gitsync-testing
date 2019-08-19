@@ -2,7 +2,7 @@
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 
-def send_vital_reminder():
+def send_vital_reminder_func():
     try:
 
         payload = {
