@@ -7,7 +7,7 @@ from jobs.vitals.dynjobs import send_dyn_func
 from config import local_tz, default_args
 
 send_dyn_dag = DAG(
-    dag_id="send_dyn",
+    dag_id="send_dyn_func",
     default_args=default_args,
     schedule_interval="@once",
     catchup=False,
@@ -17,7 +17,7 @@ send_dyn_dag = DAG(
 )
 
 switch_active_cm_task = PythonOperator(
-    task_id="send_dyn",
+    task_id="send_dyn_func",
     task_concurrency=1,
     python_callable=send_dyn_func,
     dag=send_dyn_dag,

@@ -7,7 +7,7 @@ from jobs.vitals.vitaljobs import create_vitals_func
 from config import local_tz, default_args
 
 create_vitals_dag = DAG(
-    dag_id="create_vitals",
+    dag_id="create_vitals_func",
     default_args=default_args,
     schedule_interval="@once",
     catchup=False,
@@ -17,7 +17,7 @@ create_vitals_dag = DAG(
 )
 
 switch_active_cm_task = PythonOperator(
-    task_id="create_vitals",
+    task_id="create_vitals_func",
     task_concurrency=1,
     python_callable=create_vitals_func,
     dag=create_vitals_dag,

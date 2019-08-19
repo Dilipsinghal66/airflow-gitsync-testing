@@ -7,7 +7,7 @@ from jobs.vitals.vital_reminder import send_vital_reminder_func
 from config import local_tz, default_args
 
 send_vital_reminder_dag = DAG(
-    dag_id="send_vital_reminder_test",
+    dag_id="send_vital_reminder_func",
     default_args=default_args,
     schedule_interval="@once",
     catchup=False,
@@ -17,7 +17,7 @@ send_vital_reminder_dag = DAG(
 )
 
 switch_active_cm_task = PythonOperator(
-    task_id="send_vital_reminder_test",
+    task_id="send_vital_reminder_func",
     task_concurrency=1,
     python_callable=send_vital_reminder_func,
     dag=send_vital_reminder_dag,
