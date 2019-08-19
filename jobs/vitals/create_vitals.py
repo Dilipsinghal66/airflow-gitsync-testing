@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta
-
+from airflow.models import Variable
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
 from jobs.vitals.vitaljobs import create_vitals_func
 from config import local_tz, default_args
 
+create_vital_interval = str(Variable.get("create_vital_interval", '0 * * * *'))
+
 create_vitals_dag = DAG(
     dag_id="create_vitals_func",
     default_args=default_args,
-    schedule_interval="@once",
+    schedule_interval=create_vital_interval,
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),

@@ -1,9 +1,14 @@
 #from sqlalchemy.engine import create_engine
+from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 
 def send_vital_reminder_func():
     try:
+
+        vital_reminder_flag = int(Variable.get("vital_reminder_flag", '0'))
+        if vital_reminder_flag == 1:
+            return
 
         payload = {
             "action": "vitals_reminder_6_am",

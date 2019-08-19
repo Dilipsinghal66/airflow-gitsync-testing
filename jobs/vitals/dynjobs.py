@@ -1,9 +1,14 @@
+from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 PAGE_SIZE = 1000
 
 def send_dyn_func():
     try:
+
+        process_dyn_flag = int(Variable.get("process_dyn_flag", '0'))
+        if process_dyn_flag == 1:
+            return
 
         payload = {
             "action": "information_card",
