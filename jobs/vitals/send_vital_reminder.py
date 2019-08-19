@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.vitals.vital_reminder import vital_reminder
+from jobs.vitals.vital_reminder import send_reminder
 from config import local_tz, default_args
 
-vital_reminder_dag = DAG(
-    dag_id="vital_reminder",
+send_reminder_dag = DAG(
+    dag_id="send_reminder",
     default_args=default_args,
     schedule_interval="@once",
     catchup=False,
@@ -17,10 +17,10 @@ vital_reminder_dag = DAG(
 )
 
 switch_active_cm_task = PythonOperator(
-    task_id="vital_reminder",
+    task_id="send_reminder",
     task_concurrency=1,
-    python_callable=vital_reminder,
-    dag=vital_reminder_dag,
+    python_callable=send_reminder,
+    dag=send_reminder_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
