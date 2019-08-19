@@ -149,6 +149,8 @@ def switch_active_cm():
                                         filter=_filter, collection="user")
     for user in switchable_users:
         active_cm = process_switch(user=user, service=service)
+        if not active_cm:
+            return True
         user_endpoint = str(user.get("_id"))
         try:
             payload = {
