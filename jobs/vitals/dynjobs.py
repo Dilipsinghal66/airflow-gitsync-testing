@@ -67,5 +67,3 @@ def send_dyn():
 
     except:
         print("Error Exception raised")
-
-send_dyn()
