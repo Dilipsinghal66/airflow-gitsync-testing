@@ -1,14 +1,15 @@
-import json
 from datetime import datetime
-from random import choice
 from time import sleep
 
-from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
-from twilio.rest import Client
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
+from common.twilio_helpers import get_twilio_service, \
+    process_switch
+
+active_cm_list = Variable().get(key="active_cm_list",
+                                deserialize_json=True)
 
 
 def process_dynamic_task(**kwargs):
@@ -41,8 +42,8 @@ def process_dynamic_task(**kwargs):
         user_id = user.get("userId")
         patient_id = user.get("patientId")
         patient_data = message_replace_data.get(patient_id)
-        for i in range(0,len(patient_data)):
-            old = "#"+str(i)+"#"
+        for i in range(0, len(patient_data)):
+            old = "#" + str(i) + "#"
             new = str(patient_data[i])
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
@@ -142,76 +143,30 @@ def level_jump_patient():
 
 
 def switch_active_cm():
-    active_cm_list = Variable().get(key="active_cm_list",
-                                    deserialize_json=True)
-    twilio_hook = HttpHook().get_connection(conn_id="http_twilio")
-    account_sid = twilio_hook.login
-    auth_token = twilio_hook.password
-    service_sid = twilio_hook.extra_dejson.get("service_sid")
-    twilio_conn = Client(account_sid, auth_token)
-    service = twilio_conn.chat.services.get(sid=service_sid)
+    service = get_twilio_service()
     _filter = {"userStatus": 4, "assignedCm": {"$nin": active_cm_list}}
-    active_cm_attributes = {
-        "isCm": True,
-        "activeCm": True
-    }
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
                                         filter=_filter, collection="user")
     for user in switchable_users:
-        active_cm_exists = False
-        user_channel = user.get("chatInformation", {}).get("providerData",
-                                                           {}).get(
-            "channelSid", None)
-        user_identity = user.get("chatInformation", {}).get("providerData",
-                                                            {}).get("identity",
-                                                                    None)
-        print(user_identity)
+        active_cm = process_switch(user=user, service=service)
         user_endpoint = str(user.get("_id"))
-        if not user_channel or not user_identity:
-            continue
-        channel = service.channels(user_channel).fetch()
-        members = channel.members.list()
-        for member in members:
-            if not int(member.identity) == int(user_identity):
-                print(member.attributes)
-                attributes = json.loads(member.attributes)
-                active_cm = attributes.get("activeCm")
-                if active_cm:
-                    if member.identity in active_cm_list:
-                        active_cm_exists = True
-                        continue
-                print("Deleting member " + member.identity +
-                      "from channel " + user_channel)
-                member.delete()
-                print("Member deleted" + member.identity +
-                      "from channel" + user_channel)
-        if not active_cm_exists:
-            active_cm = choice(active_cm_list)
-            print("Active member adding to " + user_channel +
-                  "with identity " + active_cm)
-            channel.members.create(active_cm,
-                                   attributes=json.dumps(
-                                       active_cm_attributes))
+        try:
+            payload = {
+                "assignedCm": active_cm
+            }
+            make_http_request(conn_id="http_user_url", method="PATCH",
+                              endpoint=user_endpoint, payload=payload)
+        except Exception as e:
+            sleep(5)
             try:
-                payload = {
-                    "assignedCm": active_cm
-                }
                 make_http_request(conn_id="http_user_url", method="PATCH",
                                   endpoint=user_endpoint, payload=payload)
             except Exception as e:
                 sleep(5)
                 try:
-                    make_http_request(conn_id="http_user_url", method="PATCH",
-                                      endpoint=user_endpoint, payload=payload)
+                    make_http_request(conn_id="http_user_url",
+                                      method="PATCH",
+                                      endpoint=user_endpoint,
+                                      payload=payload)
                 except Exception as e:
-                    sleep(5)
-                    try:
-                        make_http_request(conn_id="http_user_url",
-                                          method="PATCH",
-                                          endpoint=user_endpoint,
-                                          payload=payload)
-                    except Exception as e:
-                        print("Failed to update channel for " + user_channel)
-            print(
-                "Active member added to " + user_channel +
-                "with identity " + active_cm)
+                    print("Failed to update channel for " + user_endpoint)
