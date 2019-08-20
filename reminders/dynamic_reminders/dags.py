@@ -1,10 +1,14 @@
 from datetime import datetime, timedelta
 
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
 from config import local_tz, default_args
-from reminders.dynamic_reminders.reminder import send_reminder
+from reminders.dynamic_reminders.reminder import send_reminder, send_meditation
+
+meditation_schedule = Variable().get(key="meditation_schedule",
+                                     deserialize_json=True)
 
 dynamic_reminder_21_45_dag = DAG(
     dag_id="dynamic_reminder_21_45",
@@ -22,6 +26,17 @@ dynamic_reminder_21_45_task = PythonOperator(
     python_callable=send_reminder,
     dag=dynamic_reminder_21_45_dag,
     op_kwargs={},
+    pool="task_reminder_pool",
+    retry_exponential_backoff=True,
+    provide_context=True
+)
+
+meditation_content_21_45_task = PythonOperator(
+    task_id="meditation_content_21_45_task",
+    task_concurrency=1,
+    python_callable=send_meditation,
+    dag=dynamic_reminder_21_45_dag,
+    op_kwargs={"schedule": meditation_schedule},
     pool="task_reminder_pool",
     retry_exponential_backoff=True,
     provide_context=True

@@ -12,6 +12,19 @@ active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
 
 
+def send_chat_message(user_id=None, payload=None):
+    try:
+        endpoint = "user/" + str(
+            round(user_id)) + "/message"
+        print(endpoint)
+        status, body = make_http_request(
+            conn_id="http_chat_service_url",
+            endpoint=endpoint, method="POST", payload=payload)
+        print(status, body)
+    except Exception as e:
+        raise ValueError(str(e))
+
+
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
@@ -47,15 +60,7 @@ def process_dynamic_task(**kwargs):
             new = str(patient_data[i])
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
-        try:
-            endpoint = "user/" + str(round(user_id)) + "/message"
-            print(endpoint)
-            status, body = make_http_request(
-                conn_id="http_chat_service_url",
-                endpoint=endpoint, method="POST", payload=payload)
-            print(status, body)
-        except Exception as e:
-            raise ValueError(str(e))
+        send_chat_message(user_id=user_id, payload=payload)
     print(sql_data)
 
 

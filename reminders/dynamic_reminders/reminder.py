@@ -1,10 +1,14 @@
+import calendar
 from datetime import date
 
 from airflow.models import Variable
 from dateutil import parser
 
 from common.db_functions import get_data_from_db
+from common.helpers import send_chat_message
 from common.http_functions import make_http_request
+
+calendar.setfirstweekday(6)
 
 
 def get_patient_days(patient):
@@ -73,13 +77,45 @@ def send_reminder(**kwargs):
                     continue
                 message = dynamic_messages[0]
             payload["message"] = message
-            try:
-                endpoint = "user/" + str(
-                    round(user_id)) + "/message"
-                print(endpoint)
-                status, body = make_http_request(
-                    conn_id="http_chat_service_url",
-                    endpoint=endpoint, method="POST", payload=payload)
-                print(status, body)
-            except Exception as e:
-                raise ValueError(str(e))
+            send_chat_message(user_id=user_id, payload=payload)
+
+
+def get_meditation_for_today(meditation_schedule=None):
+    today = date.today()
+    month_calendar = calendar.monthcalendar(today.year, today.month)
+    day_today = today.day
+    week_of_month = 0
+    day_of_week = 0
+    for i in range(len(month_calendar)):
+        if day_today in month_calendar[i]:
+            week_of_month = i
+            day_of_week = month_calendar[i].index(day_today)
+    meditation = meditation_schedule[week_of_month][day_of_week]
+    return meditation
+
+
+def send_meditation(**kwargs):
+    meditation_schedule = kwargs.get("schedule")
+    test_user_id = int(Variable.get("test_user_id", '0'))
+    exclude_user_list = list(
+        map(int, Variable.get("exclude_user_ids", "0").split(",")))
+    payload = {
+        "action": "meditation",
+        "message": get_meditation_for_today(
+            meditation_schedule=meditation_schedule)
+    }
+    user_filter = {
+        "userStatus": {"$in": [4]}
+    }
+    if test_user_id:
+        user_filter["userId"] = test_user_id
+    user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                                 filter=user_filter, batch_size=100)
+    while user_data.alive:
+        for user in user_data:
+            user_id = user.get("userId")
+            if test_user_id and int(user_id) != test_user_id:
+                continue
+            if int(user_id) in exclude_user_list:
+                continue
+            send_chat_message(user_id=user_id, payload=payload)
