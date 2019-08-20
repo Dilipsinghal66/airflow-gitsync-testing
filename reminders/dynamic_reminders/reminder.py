@@ -105,8 +105,9 @@ def send_meditation(**kwargs):
         return
     payload = {
         "action": "meditation",
-        "message": meditation_id
+        "message": str(meditation_id)
     }
+    print(payload)
     user_filter = {
         "userStatus": {"$in": [4]}
     }
