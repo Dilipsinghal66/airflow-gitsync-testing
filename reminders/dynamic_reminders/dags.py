@@ -18,6 +18,7 @@ dynamic_reminder_21_45_dag = DAG(
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
     dagrun_timeout=timedelta(minutes=1),
+    concurrency=2
 )
 
 dynamic_reminder_21_45_task = PythonOperator(
