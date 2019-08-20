@@ -80,16 +80,20 @@ def send_reminder(**kwargs):
             send_chat_message(user_id=user_id, payload=payload)
 
 
-def get_meditation_for_today(meditation_schedule=None):
+def get_meditation_for_today(meditation_schedule=None, day=0):
     today = date.today()
     month_calendar = calendar.monthcalendar(today.year, today.month)
-    day_today = today.day
+    day_today = day
     week_of_month = 0
     day_of_week = 0
     for i in range(len(month_calendar)):
         if day_today in month_calendar[i]:
-            week_of_month = i
             day_of_week = month_calendar[i].index(day_today)
+    for i in range(len(month_calendar)):
+        if month_calendar[i][day_of_week] and month_calendar[i][
+                                        day_of_week] < day_today:
+            week_of_month += 1
+    print(day_of_week, week_of_month)
     meditation = meditation_schedule[week_of_month][day_of_week]
     return meditation
 
