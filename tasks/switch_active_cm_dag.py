@@ -9,7 +9,7 @@ from config import local_tz, default_args
 switch_active_cm_dag = DAG(
     dag_id="switch_active_cm",
     default_args=default_args,
-    schedule_interval="*/5 * * * *",
+    schedule_interval="@every_5_minutes",
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
