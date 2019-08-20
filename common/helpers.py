@@ -145,7 +145,6 @@ def level_jump_patient():
 def switch_active_cm():
     service = get_twilio_service()
     _filter = {"userStatus": 4, "assignedCm": {"$nin": active_cm_list}}
-    print(_filter)
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
                                         filter=_filter, collection="user")
     for user in switchable_users:
