@@ -99,10 +99,13 @@ def send_meditation(**kwargs):
     test_user_id = int(Variable.get("test_user_id", '0'))
     exclude_user_list = list(
         map(int, Variable.get("exclude_user_ids", "0").split(",")))
+    meditation_id = get_meditation_for_today(
+        meditation_schedule=meditation_schedule)
+    if not meditation_id:
+        return
     payload = {
         "action": "meditation",
-        "message": get_meditation_for_today(
-            meditation_schedule=meditation_schedule)
+        "message": meditation_id
     }
     user_filter = {
         "userStatus": {"$in": [4]}
