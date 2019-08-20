@@ -164,11 +164,13 @@ def switch_active_cm():
             make_http_request(conn_id="http_user_url", method="PATCH",
                               endpoint=user_endpoint, payload=payload)
         except Exception as e:
+            print(e)
             sleep(5)
             try:
                 make_http_request(conn_id="http_user_url", method="PATCH",
                                   endpoint=user_endpoint, payload=payload)
             except Exception as e:
+                print(e)
                 sleep(5)
                 try:
                     make_http_request(conn_id="http_user_url",
@@ -176,4 +178,5 @@ def switch_active_cm():
                                       endpoint=user_endpoint,
                                       payload=payload)
                 except Exception as e:
+                    print(e)
                     print("Failed to update channel for " + user_endpoint)
