@@ -377,3 +377,7 @@ def refresh_active_user_redis():
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
+
+
+def add_care_manager():
+    pass
