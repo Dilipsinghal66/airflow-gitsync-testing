@@ -30,11 +30,15 @@ def process_dynamic_task(**kwargs):
     mongo_query = kwargs.get("query", {}).get("mongo", None)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
-    sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+    sql_data = None
+    if sql_query:
+        sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query)
     collection = mongo_query.get("collection")
     _filter = mongo_query.get("query")
-    mongo_data = get_data_from_db(conn_id="mongo_user_db",
+    mongo_data = None
+    if mongo_query:
+        mongo_data = get_data_from_db(conn_id="mongo_user_db",
                                   collection=collection, filter=_filter)
     patient_id_list = []
     message_replace_data = {}
