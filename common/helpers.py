@@ -170,6 +170,12 @@ def get_patients_activated_today():
 
 
 def get_deactivated_patients():
+    """
+    Function to return all users that have been marked as deactivated but not
+    deleted from mongodb database.
+
+    :return: None
+    """
     _filter = {
         "userStatus": 3,
         "deleted": False
@@ -234,30 +240,78 @@ def switch_active_cm():
 
 
 def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
+    """
+    This function fetches all members of the target channel defined in
+    `channel_sid` and deletes the same from the channel.
+
+    :param twilio_service: twilio chat service instance
+    :param channel_sid: twilio channel specific to user
+    :return: None
+    """
+    print("Cleaning up twilio channel " + channel_sid + " of all members.")
     channel = twilio_service.channels.get(sid=channel_sid)
     members = channel.members.list()
     if members:
         for member in members:
             member.delete()
+    print(channel_sid + " cleaned of all members.")
 
 
 def twilio_delete_user(twilio_service=None, user_sid=None):
+    """
+    This function fetches the user in twilio given by `user_sid` and deletes it
+
+    :param twilio_service: twilio chat service instance
+    :param user_sid: twilio user sid of the user
+    :return:
+    """
+    print("Deleting deactivated twilio user " + user_sid)
     user = twilio_service.users.get(user_sid)
     user.delete()
+    print("Deleted deactivated twilio user" + user_sid)
 
 
 def mark_user_deleted(_id):
+    """
+    This function makes an api call to user service to mark the user specified
+    by `_id` as deleted.
+    :param _id: ObjectId mongo _id of the user to be deleted
+    :return: None
+    """
+    print("Marking user with id " + _id + " as deleted in user service")
     make_http_request(conn_id="http_user_url", method="DELETE", endpoint=_id)
+    print("User with id " + _id + " marked as deleted in user service")
 
 
 def twilio_cleanup():
+    """
+    Python callable used for twilio cleanup dag. This function fetches
+    deactivated patients, deletes members from each patient in twilio
+    and marks patient as deleted in user service.
+
+    - fetch deactivated patients
+    - remove members from patient's channel
+    - remove patient's user from twilio
+    - mark patient as deleted in user service
+
+    Deactivated patients condition
+    if user.userStatus == INACTIVE and user.deleted = False
+
+    :return: None
+    """
+    print("Fetching users deactivated but not deleted. ")
     users_deactivated = get_deactivated_patients()
-    twilio_service = None
     if users_deactivated:
+        print("Deactivated users fetched. Proceeding to deletion")
         twilio_service = get_twilio_service()
+    else:
+        print("No new deleted users found. Nothing to do")
+        return
     for user in users_deactivated:
         patient_id = user.get("patient_id")
         _id = str(user.get("_id"))
+        print("Processing deletion for deactivated patient " + str(
+            patient_id) + " with id " + _id)
         chat_information = user.get("chatInformation", {})
         provider_data = chat_information.get("providerData", {})
         channel_sid = provider_data.get("channelSid", None)
@@ -282,4 +336,4 @@ def twilio_cleanup():
             mark_user_deleted(_id=_id)
         except Exception as e:
             print(e)
-        break
+    print("Finished processing deactivated users for deletion. ")
