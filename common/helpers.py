@@ -233,7 +233,53 @@ def switch_active_cm():
                     print("Failed to update channel for " + user_endpoint)
 
 
+def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
+    channel = twilio_service.channels.get(sid=channel_sid)
+    members = channel.members.list()
+    if members:
+        for member in members:
+            member.delete()
+
+
+def twilio_delete_user(twilio_service=None, user_sid=None):
+    user = twilio_service.users.get(user_sid)
+    user.delete()
+
+
+def mark_user_deleted(_id):
+    make_http_request(conn_id="http_user_url", method="DELETE", endpoint=_id)
+
+
 def twilio_cleanup():
     users_deactivated = get_deactivated_patients()
+    twilio_service = None
+    if users_deactivated:
+        twilio_service = get_twilio_service()
     for user in users_deactivated:
-        print(user)
+        patient_id = user.get("patient_id")
+        _id = str(user.get("_id"))
+        chat_information = user.get("chatInformation", {})
+        provider_data = chat_information.get("providerData", {})
+        channel_sid = provider_data.get("channelSid", None)
+        if not channel_sid:
+            print("Error in user data for " + str(
+                patient_id) + ". Missing channel information")
+        user_sid = provider_data.get("userSid", None)
+        if not user_sid:
+            print("Error in user data for " + str(
+                patient_id) + ". Missing twilio user information")
+        try:
+            twilio_cleanup_channel(twilio_service=twilio_service,
+                                   channel_sid=channel_sid)
+        except Exception as e:
+            print(e)
+        try:
+            twilio_delete_user(twilio_service=twilio_service,
+                               user_sid=user_sid)
+        except Exception as e:
+            print(e)
+        try:
+            mark_user_deleted(_id=_id)
+        except Exception as e:
+            print(e)
+        break
