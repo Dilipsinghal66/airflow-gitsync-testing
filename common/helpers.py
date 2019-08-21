@@ -31,6 +31,7 @@ def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
     print(mongo_query)
+    print(type(mongo_query))
     mongo_query = json.loads(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
