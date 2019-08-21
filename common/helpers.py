@@ -33,6 +33,7 @@ def process_dynamic_task(**kwargs):
     print(mongo_query)
     print(type(mongo_query))
     mongo_query = json.loads(mongo_query)
+    print(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
     sql_data = None
