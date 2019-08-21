@@ -1,9 +1,9 @@
 import json
 from datetime import datetime
 from time import sleep
-from dateutil import parser
 
 from airflow.models import Variable
+from dateutil import parser
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
@@ -27,6 +27,22 @@ def send_chat_message(user_id=None, payload=None):
         raise ValueError(str(e))
 
 
+def mongo_query_builder(query_data):
+    query = query_data.get("query")
+    field = query.get("field")
+    op = query.get("op")
+    value = query.get("value")
+    value_type = query.get("value_type")
+    if value_type == "date":
+        value = parser.parse(value)
+    mongo_query = {
+        field: {
+            op: value
+        }
+    }
+    return mongo_query
+
+
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
@@ -41,7 +57,7 @@ def process_dynamic_task(**kwargs):
         sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                     sql_query=sql_query)
     collection = mongo_query.get("collection")
-    _filter = mongo_query.get("query")
+    _filter = mongo_query_builder(query_data=mongo_query)
     mongo_data = None
     if mongo_query:
         mongo_data = get_data_from_db(conn_id="mongo_user_db",
