@@ -11,6 +11,16 @@ active_cm_attributes = {
 
 
 def get_twilio_service():
+    """
+    This function returns Twilio chat service instance.
+    Credentials are fetched from http hook defined in airflow.
+
+    - account_sid Account Sid for the given instance
+    - auth_token Auth token for twilio authentication
+    - service_sid Service to be fetched from twilio
+
+    :return: TwilioChat instance
+    """
     twilio_hook = HttpHook().get_connection(conn_id="http_twilio")
     account_sid = twilio_hook.login
     auth_token = twilio_hook.password
