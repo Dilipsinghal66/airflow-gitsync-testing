@@ -169,6 +169,16 @@ def get_patients_activated_today():
     return patient_list
 
 
+def get_deactivated_patients():
+    _filter = {
+        "userStatus": 3,
+        "deleted": False
+    }
+    user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                                 filter=_filter)
+    return user_data
+
+
 def level_jump_patient():
     patient_list = get_patients_activated_today()
     print("Activated patients ", patient_list)
@@ -221,3 +231,9 @@ def switch_active_cm():
                 except Exception as e:
                     print(e)
                     print("Failed to update channel for " + user_endpoint)
+
+
+def twilio_cleanup():
+    users_deactivated = get_deactivated_patients()
+    for user in users_deactivated:
+        print(user)
