@@ -21,8 +21,10 @@ def get_cron_expression(job_timings=None):
         return default_time
     time_list = scheduled_time.split(":")
     try:
-        date_list = scheduled_date.split("-")
-        print(date_list)
+        if scheduled_date:
+            date_list = scheduled_date.split("-")
+        else:
+            date_list = None
     except Exception as e:
         date_list = None
     cron_expression = time_list[1] + " " + time_list[0]
