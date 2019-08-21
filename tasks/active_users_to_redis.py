@@ -9,7 +9,7 @@ from config import local_tz, default_args
 active_to_redis_dag = DAG(
     dag_id="active_to_redis",
     default_args=default_args,
-    schedule_interval="@daily",
+    schedule_interval="@hourly",
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
