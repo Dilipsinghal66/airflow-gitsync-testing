@@ -3,6 +3,7 @@ from datetime import datetime
 from time import sleep
 
 from airflow.models import Variable
+from airflow.contrib.hooks.redis_hook import RedisHook
 from dateutil import parser
 
 from common.db_functions import get_data_from_db
@@ -337,3 +338,14 @@ def twilio_cleanup():
         except Exception as e:
             print(e)
     print("Finished processing deactivated users for deletion. ")
+
+
+def refresh_active_user_redis():
+    redis_hook = RedisHook(redis_conn_id="redis_active_users_chat")
+    redis_conn = redis_hook.get_conn()
+    _filter = {"userStatus": 4, "assignedCm": {"$in": active_cm_list}}
+    cacheable_users = get_data_from_db(conn_id="mongo_user_db",
+                                       filter=_filter, collection="user")
+    for cm in active_cm_list:
+        for user in cacheable_users:
+            redis_conn.rpush("active_users"+str(cm), user)
