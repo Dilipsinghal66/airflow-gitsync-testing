@@ -239,6 +239,11 @@ def switch_active_cm():
                 except Exception as e:
                     print(e)
                     print("Failed to update channel for " + user_endpoint)
+    if switchable_users:
+        try:
+            refresh_active_user_redis()
+        except Exception as e:
+            print(e)
 
 
 def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
@@ -366,4 +371,4 @@ def refresh_active_user_redis():
     for cm in active_cm_list:
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
-            redis_conn.rpush("active_users"+str(cm), sanitized_data)
+            redis_conn.rpush("active_users_"+str(cm), sanitized_data)
