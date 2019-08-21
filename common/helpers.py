@@ -234,30 +234,42 @@ def switch_active_cm():
 
 
 def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
+    print("Cleaning up twilio channel " + channel_sid + " of all members.")
     channel = twilio_service.channels.get(sid=channel_sid)
     members = channel.members.list()
     if members:
         for member in members:
             member.delete()
+    print(channel_sid + " cleaned of all members.")
 
 
 def twilio_delete_user(twilio_service=None, user_sid=None):
+    print("Deleting deactivated twilio user " + user_sid)
     user = twilio_service.users.get(user_sid)
     user.delete()
+    print("Deleted deactivated twilio user" + user_sid)
 
 
 def mark_user_deleted(_id):
+    print("Marking user with id " + _id + " as deleted in user service")
     make_http_request(conn_id="http_user_url", method="DELETE", endpoint=_id)
+    print("User with id " + _id + " marked as deleted in user service")
 
 
 def twilio_cleanup():
+    print("Fetching users deactivated but not deleted. ")
     users_deactivated = get_deactivated_patients()
-    twilio_service = None
     if users_deactivated:
+        print("Deactivated users fetched. Proceeding to deletion")
         twilio_service = get_twilio_service()
+    else:
+        print("No new deleted users found. Nothing to do")
+        return
     for user in users_deactivated:
         patient_id = user.get("patient_id")
         _id = str(user.get("_id"))
+        print("Processing deletion for deactivated patient " + str(
+            patient_id) + " with id " + _id)
         chat_information = user.get("chatInformation", {})
         provider_data = chat_information.get("providerData", {})
         channel_sid = provider_data.get("channelSid", None)
@@ -282,4 +294,4 @@ def twilio_cleanup():
             mark_user_deleted(_id=_id)
         except Exception as e:
             print(e)
-        break
+    print("Finished processing deactivated users for deletion. ")
