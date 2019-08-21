@@ -45,6 +45,7 @@ def mongo_query_builder(query_data):
 
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
+    mongo_filter_field = None
     mongo_query = kwargs.get("query", {}).get("mongo", None)
     print(mongo_query)
     print(type(mongo_query))
@@ -73,12 +74,13 @@ def process_dynamic_task(**kwargs):
 
     if mongo_data:
         for patient in mongo_data:
-            print(patient)
-            patient_id = patient.get("patientId")
+            if "patientId" not in patient.keys():
+                mongo_filter_field = "_id"
+            patient_id = patient.get(mongo_filter_field)
             patient_id_list.append(patient_id)
     print(patient_id_list)
     _filter = {
-        "patientId": {"$in": patient_id_list}
+        mongo_filter_field: {"$in": patient_id_list}
     }
     projection = {
         "userId": 1, "patientId": 1, "_id": 0
