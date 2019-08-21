@@ -2,15 +2,15 @@ import json
 from datetime import datetime
 from time import sleep
 
-from airflow.models import Variable
 from airflow.contrib.hooks.redis_hook import RedisHook
+from airflow.models import Variable
+from bson import ObjectId
 from dateutil import parser
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
     process_switch
-from bson import ObjectId
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -365,10 +365,12 @@ def sanitize_data(data):
 def refresh_active_user_redis():
     redis_hook = RedisHook(redis_conn_id="redis_active_users_chat")
     redis_conn = redis_hook.get_conn()
-    _filter = {"userStatus": 4, "assignedCm": {"$in": active_cm_list}}
-    cacheable_users = get_data_from_db(conn_id="mongo_user_db",
-                                       filter=_filter, collection="user")
     for cm in active_cm_list:
+        _filter = {"userStatus": 4, "assignedCm": cm}
+        cacheable_users = get_data_from_db(conn_id="mongo_user_db",
+                                           filter=_filter, collection="user")
+        if cacheable_users:
+            redis_conn.delete("active_users_"+str(cm))
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
-            redis_conn.rpush("active_users_"+str(cm), sanitized_data)
+            redis_conn.rpush("active_users_" + str(cm), sanitized_data)
