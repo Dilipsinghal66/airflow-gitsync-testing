@@ -58,20 +58,23 @@ def process_dynamic_task(**kwargs):
                                     sql_query=sql_query)
     collection = mongo_query.get("collection")
     _filter = mongo_query_builder(query_data=mongo_query)
+    print(_filter)
     mongo_data = None
     if mongo_query:
         mongo_data = get_data_from_db(conn_id="mongo_user_db",
                                       collection=collection, filter=_filter)
     patient_id_list = []
     message_replace_data = {}
-    for patient in sql_data:
-        patient_id = patient[0]
-        patient_id_list.append(patient_id)
-        message_replace_data[patient_id] = patient
+    if sql_data:
+        for patient in sql_data:
+            patient_id = patient[0]
+            patient_id_list.append(patient_id)
+            message_replace_data[patient_id] = patient
 
-    for patient in mongo_data:
-        patient_id = patient.get("patientId")
-        patient_id_list.append(patient_id)
+    if mongo_data:
+        for patient in mongo_data:
+            patient_id = patient.get("patientId")
+            patient_id_list.append(patient_id)
     print(patient_id_list)
     _filter = {
         "patientId": {"$in": patient_id_list}
