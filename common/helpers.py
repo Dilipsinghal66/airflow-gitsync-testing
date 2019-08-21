@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from time import sleep
+from dateutil import parser
 
 from airflow.models import Variable
 
@@ -29,6 +30,7 @@ def send_chat_message(user_id=None, payload=None):
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
+    print(mongo_query)
     mongo_query = json.loads(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
