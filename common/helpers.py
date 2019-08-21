@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from time import sleep
 
@@ -28,18 +29,19 @@ def send_chat_message(user_id=None, payload=None):
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
+    mongo_query = json.loads(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
     sql_data = None
     if sql_query:
         sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                                sql_query=sql_query)
+                                    sql_query=sql_query)
     collection = mongo_query.get("collection")
     _filter = mongo_query.get("query")
     mongo_data = None
     if mongo_query:
         mongo_data = get_data_from_db(conn_id="mongo_user_db",
-                                  collection=collection, filter=_filter)
+                                      collection=collection, filter=_filter)
     patient_id_list = []
     message_replace_data = {}
     for patient in sql_data:
@@ -73,7 +75,7 @@ def process_dynamic_task(**kwargs):
             new = str(patient_data[i])
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
-        #send_chat_message(user_id=user_id, payload=payload)
+        # send_chat_message(user_id=user_id, payload=payload)
     print(sql_data)
 
 
