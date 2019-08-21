@@ -73,6 +73,7 @@ def process_dynamic_task(**kwargs):
 
     if mongo_data:
         for patient in mongo_data:
+            print(patient)
             patient_id = patient.get("patientId")
             patient_id_list.append(patient_id)
     print(patient_id_list)
