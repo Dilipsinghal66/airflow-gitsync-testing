@@ -17,7 +17,7 @@ twilio_cleanup_dag = DAG(
 )
 
 twilio_cleanup_task = PythonOperator(
-    task_id="switch_active_cm",
+    task_id="twilio_cleanup_task",
     task_concurrency=1,
     python_callable=twilio_cleanup,
     dag=twilio_cleanup_dag,
