@@ -32,12 +32,21 @@ def process_dynamic_task(**kwargs):
     message: str = kwargs.get("message")
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query)
+    collection = mongo_query.get("collection")
+    _filter = mongo_query.get("query")
+    mongo_data = get_data_from_db(conn_id="mongo_user_db",
+                                  collection=collection, filter=_filter)
     patient_id_list = []
     message_replace_data = {}
     for patient in sql_data:
         patient_id = patient[0]
         patient_id_list.append(patient_id)
         message_replace_data[patient_id] = patient
+
+    for patient in mongo_data:
+        patient_id = patient.get("patientId")
+        patient_id_list.append(patient_id)
+    print(patient_id_list)
     _filter = {
         "patientId": {"$in": patient_id_list}
     }
@@ -60,7 +69,7 @@ def process_dynamic_task(**kwargs):
             new = str(patient_data[i])
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
-        send_chat_message(user_id=user_id, payload=payload)
+        #send_chat_message(user_id=user_id, payload=payload)
     print(sql_data)
 
 
