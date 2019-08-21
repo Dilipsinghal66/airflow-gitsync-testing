@@ -10,6 +10,7 @@ from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
     process_switch
+from bson import ObjectId
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -340,6 +341,22 @@ def twilio_cleanup():
     print("Finished processing deactivated users for deletion. ")
 
 
+def sanitize_data(data):
+    if isinstance(data, ObjectId):
+        return str(data)
+    if isinstance(data, datetime):
+        return str(data)
+    if isinstance(data, dict):
+        for k, v in data.items():
+            data[k] = sanitize_data(v)
+            if isinstance(v, list):
+                v1 = []
+                for d in v:
+                    v1.append(sanitize_data(d))
+                data[k] = v1
+    return data
+
+
 def refresh_active_user_redis():
     redis_hook = RedisHook(redis_conn_id="redis_active_users_chat")
     redis_conn = redis_hook.get_conn()
@@ -348,4 +365,5 @@ def refresh_active_user_redis():
                                        filter=_filter, collection="user")
     for cm in active_cm_list:
         for user in cacheable_users:
-            redis_conn.rpush("active_users"+str(cm), user)
+            sanitized_data = json.dumps(sanitize_data(user))
+            redis_conn.rpush("active_users"+str(cm), sanitized_data)
