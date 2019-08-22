@@ -211,6 +211,7 @@ def switch_active_cm():
     _filter = {"userStatus": 4, "assignedCm": {"$nin": active_cm_list}}
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
                                         filter=_filter, collection="user")
+    update_redis = False
     for user in switchable_users:
         active_cm = process_switch(user=user, service=service)
         if not active_cm:
@@ -222,12 +223,14 @@ def switch_active_cm():
             }
             make_http_request(conn_id="http_user_url", method="PATCH",
                               endpoint=user_endpoint, payload=payload)
+            update_redis = True
         except Exception as e:
             print(e)
             sleep(5)
             try:
                 make_http_request(conn_id="http_user_url", method="PATCH",
                                   endpoint=user_endpoint, payload=payload)
+                update_redis = True
             except Exception as e:
                 print(e)
                 sleep(5)
@@ -236,10 +239,11 @@ def switch_active_cm():
                                       method="PATCH",
                                       endpoint=user_endpoint,
                                       payload=payload)
+                    update_redis = True
                 except Exception as e:
                     print(e)
                     print("Failed to update channel for " + user_endpoint)
-    if switchable_users:
+    if update_redis:
         try:
             refresh_active_user_redis()
         except Exception as e:
