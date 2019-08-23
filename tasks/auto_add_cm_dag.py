@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from common.helpers import switch_active_cm
+from common.helpers import add_care_manager
 from config import local_tz, default_args
 
-switch_active_cm_dag = DAG(
-    dag_id="switch_active_cm",
+populate_cm_dag = DAG(
+    dag_id="populate_cm",
     default_args=default_args,
     schedule_interval="@every_5_minutes",
     catchup=False,
@@ -17,10 +17,10 @@ switch_active_cm_dag = DAG(
 )
 
 switch_active_cm_task = PythonOperator(
-    task_id="switch_active_cm",
+    task_id="populate_cm",
     task_concurrency=1,
-    python_callable=switch_active_cm,
-    dag=switch_active_cm_dag,
+    python_callable=add_care_manager,
+    dag=populate_cm_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
