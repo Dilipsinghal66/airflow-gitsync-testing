@@ -10,7 +10,7 @@ from dateutil import parser
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
-    process_switch
+    process_switch, is_active_cm
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -382,7 +382,8 @@ def refresh_active_user_redis():
 
 def get_care_managers():
     _filter = {
-        "isCm": True
+        "isCm": True,
+        "cmId": {"$gt": 99999}
     }
     projection = {
         "cmId": 1,
@@ -390,9 +391,34 @@ def get_care_managers():
     }
     cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                filter=_filter, projection=projection)
-    for cm in cm_data:
-        print(cm)
+    return cm_data
+
+
+def compute_cm_priority(cm_list):
+    print(cm_list)
+    cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'])
+    return cm_priority_list
 
 
 def add_care_manager():
-    get_care_managers()
+    cm_data = get_care_managers()
+    twilio_service = get_twilio_service()
+    cm_slot_list = []
+    for cm in cm_data:
+        identity = int(round(cm.get("cmId")))
+        cm_open_slots = 0
+        if identity:
+            twilio_user = twilio_service.users.get(str(identity))
+            twilio_user = twilio_user.fetch()
+            active_user_cm = is_active_cm(cm=twilio_user)
+            if active_user_cm:
+                continue
+            cm_joined_channels = twilio_user.joined_channels_count
+            cm_open_slots = 1000 - cm_joined_channels
+
+        cm_slot_list.append({
+            "cmId": identity,
+            "openSlots": cm_open_slots
+        })
+    cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
+    print(cm_by_priority)
