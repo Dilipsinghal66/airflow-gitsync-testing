@@ -395,7 +395,26 @@ def get_care_managers():
 
 
 def create_cm(cm):
-    pass
+    cm_id = cm.get("cmId")
+    cm_id_new = cm_id - 1
+    cm_payload = {"phoneNo": cm_id_new,
+                  "userId": cm_id_new,
+                  "firstName": "Zyla",
+                  "lastName": "Care",
+                  "age": 0,
+                  "email": "zyla@zyla.in",
+                  "gender": 1,
+                  "patientId": cm_id_new,
+                  "userStatus": 6,
+                  "isCm": True,
+                  "existing": False,
+                  "cmId": cm_id_new}
+    try:
+        make_http_request(conn_id="http_chat_service_url", method="POST",
+                          payload=cm_payload)
+    except Exception as e:
+        print(e)
+        raise ValueError("Care Manager create failed. ")
 
 
 def enough_open_slots(cm_list):
@@ -419,8 +438,7 @@ def compute_cm_priority(cm_list):
                                            deserialize_json=True)
     cm_list = list(
         filter(lambda d: d["openSlots"] > per_cm_slot_threshold, cm_list))
-    cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'],
-                              reverse=True)
+    cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'])
     return cm_priority_list
 
 
@@ -448,6 +466,7 @@ def add_care_manager():
             "openSlots": cm_open_slots
         })
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
-    print(cm_by_priority)
     if enough_open_slots(cm_list=cm_by_priority):
         print("we have enough cm slots")
+    else:
+        create_cm(cm=cm_by_priority[-1:])
