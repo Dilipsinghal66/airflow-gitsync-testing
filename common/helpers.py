@@ -380,5 +380,19 @@ def refresh_active_user_redis():
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
 
 
+def get_care_managers():
+    _filter = {
+        "isCm": True
+    }
+    projection = {
+        "cmId": 1,
+        "_id": 0
+    }
+    cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                               filter=_filter, projection=projection)
+    for cm in cm_data:
+        print(cm)
+
+
 def add_care_manager():
-    pass
+    get_care_managers()
