@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from time import sleep
 
@@ -373,7 +374,7 @@ def refresh_active_user_redis():
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
         if cacheable_users:
-            redis_conn.delete("active_users_"+str(cm))
+            redis_conn.delete("active_users_" + str(cm))
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
