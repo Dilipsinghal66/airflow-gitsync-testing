@@ -10,7 +10,7 @@ from dateutil import parser
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
-    process_switch, is_active_cm
+    process_switch
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -394,9 +394,33 @@ def get_care_managers():
     return cm_data
 
 
+def create_cm(cm):
+    pass
+
+
+def enough_open_slots(cm_list):
+    slot_threshold = Variable().get(key="cm_available_avg_slot_threshold",
+                                    deserialize_json=True)
+    cm_count = len(cm_list)
+    available_slots = 0
+    for cm in cm_list:
+        slots = cm.get("openSlots")
+        available_slots += slots
+    avg_available = round(available_slots / cm_count)
+    if avg_available and avg_available > slot_threshold:
+        enough_slots = True
+    else:
+        enough_slots = False
+    return enough_slots
+
+
 def compute_cm_priority(cm_list):
-    print(cm_list)
-    cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'])
+    per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
+                                           deserialize_json=True)
+    cm_list = list(
+        filter(lambda d: d["openSlots"] > per_cm_slot_threshold, cm_list))
+    cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'],
+                              reverse=True)
     return cm_priority_list
 
 
@@ -414,8 +438,7 @@ def add_care_manager():
             except Exception as e:
                 print(e)
                 continue
-            active_user_cm = is_active_cm(cm=twilio_user)
-            if active_user_cm:
+            if identity in active_cm_list:
                 continue
             cm_joined_channels = twilio_user.joined_channels_count
             cm_open_slots = 1000 - cm_joined_channels
@@ -426,3 +449,5 @@ def add_care_manager():
         })
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
     print(cm_by_priority)
+    if enough_open_slots(cm_list=cm_by_priority):
+        print("we have enough cm slots")

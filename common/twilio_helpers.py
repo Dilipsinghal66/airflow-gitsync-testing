@@ -88,14 +88,3 @@ def process_switch(user=None, service=None):
     print("Active cm is not assigned. Processing further. ")
     active_cm = swap_cm_with_active(old_cm=cm_member, channel=channel)
     return active_cm
-
-
-def is_active_cm(cm):
-    cm_attributes = cm.attributes
-    cm_active = False
-    if cm_attributes:
-        cm_attributes = json.loads(cm_attributes)
-        active_cm = cm_attributes.get("activeCm")
-        if active_cm:
-            cm_active = True
-    return cm_active
