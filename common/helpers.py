@@ -409,7 +409,11 @@ def add_care_manager():
         cm_open_slots = 0
         if identity:
             twilio_user = twilio_service.users.get(str(identity))
-            twilio_user = twilio_user.fetch()
+            try:
+                twilio_user = twilio_user.fetch()
+            except Exception as e:
+                print(e)
+                continue
             active_user_cm = is_active_cm(cm=twilio_user)
             if active_user_cm:
                 continue
