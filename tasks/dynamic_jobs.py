@@ -10,10 +10,34 @@ from config import local_tz, default_args
 scheduled_jobs = get_data_from_db(conn_id="mongo_user_db",
                                   collection="job_storage")
 
+
+def get_cron_expression(job_timings=None):
+    default_time = "@once"
+    if not job_timings:
+        return default_time
+    scheduled_time = job_timings.get("scheduledTime", None)
+    scheduled_date = job_timings.get("scheduledDate", None)
+    if not scheduled_time:
+        return default_time
+    time_list = scheduled_time.split(":")
+    try:
+        if scheduled_date:
+            date_list = scheduled_date.split("-")
+        else:
+            date_list = None
+    except Exception as e:
+        date_list = None
+    cron_expression = time_list[1] + " " + time_list[0]
+    if not date_list:
+        cron_expression += " * * *"
+    else:
+        cron_expression += " " + date_list[2] + " " + date_list[1] + " *"
+    return cron_expression
+
+
 for job in scheduled_jobs:
     job_name = job.get("jobName", "")
-    job_time = job.get("scheduledTime", None)
-    job_time = "@once"
+    job_time = get_cron_expression(job_timings=job)
     if job_name:
         job_name = job_name.lower().replace(" ", "_")
     else:
