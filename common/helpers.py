@@ -470,3 +470,9 @@ def add_care_manager():
         print("we have enough cm slots")
     else:
         create_cm(cm=cm_by_priority[-1:])
+    redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
+    redis_conn = redis_hook.get_conn()
+    redis_conn.delete("cm:inactive_pool")
+    for cm in cm_by_priority:
+        cm_data = json.dumps(cm)
+        redis_conn.rpush("cm:inactive_pool", cm_data)
