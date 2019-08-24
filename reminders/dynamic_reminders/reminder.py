@@ -1,5 +1,6 @@
 import calendar
 from datetime import date
+from time import sleep
 
 from airflow.models import Variable
 from dateutil import parser
@@ -9,6 +10,11 @@ from common.helpers import send_chat_message
 from common.http_functions import make_http_request
 
 calendar.setfirstweekday(6)
+
+count_threshold = int(Variable().get(key="request_count_threshold",
+                                     deserialize_json=True))
+time_delay = int(
+    Variable().get(key="request_time_delay", deserialize_json=True))
 
 
 def get_patient_days(patient):
@@ -59,6 +65,7 @@ def send_reminder(**kwargs):
         user_filter["userId"] = test_user_id
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=user_filter, batch_size=100)
+    request_count = 0
     while user_data.alive:
         for user in user_data:
             user_id = user.get("userId")
@@ -78,6 +85,13 @@ def send_reminder(**kwargs):
                 message = dynamic_messages[0]
             payload["message"] = message
             send_chat_message(user_id=user_id, payload=payload)
+            if request_count >= count_threshold:
+                print("Request limit reached. Stopping for " + str(
+                    time_delay) + " milliseconds")
+                sleep(time_delay / 1000)
+                request_count = 0
+            else:
+                request_count += 1
 
 
 def get_meditation_for_today(meditation_schedule=None):
@@ -91,7 +105,7 @@ def get_meditation_for_today(meditation_schedule=None):
             day_of_week = month_calendar[i].index(day_today)
     for i in range(len(month_calendar)):
         if month_calendar[i][day_of_week] and month_calendar[i][
-                                        day_of_week] < day_today:
+            day_of_week] < day_today:
             week_of_month += 1
     print(day_of_week, week_of_month)
     meditation = meditation_schedule[week_of_month][day_of_week]
@@ -119,6 +133,7 @@ def send_meditation(**kwargs):
         user_filter["userId"] = test_user_id
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=user_filter, batch_size=100)
+    request_count = 0
     while user_data.alive:
         for user in user_data:
             user_id = user.get("userId")
@@ -127,3 +142,10 @@ def send_meditation(**kwargs):
             if int(user_id) in exclude_user_list:
                 continue
             send_chat_message(user_id=user_id, payload=payload)
+            if request_count >= count_threshold:
+                print("Request limit reached. Stopping for " + str(
+                    time_delay) + " milliseconds")
+                sleep(time_delay / 1000)
+                request_count = 0
+            else:
+                request_count += 1
