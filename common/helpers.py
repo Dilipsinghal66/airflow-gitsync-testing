@@ -380,5 +380,99 @@ def refresh_active_user_redis():
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
 
 
+def get_care_managers():
+    _filter = {
+        "isCm": True,
+        "cmId": {"$gt": 99999}
+    }
+    projection = {
+        "cmId": 1,
+        "_id": 0
+    }
+    cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                               filter=_filter, projection=projection)
+    return cm_data
+
+
+def create_cm(cm):
+    cm_id = cm.get("cmId")
+    cm_id_new = cm_id - 1
+    cm_payload = {"phoneNo": cm_id_new,
+                  "userId": cm_id_new,
+                  "firstName": "Zyla",
+                  "lastName": "Care",
+                  "age": 0,
+                  "email": "zyla@zyla.in",
+                  "gender": 1,
+                  "patientId": cm_id_new,
+                  "userStatus": 6,
+                  "isCm": True,
+                  "existing": False,
+                  "cmId": cm_id_new}
+    try:
+        make_http_request(conn_id="http_chat_service_url", method="POST",
+                          payload=cm_payload)
+    except Exception as e:
+        print(e)
+        raise ValueError("Care Manager create failed. ")
+
+
+def enough_open_slots(cm_list):
+    slot_threshold = Variable().get(key="cm_available_avg_slot_threshold",
+                                    deserialize_json=True)
+    cm_count = len(cm_list)
+    available_slots = 0
+    for cm in cm_list:
+        slots = cm.get("openSlots")
+        available_slots += slots
+    avg_available = round(available_slots / cm_count)
+    if avg_available and avg_available > slot_threshold:
+        enough_slots = True
+    else:
+        enough_slots = False
+    return enough_slots
+
+
+def compute_cm_priority(cm_list):
+    per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
+                                           deserialize_json=True)
+    cm_list = list(
+        filter(lambda d: d["openSlots"] > per_cm_slot_threshold, cm_list))
+    cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'])
+    return cm_priority_list
+
+
 def add_care_manager():
-    pass
+    cm_data = get_care_managers()
+    twilio_service = get_twilio_service()
+    cm_slot_list = []
+    for cm in cm_data:
+        identity = int(round(cm.get("cmId")))
+        cm_open_slots = 0
+        if identity:
+            twilio_user = twilio_service.users.get(str(identity))
+            try:
+                twilio_user = twilio_user.fetch()
+            except Exception as e:
+                print(e)
+                continue
+            if identity in active_cm_list:
+                continue
+            cm_joined_channels = twilio_user.joined_channels_count
+            cm_open_slots = 1000 - cm_joined_channels
+
+        cm_slot_list.append({
+            "cmId": identity,
+            "openSlots": cm_open_slots
+        })
+    cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
+    if enough_open_slots(cm_list=cm_by_priority):
+        print("we have enough cm slots")
+    else:
+        create_cm(cm=cm_by_priority[-1:])
+    redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
+    redis_conn = redis_hook.get_conn()
+    redis_conn.delete("cm:inactive_pool")
+    for cm in cm_by_priority:
+        cm_data = json.dumps(cm)
+        redis_conn.rpush("cm:inactive_pool", cm_data)
