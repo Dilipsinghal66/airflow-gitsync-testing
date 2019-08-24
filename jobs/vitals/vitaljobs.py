@@ -1,11 +1,16 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
 import datetime
+from config import local_tz
+
 PAGE_SIZE = 1000
 
 def isRecommended(param, fortoday):
     ret = 0
-    day = datetime.datetime.today().weekday()
+    date = datetime.datetime.today()
+    now_aware = date.replace(tzinfo=local_tz)
+    day = now_aware.weekday()
+
 
     if fortoday==False:
         day = 0 if day==6 else day+1
@@ -42,17 +47,17 @@ def create_vitals_func():
         if vital_create_flag == 1:
             return
         #engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')
-        print("starting create vitals job")
+        #print("starting create vitals job")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
-        print("got db connection from environment")
+        #print("got db connection from environment")
         connection = engine.get_conn()
-        print("got the connection no looking for cursor")
+        #print("got the connection no looking for cursor")
         cursor = connection.cursor()
-        print("got the cursor")
+        #print("got the cursor")
 
         cursor.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
         totalcount = cursor.fetchone()[0]
-        print(totalcount)
+        #print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         print(numberofPage)
         for i in range(numberofPage):
@@ -64,7 +69,7 @@ def create_vitals_func():
                 for id in row:
                     patientIdList.append(id)
 
-            print(patientIdList)
+            #print(patientIdList)
 
             for patientid in patientIdList:
                 paramGroupSqlQuery = "select distinct(paramGroupId) from zylaapi.testReadings where patientid = " + str(patientid)
@@ -91,7 +96,7 @@ def create_vitals_func():
 
                 patientIdDict[str(patientid)] = patientIdParamList;
 
-            print(patientIdDict)
+            #print(patientIdDict)
 
             for key, value in patientIdDict.items():
                 checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=CURDATE() and patientid = " + str(key)
@@ -103,18 +108,12 @@ def create_vitals_func():
 
                 for param in value:
                     recommend = isRecommended(param, True)
-                    if param in paramInsertedToday:
-                        print("Run Update Query for param " + str(param))
-                        # updateSqlQuery = "UPDATE TABLE zylaapi.patientTestReadings SET isRecommended = b'"+ str(recommend) + "' WHERE forDate = CURDATE() and patientid = " + str(key) + " and paramId = " + str(param)
-                        # print(updateSqlQuery)
-                        # cursor.execute(updateSqlQuery)
-                        print(recommend)
-                    else:
-                        print("Run insert Query for param " + str(param))
+                    if param not in paramInsertedToday:
+
                         insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(key) + ", " + str(param) + ", CURDATE(), b'" + str(recommend) + "')"
-                        print(insertSqlQuery)
+
                         cursor.execute(insertSqlQuery)
-                        print(recommend)
+
 
             for key, value in patientIdDict.items():
                 checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(key)
@@ -126,18 +125,11 @@ def create_vitals_func():
 
                 for param in value:
                     recommend = isRecommended(param, False)
-                    if param in paramInsertedTom:
-                        print("Run Update Query for param " + str(param))
-                        # updateSqlQuery = "UPDATE TABLE zylaapi.patientTestReadings SET isRecommended = b'" + str(recommend) + "' WHERE forDate = DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(key) + " and paramId = " + str(param)
-                        # print(updateSqlQuery)
-                        # cursor.execute(updateSqlQuery)
-                        print(recommend)
-                    else:
-                        print("Run insert Query for param " + str(param))
+                    if param not in paramInsertedTom:
                         insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(key) + ", " + str(param) + ", DATE_ADD(CURDATE(), INTERVAL +1 DAY), b'" + str(recommend) + "')"
-                        print(insertSqlQuery)
+
                         cursor.execute(insertSqlQuery)
-                        print(recommend)
+
 
             connection.commit()
 
