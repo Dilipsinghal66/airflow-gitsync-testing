@@ -86,6 +86,8 @@ def send_reminder(**kwargs):
             payload["message"] = message
             send_chat_message(user_id=user_id, payload=payload)
             if request_count >= count_threshold:
+                print("Request limit reached. Stopping for " + str(
+                    time_delay) + " milliseconds")
                 sleep(time_delay / 1000)
                 request_count = 0
             else:
@@ -141,6 +143,8 @@ def send_meditation(**kwargs):
                 continue
             send_chat_message(user_id=user_id, payload=payload)
             if request_count >= count_threshold:
+                print("Request limit reached. Stopping for " + str(
+                    time_delay) + " milliseconds")
                 sleep(time_delay / 1000)
                 request_count = 0
             else:
