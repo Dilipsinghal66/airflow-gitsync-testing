@@ -40,7 +40,7 @@ def send_dyn_func():
                 patientIdList.append(row[0])
                 patientIdDict[str(row[0])] = str(row[1]);
 
-            #print(patientIdDict)
+            print(patientIdDict)
 
             for key, value in patientIdDict.items():
                 informationCardSqlQuery = "select id from zylaapi.information_cards where status = 4 and id > " + str(
@@ -59,14 +59,14 @@ def send_dyn_func():
                     endpoint = "user/" + str(round(user_id)) + "/message"
                     #print(endpoint)
                     #print(payload)
-                    status, body = make_http_request(
-                        conn_id="http_chat_service_url",
-                        endpoint=endpoint, method="POST", payload=payload)
+                    #status, body = make_http_request(
+                    #    conn_id="http_chat_service_url",
+                    #    endpoint=endpoint, method="POST", payload=payload)
                     #print(status, body)
 
                     updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(informationIdtobeSent) + " where id = " + str(key)
                     #print(updateSqlQuery)
-                    cursor.execute(updateSqlQuery)
+                    #cursor.execute(updateSqlQuery)
 
                     sleep(.300)
 
@@ -77,8 +77,9 @@ def send_dyn_func():
 
 
 
-    except:
+    except Exception as e:
         print("Error Exception raised")
-        
+        print(e)
+
 
     connection.commit()
