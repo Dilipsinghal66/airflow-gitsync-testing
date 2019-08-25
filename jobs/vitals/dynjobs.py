@@ -68,12 +68,17 @@ def send_dyn_func():
                     #print(updateSqlQuery)
                     cursor.execute(updateSqlQuery)
 
-                    connection.commit()
-
                     sleep(.300)
+
+
 
                 else:
                     print("All DYN Ids are sent We need to reset this patient Id " + str(key))
 
+
+
     except:
         print("Error Exception raised")
+        
+
+    connection.commit()
