@@ -45,29 +45,29 @@ def send_dyn_func():
             for key, value in patientIdDict.items():
                 informationCardSqlQuery = "select id from zylaapi.information_cards where status = 4 and id > " + str(
                     value) + " order by id LIMIT 1"
-                print(informationCardSqlQuery)
+                #print(informationCardSqlQuery)
                 number_of_rows = cursor.execute(informationCardSqlQuery)
-                print(number_of_rows)
+                #print(number_of_rows)
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
-                    print(informationIdtobeSent)
+                    #print(informationIdtobeSent)
                     no_of_rows = cursor.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id = " + str(key) + " )")
                     if no_of_rows > 0:
                         user_id = cursor.fetchone()[0]
 
-                        print(user_id)
+                        #print(user_id)
                         payload["message"] = str(informationIdtobeSent)
                         endpoint = "user/" + str(round(user_id)) + "/message"
                         #print(endpoint)
                         #print(payload)
-                        #status, body = make_http_request(
-                        #    conn_id="http_chat_service_url",
-                        #    endpoint=endpoint, method="POST", payload=payload)
+                        status, body = make_http_request(
+                            conn_id="http_chat_service_url",
+                            endpoint=endpoint, method="POST", payload=payload)
                         #print(status, body)
 
                         updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(informationIdtobeSent) + " where id = " + str(key)
                         #print(updateSqlQuery)
-                        #cursor.execute(updateSqlQuery)
+                        cursor.execute(updateSqlQuery)
 
                         sleep(.300)
 
@@ -83,4 +83,4 @@ def send_dyn_func():
         print(e)
 
 
-    #connection.commit()
+    connection.commit()
