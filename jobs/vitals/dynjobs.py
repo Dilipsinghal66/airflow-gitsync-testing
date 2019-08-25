@@ -45,16 +45,16 @@ def send_dyn_func():
             for key, value in patientIdDict.items():
                 informationCardSqlQuery = "select id from zylaapi.information_cards where status = 4 and id > " + str(
                     value) + " order by id LIMIT 1"
-                #print(informationCardSqlQuery)
+                print(informationCardSqlQuery)
                 number_of_rows = cursor.execute(informationCardSqlQuery)
-                #print(number_of_rows)
+                print(number_of_rows)
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
-                    #print(informationIdtobeSent)
+                    print(informationIdtobeSent)
                     cursor.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id = " + str(key) + " )")
                     user_id = cursor.fetchone()[0]
 
-                    #print(user_id)
+                    print(user_id)
                     payload["message"] = str(informationIdtobeSent)
                     endpoint = "user/" + str(round(user_id)) + "/message"
                     #print(endpoint)
