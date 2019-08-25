@@ -51,24 +51,25 @@ def send_dyn_func():
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
                     print(informationIdtobeSent)
-                    cursor.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id = " + str(key) + " )")
-                    user_id = cursor.fetchone()[0]
+                    no_of_rows = cursor.execute("select distinct(id) from zylaapi.auth where phoneno in (select phoneno from zylaapi.patient_profile where id = " + str(key) + " )")
+                    if no_of_rows > 0:
+                        user_id = cursor.fetchone()[0]
 
-                    print(user_id)
-                    payload["message"] = str(informationIdtobeSent)
-                    endpoint = "user/" + str(round(user_id)) + "/message"
-                    #print(endpoint)
-                    #print(payload)
-                    #status, body = make_http_request(
-                    #    conn_id="http_chat_service_url",
-                    #    endpoint=endpoint, method="POST", payload=payload)
-                    #print(status, body)
+                        print(user_id)
+                        payload["message"] = str(informationIdtobeSent)
+                        endpoint = "user/" + str(round(user_id)) + "/message"
+                        #print(endpoint)
+                        #print(payload)
+                        #status, body = make_http_request(
+                        #    conn_id="http_chat_service_url",
+                        #    endpoint=endpoint, method="POST", payload=payload)
+                        #print(status, body)
 
-                    updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(informationIdtobeSent) + " where id = " + str(key)
-                    #print(updateSqlQuery)
-                    #cursor.execute(updateSqlQuery)
+                        updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(informationIdtobeSent) + " where id = " + str(key)
+                        #print(updateSqlQuery)
+                        #cursor.execute(updateSqlQuery)
 
-                    sleep(.300)
+                        sleep(.300)
 
 
 
@@ -82,4 +83,4 @@ def send_dyn_func():
         print(e)
 
 
-    connection.commit()
+    #connection.commit()
