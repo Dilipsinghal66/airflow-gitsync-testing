@@ -26,13 +26,13 @@ def send_dyn_func():
         cursor = connection.cursor()
         #print("created connection from engine")
 
-        cursor.execute("select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")
+        cursor.execute("select count(*) from zylaapi.patient_profile where status = 4")
         totalcount = cursor.fetchone()[0]
         #print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         #print(numberofPage)
         for i in range(numberofPage):
-            patientIdSqlQuerry = "select id, countDidYouKnow from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
+            patientIdSqlQuerry = "select id, countDidYouKnow from zylaapi.patient_profile where status = 4 LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
             patientIdList = []
             patientIdDict = {}
