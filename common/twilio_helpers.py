@@ -46,7 +46,7 @@ def if_exists_active_cm(user_channel=None, user_identity=None, service=None):
     cm_member = None
     channel = service.channels(user_channel).fetch()
     members = channel.members.list()
-    if len(members) != 2:
+    if len(members) < 1:
         raise ValueError("Something is wrong with channel " + user_channel)
     for member in members:
         if not int(member.identity) == int(user_identity):
