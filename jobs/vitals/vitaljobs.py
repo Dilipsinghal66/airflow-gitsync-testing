@@ -8,8 +8,9 @@ PAGE_SIZE = 1000
 def isRecommended(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
-    now_aware = date.replace(tzinfo=local_tz)
-    day = now_aware.weekday()
+    timedelta = datetime.timedelta(hours=5, minutes=30)
+    todaydate = date + timedelta
+    day = todaydate.weekday()
 
 
     if fortoday==False:
