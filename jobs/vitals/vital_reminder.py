@@ -66,11 +66,12 @@ def send_vital_reminder_func():
         recParam = recommendParam()
 
         recParamMsgSqlQuery = "select name from zylaapi.params where id in (" + recParam + ")"
-        cursor.execute(recParamMsgSqlQuery)
+        number_of_rows = cursor.execute(recParamMsgSqlQuery)
 
-        for row in cursor.fetchall():
-            for name in row:
-                message = message + "name " + "\n"
+        if number_of_rows > 0:
+            for row in cursor.fetchall():
+                for name in row:
+                    message = message + name + "\n"
 
         #print("Hitting recommended jobs end point")
         for user_id in patientIdList:
@@ -85,5 +86,7 @@ def send_vital_reminder_func():
             sleep(.300)
 
 
-    except:
+
+    except Exception as e:
         print("Error Exception raised")
+        print(e)
