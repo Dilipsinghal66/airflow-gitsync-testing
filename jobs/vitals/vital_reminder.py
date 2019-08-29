@@ -75,7 +75,7 @@ def send_vital_reminder_func():
                     message = message + name + "\n"
 
         #print("Hitting recommended jobs end point")
-        payload["message"] = "\"" + message + "\""
+        payload["message"] = message
         print(payload)
         for user_id in patientIdList:
             endpoint = "user/" + str(
