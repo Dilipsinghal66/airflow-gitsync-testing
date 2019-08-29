@@ -135,5 +135,6 @@ def create_vitals_func():
             connection.commit()
 
 
-    except:
+    except Exception as e:
         print("Error Exception raised")
+        print(e)
