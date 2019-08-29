@@ -68,12 +68,14 @@ def send_vital_reminder_func():
         recParamMsgSqlQuery = "select name from zylaapi.params where id in (" + recParam + ")"
         number_of_rows = cursor.execute(recParamMsgSqlQuery)
 
+        message = "Recommended vitals to test today: \n"
         if number_of_rows > 0:
             for row in cursor.fetchall():
                 for name in row:
                     message = message + name + "\n"
 
         #print("Hitting recommended jobs end point")
+        payload["message"] = message
         for user_id in patientIdList:
             endpoint = "user/" + str(
                 round(user_id)) + "/message"
