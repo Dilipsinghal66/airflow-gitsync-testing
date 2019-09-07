@@ -468,10 +468,13 @@ def add_care_manager():
             if identity in active_cm_list:
                 print("care manager checkout point 7")
                 continue
+            print(twilio_user)
             cm_joined_channels = twilio_user.joined_channels_count
+            print(cm_joined_channels)
             print("care manager checkout point 8")
             cm_open_slots = 1000 - cm_joined_channels
             print("care manager checkout point 9")
+            print(cm_open_slots)
 
         cm_slot_list.append({
             "cmId": identity,
