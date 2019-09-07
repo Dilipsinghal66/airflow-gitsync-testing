@@ -453,6 +453,7 @@ def add_care_manager():
     cm_slot_list = []
     for cm in cm_data:
         identity = int(round(cm.get("cmId")))
+        print(identity)
         print("care manager checkout point 3")
         cm_open_slots = 0
         if identity:
