@@ -444,22 +444,31 @@ def compute_cm_priority(cm_list):
 
 def add_care_manager():
     cm_data = get_care_managers()
+    print("care manager checkout point 1")
     twilio_service = get_twilio_service()
+    print("care manager checkout point 2")
     cm_slot_list = []
     for cm in cm_data:
         identity = int(round(cm.get("cmId")))
+        print("care manager checkout point 3")
         cm_open_slots = 0
         if identity:
             twilio_user = twilio_service.users.get(str(identity))
+            print("care manager checkout point 4")
             try:
                 twilio_user = twilio_user.fetch()
+                print("care manager checkout point 5")
             except Exception as e:
+                print("care manager checkout point 6")
                 print(e)
                 continue
             if identity in active_cm_list:
+                print("care manager checkout point 7")
                 continue
             cm_joined_channels = twilio_user.joined_channels_count
+            print("care manager checkout point 8")
             cm_open_slots = 1000 - cm_joined_channels
+            print("care manager checkout point 9")
 
         cm_slot_list.append({
             "cmId": identity,
@@ -469,7 +478,9 @@ def add_care_manager():
     if enough_open_slots(cm_list=cm_by_priority):
         print("we have enough cm slots")
     else:
+        print("care manager checkout point 10")
         create_cm(cm=cm_by_priority[-1:])
+        print("care manager checkout point 11")
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
     redis_conn.delete("cm:inactive_pool")
