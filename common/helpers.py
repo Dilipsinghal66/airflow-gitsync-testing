@@ -486,6 +486,7 @@ def add_care_manager():
         print("we have enough cm slots")
     else:
         print("care manager checkout point 10")
+        print(cm_by_priority)
         create_cm(cm=cm_by_priority[-1:])
         print("care manager checkout point 11")
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
