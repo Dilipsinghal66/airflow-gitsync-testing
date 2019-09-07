@@ -421,7 +421,10 @@ def enough_open_slots(cm_list):
     slot_threshold = Variable().get(key="cm_available_avg_slot_threshold",
                                     deserialize_json=True)
     cm_count = len(cm_list)
+    print(cm_count)
     available_slots = 0
+    if cm_count == 0:
+        return False
     for cm in cm_list:
         slots = cm.get("openSlots")
         available_slots += slots
