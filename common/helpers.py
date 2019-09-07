@@ -395,8 +395,8 @@ def get_care_managers():
 
 
 def create_cm(cm):
-    cm_id = cm.get("cmId")
-    cm_id_new = cm_id - 1
+    #cm_id = cm.get("cmId")
+    cm_id_new = "9999999977"
     cm_payload = {"phoneNo": cm_id_new,
                   "userId": cm_id_new,
                   "firstName": "Zyla",
