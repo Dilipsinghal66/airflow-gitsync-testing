@@ -415,9 +415,8 @@ def create_cm(cm, tries=3):
                   "existing": False,
                   "cmId": cm_id_new}
     try:
-        raise Exception("Test")
-        # make_http_request(conn_id="http_chat_service_url", method="POST",
-        #                   payload=cm_payload)
+        make_http_request(conn_id="http_chat_service_url", method="POST",
+                          payload=cm_payload)
     except Exception as e:
         log.error(e)
         if tries:
