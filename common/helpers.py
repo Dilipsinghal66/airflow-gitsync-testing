@@ -16,7 +16,7 @@ from common.twilio_helpers import get_twilio_service, \
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
 
-log = LoggingMixin.log
+log = LoggingMixin().log
 
 def send_chat_message(user_id=None, payload=None):
     try:
