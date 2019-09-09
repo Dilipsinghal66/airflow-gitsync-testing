@@ -18,6 +18,7 @@ active_cm_list = Variable().get(key="active_cm_list",
 
 log = LoggingMixin().log
 
+
 def send_chat_message(user_id=None, payload=None):
     try:
         endpoint = "user/" + str(
@@ -397,8 +398,10 @@ def get_care_managers():
 
 
 def create_cm(cm):
+    log.debug("Creating new cm on the basis of "+json.dumps(cm))
     cm_id = cm.get("cmId")
     cm_id_new = cm_id - 1
+    log.debug("New care manager id "+str(cm_id_new))
     cm_payload = {"phoneNo": cm_id_new,
                   "userId": cm_id_new,
                   "firstName": "Zyla",
@@ -415,25 +418,34 @@ def create_cm(cm):
         make_http_request(conn_id="http_chat_service_url", method="POST",
                           payload=cm_payload)
     except Exception as e:
-        print(e)
+        log.error(e)
         raise ValueError("Care Manager create failed. ")
 
 
 def enough_open_slots(cm_list):
     slot_threshold = Variable().get(key="cm_available_avg_slot_threshold",
                                     deserialize_json=True)
+    log.debug("Average slots that must be available for all CMs " + str(
+        slot_threshold))
+    log.debug(type(slot_threshold))
     cm_count = len(cm_list)
-    print(cm_count)
+    log.info("Total available care managers "+str(cm_count))
     available_slots = 0
     # if cm_count == 0:
     #     return False
     for cm in cm_list:
         slots = cm.get("openSlots")
         available_slots += slots
+    log.debug("Total available slots: "+str(available_slots))
     avg_available = round(available_slots / cm_count)
     if avg_available and avg_available > slot_threshold:
+        log.debug("We have enough slots available above threshold")
+        log.debug("Average available slots: "+str(avg_available))
         enough_slots = True
     else:
+        log.warning("Available slots less than threshold")
+        log.warning("Average available slots: "+str(avg_available))
+        log.warning("Slot threshold required: "+str(slot_threshold))
         enough_slots = False
     return enough_slots
 
@@ -499,7 +511,8 @@ def add_care_manager():
         log.info("we have enough cm slots.Nothing to do further")
     else:
         log.warning("We do not have enough open slots. Creating new CM")
-        create_cm(cm=cm_by_priority[-1:])
+        cm_top_priority = cm_by_priority[-1:]
+        create_cm(cm=cm_top_priority)
         print("care manager checkout point 11")
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
