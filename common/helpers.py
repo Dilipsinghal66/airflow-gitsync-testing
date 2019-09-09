@@ -3,6 +3,7 @@ from datetime import datetime
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
+from airflow.logging_config import log
 from airflow.models import Variable
 from bson import ObjectId
 from dateutil import parser
@@ -421,7 +422,10 @@ def enough_open_slots(cm_list):
     slot_threshold = Variable().get(key="cm_available_avg_slot_threshold",
                                     deserialize_json=True)
     cm_count = len(cm_list)
+    print(cm_count)
     available_slots = 0
+    # if cm_count == 0:
+    #     return False
     for cm in cm_list:
         slots = cm.get("openSlots")
         available_slots += slots
@@ -443,33 +447,53 @@ def compute_cm_priority(cm_list):
 
 
 def add_care_manager():
+    log.debug("Fetching care manager data from db. ")
     cm_data = get_care_managers()
+    log.debug("Care managers fetched from db")
+    log.debug(cm_data)
+    log.debug("Init twilio service object ")
     twilio_service = get_twilio_service()
+    log.debug("Twilio service object init successful ")
     cm_slot_list = []
     for cm in cm_data:
         identity = int(round(cm.get("cmId")))
+        log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
             twilio_user = twilio_service.users.get(str(identity))
+            log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
             except Exception as e:
-                print(e)
+                log.error(e)
+                log.error(
+                    "Twilio user for " + str(identity) + " failed to fetch")
+                log.warning("Continuing as nothing to do")
                 continue
             if identity in active_cm_list:
+                log.warning(
+                    str(identity) + " is in active cm list. Nothing to do")
                 continue
             cm_joined_channels = twilio_user.joined_channels_count
+            log.debug("Total channels joined by cm " + str(cm_joined_channels))
             cm_open_slots = 1000 - cm_joined_channels
+            log.debug(
+                "Open slots for " + str(identity) + " : " + str(cm_open_slots))
 
         cm_slot_list.append({
             "cmId": identity,
             "openSlots": cm_open_slots
         })
+    log.debug("Care managers with slots opened for further processing")
+    log.debug(cm_slot_list)
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
     if enough_open_slots(cm_list=cm_by_priority):
         print("we have enough cm slots")
     else:
+        print("care manager checkout point 10")
+        print(cm_by_priority)
         create_cm(cm=cm_by_priority[-1:])
+        print("care manager checkout point 11")
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
     redis_conn.delete("cm:inactive_pool")
