@@ -441,9 +441,15 @@ def enough_open_slots(cm_list):
 def compute_cm_priority(cm_list):
     per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
                                            deserialize_json=True)
+    log.debug("Min slot threshold per cm " + str(per_cm_slot_threshold))
+    log.debug(type(per_cm_slot_threshold))
     cm_list = list(
         filter(lambda d: d["openSlots"] > per_cm_slot_threshold, cm_list))
+    log.debug("CM list after threshold computation ")
+    log.debug(cm_list)
     cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'])
+    log.debug("CM list after priority computation")
+    log.debug(cm_list)
     return cm_priority_list
 
 
@@ -487,12 +493,12 @@ def add_care_manager():
         })
     log.debug("Care managers with slots opened for further processing")
     log.debug(cm_slot_list)
+    log.debug("Computing cm list by priority")
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
     if enough_open_slots(cm_list=cm_by_priority):
-        print("we have enough cm slots")
+        log.info("we have enough cm slots.Nothing to do further")
     else:
-        print("care manager checkout point 10")
-        print(cm_by_priority)
+        log.warning("We do not have enough open slots. Creating new CM")
         create_cm(cm=cm_by_priority[-1:])
         print("care manager checkout point 11")
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
