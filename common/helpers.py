@@ -4,6 +4,7 @@ from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
 from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
 from dateutil import parser
 
@@ -14,6 +15,8 @@ from common.twilio_helpers import get_twilio_service, \
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
+
+log = LoggingMixin().log
 
 
 def send_chat_message(user_id=None, payload=None):
@@ -394,9 +397,11 @@ def get_care_managers():
     return cm_data
 
 
-def create_cm(cm):
-    #cm_id = cm.get("cmId")
-    cm_id_new = 9999999977
+def create_cm(cm, tries=3):
+    log.debug("Creating new cm on the basis of " + json.dumps(cm))
+    cm_id = cm.get("cmId")
+    cm_id_new = cm_id - 1
+    log.debug("New care manager id " + str(cm_id_new))
     cm_payload = {"phoneNo": cm_id_new,
                   "userId": cm_id_new,
                   "firstName": "Zyla",
@@ -413,25 +418,35 @@ def create_cm(cm):
         make_http_request(conn_id="http_chat_service_url", method="POST",
                           payload=cm_payload)
     except Exception as e:
-        print(e)
+        log.error(e)
+        if tries:
+            retry = tries - 1
+            create_cm(cm, tries=retry)
         raise ValueError("Care Manager create failed. ")
 
 
 def enough_open_slots(cm_list):
     slot_threshold = Variable().get(key="cm_available_avg_slot_threshold",
                                     deserialize_json=True)
+    log.debug("Average slots that must be available for all CMs " + str(
+        slot_threshold))
+    log.debug(type(slot_threshold))
     cm_count = len(cm_list)
-    print(cm_count)
+    log.info("Total available care managers " + str(cm_count))
     available_slots = 0
-    if cm_count == 0:
-        return False
     for cm in cm_list:
         slots = cm.get("openSlots")
         available_slots += slots
+    log.debug("Total available slots: " + str(available_slots))
     avg_available = round(available_slots / cm_count)
     if avg_available and avg_available > slot_threshold:
+        log.debug("We have enough slots available above threshold")
+        log.debug("Average available slots: " + str(avg_available))
         enough_slots = True
     else:
+        log.warning("Available slots less than threshold")
+        log.warning("Average available slots: " + str(avg_available))
+        log.warning("Slot threshold required: " + str(slot_threshold))
         enough_slots = False
     return enough_slots
 
@@ -439,56 +454,70 @@ def enough_open_slots(cm_list):
 def compute_cm_priority(cm_list):
     per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
                                            deserialize_json=True)
+    log.debug("Min slot threshold per cm " + str(per_cm_slot_threshold))
+    log.debug(type(per_cm_slot_threshold))
     cm_list = list(
         filter(lambda d: d["openSlots"] > per_cm_slot_threshold, cm_list))
+    log.debug("CM list after threshold computation ")
+    log.debug(cm_list)
     cm_priority_list = sorted(cm_list, key=lambda i: i['openSlots'])
+    log.debug("CM list after priority computation")
+    log.debug(cm_list)
     return cm_priority_list
 
 
 def add_care_manager():
+    log.debug("Fetching care manager data from db. ")
     cm_data = get_care_managers()
-    print("care manager checkout point 1")
+    log.debug("Care managers fetched from db")
+    log.debug(cm_data)
+    log.debug("Init twilio service object ")
     twilio_service = get_twilio_service()
-    print("care manager checkout point 2")
+    log.debug("Twilio service object init successful ")
     cm_slot_list = []
     for cm in cm_data:
         identity = int(round(cm.get("cmId")))
-        print(identity)
-        print("care manager checkout point 3")
+        log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
             twilio_user = twilio_service.users.get(str(identity))
-            print("care manager checkout point 4")
+            log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
-                print("care manager checkout point 5")
             except Exception as e:
-                print("care manager checkout point 6")
-                print(e)
+                log.error(e)
+                log.error(
+                    "Twilio user for " + str(identity) + " failed to fetch")
+                log.warning("Continuing as nothing to do")
                 continue
             if identity in active_cm_list:
-                print("care manager checkout point 7")
+                log.warning(
+                    str(identity) + " is in active cm list. Nothing to do")
                 continue
-            print(twilio_user)
             cm_joined_channels = twilio_user.joined_channels_count
-            print(cm_joined_channels)
-            print("care manager checkout point 8")
+            log.debug("Total channels joined by cm " + str(cm_joined_channels))
             cm_open_slots = 1000 - cm_joined_channels
-            print("care manager checkout point 9")
-            print(cm_open_slots)
+            log.debug(
+                "Open slots for " + str(identity) + " : " + str(cm_open_slots))
 
         cm_slot_list.append({
             "cmId": identity,
             "openSlots": cm_open_slots
         })
+    log.debug("Care managers with slots opened for further processing")
+    log.debug(cm_slot_list)
+    log.debug("Computing cm list by priority")
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
-    if enough_open_slots(cm_list=cm_by_priority):
-        print("we have enough cm slots")
-    else:
-        print("care manager checkout point 10")
-        print(cm_by_priority)
-        create_cm(cm=cm_by_priority[-1:])
-        print("care manager checkout point 11")
+    try:
+        have_enough_slots = enough_open_slots(cm_list=cm_by_priority)
+        if not have_enough_slots:
+            raise ValueError("There are not enough slots. Create new CM")
+        log.info("we have enough cm slots.Nothing to do further")
+    except Exception as e:
+        log.error(e)
+        log.warning("We do not have enough open slots. Creating new CM")
+        cm_top_priority = cm_by_priority[-1:][0]
+        create_cm(cm=cm_top_priority)
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
     redis_conn.delete("cm:inactive_pool")
