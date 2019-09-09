@@ -3,6 +3,7 @@ from datetime import datetime
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
+from airflow.logging_config import log
 from airflow.models import Variable
 from bson import ObjectId
 from dateutil import parser
@@ -395,8 +396,8 @@ def get_care_managers():
 
 
 def create_cm(cm):
-    #cm_id = cm.get("cmId")
-    cm_id_new = 9999999977
+    cm_id = cm.get("cmId")
+    cm_id_new = cm_id - 1
     cm_payload = {"phoneNo": cm_id_new,
                   "userId": cm_id_new,
                   "firstName": "Zyla",
@@ -423,8 +424,8 @@ def enough_open_slots(cm_list):
     cm_count = len(cm_list)
     print(cm_count)
     available_slots = 0
-    if cm_count == 0:
-        return False
+    # if cm_count == 0:
+    #     return False
     for cm in cm_list:
         slots = cm.get("openSlots")
         available_slots += slots
@@ -446,41 +447,45 @@ def compute_cm_priority(cm_list):
 
 
 def add_care_manager():
+    log.debug("Fetching care manager data from db. ")
     cm_data = get_care_managers()
-    print("care manager checkout point 1")
+    log.debug("Care managers fetched from db")
+    log.debug(cm_data)
+    log.debug("Init twilio service object ")
     twilio_service = get_twilio_service()
-    print("care manager checkout point 2")
+    log.debug("Twilio service object init successful ")
     cm_slot_list = []
     for cm in cm_data:
         identity = int(round(cm.get("cmId")))
-        print(identity)
-        print("care manager checkout point 3")
+        log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
             twilio_user = twilio_service.users.get(str(identity))
-            print("care manager checkout point 4")
+            log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
-                print("care manager checkout point 5")
             except Exception as e:
-                print("care manager checkout point 6")
-                print(e)
+                log.error(e)
+                log.error(
+                    "Twilio user for " + str(identity) + " failed to fetch")
+                log.warning("Continuing as nothing to do")
                 continue
             if identity in active_cm_list:
-                print("care manager checkout point 7")
+                log.warning(
+                    str(identity) + " is in active cm list. Nothing to do")
                 continue
-            print(twilio_user)
             cm_joined_channels = twilio_user.joined_channels_count
-            print(cm_joined_channels)
-            print("care manager checkout point 8")
+            log.debug("Total channels joined by cm " + str(cm_joined_channels))
             cm_open_slots = 1000 - cm_joined_channels
-            print("care manager checkout point 9")
-            print(cm_open_slots)
+            log.debug(
+                "Open slots for " + str(identity) + " : " + str(cm_open_slots))
 
         cm_slot_list.append({
             "cmId": identity,
             "openSlots": cm_open_slots
         })
+    log.debug("Care managers with slots opened for further processing")
+    log.debug(cm_slot_list)
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
     if enough_open_slots(cm_list=cm_by_priority):
         print("we have enough cm slots")
