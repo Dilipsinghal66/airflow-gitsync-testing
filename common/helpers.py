@@ -100,6 +100,7 @@ def process_dynamic_task(**kwargs):
     patient_id_list = []
     message_replace_data = {}
     if sql_data:
+        print(sql_data)
         for patient in sql_data:
             patient_id = patient[0]
             patient_id_list.append(patient_id)
