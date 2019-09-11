@@ -127,6 +127,7 @@ def process_dynamic_task(**kwargs):
         "is_notification": False
     }
     print(user_data)
+    print("mrigesh")
     for user in user_data:
         print(user)
         user_id = user.get("userId")
