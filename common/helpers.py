@@ -97,6 +97,7 @@ def process_dynamic_task(**kwargs):
         "message": "",
         "is_notification": False
     }
+    print(user_data)
     for user in user_data:
         user_id = user.get("userId")
         patient_id = user.get("patientId")
