@@ -80,9 +80,8 @@ def task_success_callback(context):
 
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
-    mongo_filter_field = None
+    mongo_filter_field = "patientId"
     mongo_query = kwargs.get("query", {}).get("mongo", None)
-    print(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
     sql_data = None
@@ -94,7 +93,6 @@ def process_dynamic_task(**kwargs):
         mongo_query = json.loads(mongo_query)
         collection = mongo_query.get("collection")
         _filter = mongo_query_builder(query_data=mongo_query)
-        print(_filter)
         mongo_data = get_data_from_db(conn_id="mongo_user_db",
                                       collection=collection, filter=_filter)
     patient_id_list = []
@@ -126,11 +124,7 @@ def process_dynamic_task(**kwargs):
         "message": "",
         "is_notification": False
     }
-    from pymongo.cursor import Cursor
-    print(list(user_data))
-    print("mrigesh")
     for user in user_data:
-        print(user)
         user_id = user.get("userId")
         patient_id = user.get("patientId")
         patient_data = message_replace_data.get(patient_id)

@@ -8,8 +8,6 @@ def get_data_from_db(db_type="mongo", conn_id=None, collection=None, **kwargs):
             conn_id=conn_id).get_conn().get_default_database().get_collection(
             collection)
         data = coll.find(**kwargs)
-        print(kwargs)
-        print(data)
     if db_type == "mysql":
         data = MySqlHook(mysql_conn_id=conn_id)
         execute_query = kwargs.get("execute_query", False)
