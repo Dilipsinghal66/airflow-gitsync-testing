@@ -126,6 +126,7 @@ def process_dynamic_task(**kwargs):
         "message": "",
         "is_notification": False
     }
+    from pymongo.cursor import Cursor
     print(list(user_data))
     print("mrigesh")
     for user in user_data:
