@@ -126,7 +126,7 @@ def process_dynamic_task(**kwargs):
         "message": "",
         "is_notification": False
     }
-    print(user_data)
+    print(list(user_data))
     print("mrigesh")
     for user in user_data:
         print(user)
