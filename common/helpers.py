@@ -48,6 +48,16 @@ def mongo_query_builder(query_data):
     return mongo_query
 
 
+def task_failure_callback(context):
+    print(context)
+    pass
+
+
+def task_success_callback(context):
+    print(context)
+    pass
+
+
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_filter_field = None
