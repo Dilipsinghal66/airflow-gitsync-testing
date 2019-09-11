@@ -4,11 +4,16 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
 from common.db_functions import get_data_from_db
-from common.helpers import process_dynamic_task, task_failure_callback, task_success_callback
+from common.helpers import process_dynamic_task, task_failure_callback, \
+    task_success_callback
 from config import local_tz, default_args
 
+scheduled_jobs_filter = {
+    "executed": False
+}
 scheduled_jobs = get_data_from_db(conn_id="mongo_user_db",
-                                  collection="job_storage")
+                                  collection="job_storage",
+                                  filter=scheduled_jobs_filter)
 
 
 def get_cron_expression(job_timings=None):
