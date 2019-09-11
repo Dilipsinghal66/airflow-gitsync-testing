@@ -48,30 +48,59 @@ def mongo_query_builder(query_data):
     return mongo_query
 
 
+def task_failure_callback(context):
+    failure_payload = {
+        "executed": True,
+        "status": "failure"
+    }
+    task_instance = context.get("task")
+    task_args = task_instance.op_kwargs
+    task_mongo_id = task_args.get("_id", None)
+    if task_mongo_id:
+        task_mongo_id = str(task_mongo_id)
+    endpoint = task_mongo_id
+    make_http_request(conn_id="http_jobs_url", method="PATCH",
+                      payload=failure_payload, endpoint=endpoint)
+
+
+def task_success_callback(context):
+    success_payload = {
+        "executed": True,
+        "status": "success"
+    }
+    task_instance = context.get("task")
+    task_args = task_instance.get("op_kwargs")
+    task_mongo_id = task_args.get("_id", None)
+    if task_mongo_id:
+        task_mongo_id = str(task_mongo_id)
+    endpoint = task_mongo_id
+    make_http_request(conn_id="http_jobs_url", method="PATCH",
+                      payload=success_payload, endpoint=endpoint)
+
+
 def process_dynamic_task(**kwargs):
     action = "dynamic_message"
     mongo_filter_field = None
     mongo_query = kwargs.get("query", {}).get("mongo", None)
-    print(mongo_query)
-    print(type(mongo_query))
-    mongo_query = json.loads(mongo_query)
     print(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
     sql_data = None
     if sql_query:
         sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                                    sql_query=sql_query)
-    collection = mongo_query.get("collection")
-    _filter = mongo_query_builder(query_data=mongo_query)
-    print(_filter)
+                                    sql_query=sql_query, execute_query=True)
     mongo_data = None
     if mongo_query:
+        mongo_query = json.loads(mongo_query)
+        collection = mongo_query.get("collection")
+        _filter = mongo_query_builder(query_data=mongo_query)
+        print(_filter)
         mongo_data = get_data_from_db(conn_id="mongo_user_db",
                                       collection=collection, filter=_filter)
     patient_id_list = []
     message_replace_data = {}
     if sql_data:
+        print(sql_data)
         for patient in sql_data:
             patient_id = patient[0]
             patient_id_list.append(patient_id)
@@ -99,6 +128,7 @@ def process_dynamic_task(**kwargs):
     }
     print(user_data)
     for user in user_data:
+        print(user)
         user_id = user.get("userId")
         patient_id = user.get("patientId")
         patient_data = message_replace_data.get(patient_id)
@@ -108,7 +138,6 @@ def process_dynamic_task(**kwargs):
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
         # send_chat_message(user_id=user_id, payload=payload)
-    print(sql_data)
 
 
 def process_health_plan_not_created(patient_list):
