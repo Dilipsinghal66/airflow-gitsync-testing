@@ -83,20 +83,18 @@ def process_dynamic_task(**kwargs):
     mongo_filter_field = None
     mongo_query = kwargs.get("query", {}).get("mongo", None)
     print(mongo_query)
-    print(type(mongo_query))
-    mongo_query = json.loads(mongo_query)
-    print(mongo_query)
     sql_query = kwargs.get("query", {}).get("sql", None)
     message: str = kwargs.get("message")
     sql_data = None
     if sql_query:
         sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                     sql_query=sql_query)
-    collection = mongo_query.get("collection")
-    _filter = mongo_query_builder(query_data=mongo_query)
-    print(_filter)
     mongo_data = None
     if mongo_query:
+        mongo_query = json.loads(mongo_query)
+        collection = mongo_query.get("collection")
+        _filter = mongo_query_builder(query_data=mongo_query)
+        print(_filter)
         mongo_data = get_data_from_db(conn_id="mongo_user_db",
                                       collection=collection, filter=_filter)
     patient_id_list = []
