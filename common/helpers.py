@@ -54,7 +54,7 @@ def task_failure_callback(context):
         "status": "failure"
     }
     task_instance = context.get("task")
-    task_args = task_instance.get("op_kwargs")
+    task_args = task_instance.op_kwargs
     task_mongo_id = task_args.get("_id", None)
     if task_mongo_id:
         task_mongo_id = str(task_mongo_id)
