@@ -49,6 +49,8 @@ def mongo_query_builder(query_data):
 
 
 def task_failure_callback(context):
+    task_instance=context.get("task")
+    print(task_instance.__dict__)
     print(context)
     pass
 
