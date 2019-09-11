@@ -69,7 +69,7 @@ def task_success_callback(context):
         "status": "success"
     }
     task_instance = context.get("task")
-    task_args = task_instance.get("op_kwargs")
+    task_args = task_instance.op_kwargs
     task_mongo_id = task_args.get("_id", None)
     if task_mongo_id:
         task_mongo_id = str(task_mongo_id)
@@ -133,7 +133,7 @@ def process_dynamic_task(**kwargs):
             new = str(patient_data[i])
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
-        # send_chat_message(user_id=user_id, payload=payload)
+        send_chat_message(user_id=user_id, payload=payload)
 
 
 def process_health_plan_not_created(patient_list):
