@@ -127,6 +127,7 @@ def process_dynamic_task(**kwargs):
         "is_notification": False
     }
     for user in user_data:
+        print(user)
         user_id = user.get("userId")
         patient_id = user.get("patientId")
         patient_data = message_replace_data.get(patient_id)
@@ -136,7 +137,6 @@ def process_dynamic_task(**kwargs):
             patient_message = message.replace(old, new)
         payload["message"] = patient_message
         # send_chat_message(user_id=user_id, payload=payload)
-    print(sql_data)
 
 
 def process_health_plan_not_created(patient_list):
