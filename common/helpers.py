@@ -88,7 +88,7 @@ def process_dynamic_task(**kwargs):
     sql_data = None
     if sql_query:
         sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                                    sql_query=sql_query)
+                                    sql_query=sql_query, execute_query=True)
     mongo_data = None
     if mongo_query:
         mongo_query = json.loads(mongo_query)
