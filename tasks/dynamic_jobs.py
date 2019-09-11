@@ -27,7 +27,6 @@ def get_cron_expression(job_timings=None):
 
 
 for job in scheduled_jobs:
-    print(job)
     job_name = job.get("jobName", "")
     job_time = get_cron_expression(job_timings=job)
     if job_name:
