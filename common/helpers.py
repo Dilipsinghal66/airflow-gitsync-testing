@@ -49,15 +49,33 @@ def mongo_query_builder(query_data):
 
 
 def task_failure_callback(context):
-    task_instance=context.get("task")
-    print(task_instance.__dict__)
-    print(context)
-    pass
+    failure_payload = {
+        "executed": True,
+        "status": "failure"
+    }
+    task_instance = context.get("task")
+    task_args = task_instance.get("op_kwargs")
+    task_mongo_id = task_args.get("_id", None)
+    if task_mongo_id:
+        task_mongo_id = str(task_mongo_id)
+    endpoint = task_mongo_id
+    make_http_request(conn_id="http_jobs_url", method="PATCH",
+                      payload=failure_payload, endpoint=endpoint)
 
 
 def task_success_callback(context):
-    print(context)
-    pass
+    success_payload = {
+        "executed": True,
+        "status": "success"
+    }
+    task_instance = context.get("task")
+    task_args = task_instance.get("op_kwargs")
+    task_mongo_id = task_args.get("_id", None)
+    if task_mongo_id:
+        task_mongo_id = str(task_mongo_id)
+    endpoint = task_mongo_id
+    make_http_request(conn_id="http_jobs_url", method="PATCH",
+                      payload=success_payload, endpoint=endpoint)
 
 
 def process_dynamic_task(**kwargs):
