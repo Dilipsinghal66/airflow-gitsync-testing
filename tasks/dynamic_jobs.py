@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
 from common.db_functions import get_data_from_db
-from common.helpers import process_dynamic_task
+from common.helpers import process_dynamic_task, task_failure_callback, task_success_callback
 from config import local_tz, default_args
 
 scheduled_jobs = get_data_from_db(conn_id="mongo_user_db",
@@ -46,6 +46,8 @@ for job in scheduled_jobs:
         python_callable=process_dynamic_task,
         dag=dag,
         op_kwargs=job,
+        on_failure_callback=task_failure_callback,
+        on_success_callback=task_success_callback,
         pool="dynamic_tasks_pool",
         retry_exponential_backoff=True
     )
