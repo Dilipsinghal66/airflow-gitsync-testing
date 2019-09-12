@@ -339,7 +339,6 @@ def twilio_cleanup():
 
     :return: None
     """
-    a = 1/0
     print("Fetching users deactivated but not deleted. ")
     users_deactivated = get_deactivated_patients()
     if users_deactivated:
