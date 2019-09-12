@@ -3,6 +3,7 @@ from datetime import datetime
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
+from airflow.contrib.hooks.slack_webhook_hook import SlackWebhookHook
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
@@ -550,3 +551,6 @@ def add_care_manager():
     for cm in cm_by_priority:
         cm_data = json.dumps(cm)
         redis_conn.rpush("cm:inactive_pool", cm_data)
+
+
+
