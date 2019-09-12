@@ -22,8 +22,8 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'email': 'mrigesh@zyla.in',
-    'email_on_failure': True,
-    'email_on_retry': True,
+    'email_on_failure': False,
+    'email_on_retry': False,
     'retries': 0,
     'retry_delay': timedelta(minutes=1),
     'on_failure_callback': task_failure_slack_alert
