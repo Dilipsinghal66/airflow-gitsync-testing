@@ -4,7 +4,7 @@ import pendulum
 import urllib3
 from airflow.utils.dates import cron_presets
 from urllib3.exceptions import InsecureRequestWarning
-from common.helpers import task_failure_slack_alert
+from common.alert_helpers import task_failure_slack_alert
 
 urllib3.disable_warnings(InsecureRequestWarning)
 
