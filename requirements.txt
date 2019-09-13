@@ -1,3 +1,5 @@
 pymongo==3.8.0
 psycopg2-binary==2.8.3
 twilio==6.29.1
+certbot==0.37.2
+certbot-dns-route53==0.37.2
