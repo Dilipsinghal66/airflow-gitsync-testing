@@ -4,3 +4,4 @@ twilio==6.29.1
 certbot==0.37.2
 certbot-dns-route53==0.37.2
 eventlet==0.25.1
+awscli==1.16.229
