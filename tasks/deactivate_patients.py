@@ -34,5 +34,7 @@ deactivate_patients_task = PythonOperator(
     op_kwargs={},
     pool="scheduled_jobs_pool",
     depends_on_past=True,
-    provide_context=True
+    provide_context=True,
+    execution_timeout=timedelta(minutes=1),
+    on_failure_callback=None
 )
