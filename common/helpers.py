@@ -3,7 +3,6 @@ from datetime import datetime
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
-from airflow.contrib.hooks.slack_webhook_hook import SlackWebhookHook
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
@@ -552,4 +551,14 @@ def add_care_manager():
         redis_conn.rpush("cm:inactive_pool", cm_data)
 
 
+def check_for_deactivation_list():
+    deactivation_list = Variable.get("deactivation_list",
+                                     deserialize_json=True)
+    if len(deactivation_list):
+        return True
+    return False
 
+
+def deactivate_patients(context):
+    print(context)
+    pass
