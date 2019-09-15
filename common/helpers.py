@@ -582,10 +582,10 @@ def deactivate_patients(**kwargs):
         try:
             log.debug(
                 "Updating user status to deactivate for user " + endpoint)
-            # make_http_request(conn_id="http_user_deactivation_url",
-            #                   method=method,
-            #                   endpoint=endpoint,
-            #                   payload=payload)
+            make_http_request(conn_id="http_user_deactivation_url",
+                              method=method,
+                              endpoint=endpoint,
+                              payload=payload)
         except Exception as e:
             log.error(e)
             log.error("Deactivation failed for " + endpoint)
