@@ -3,7 +3,6 @@ from datetime import datetime
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
-from airflow.contrib.hooks.slack_webhook_hook import SlackWebhookHook
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
@@ -552,4 +551,42 @@ def add_care_manager():
         redis_conn.rpush("cm:inactive_pool", cm_data)
 
 
-
+def deactivate_patients(**kwargs):
+    log.debug("Starting deactivation of patients")
+    log.debug("Fetch deactivation list from variables. ")
+    deactivation_list = Variable.get("deactivation_list",
+                                     deserialize_json=True)
+    log.debug("Deactivation list fetched from variables. ")
+    if not len(deactivation_list):
+        log.info("No patients to deactivate. Nothing to do.")
+        return
+    log.debug("Patients to be deactivated " + json.dumps(deactivation_list))
+    _filter = {
+        "patientId": {"$in": deactivation_list},
+        "userStatus": {"$ne": 3}
+    }
+    projection = {
+        "_id": 1
+    }
+    deactivation_id_list = get_data_from_db(conn_id="mongo_user_db",
+                                            collection="user",
+                                            filter=_filter,
+                                            projection=projection)
+    for patient in deactivation_id_list:
+        _id = patient.get("_id")
+        if isinstance(_id, ObjectId):
+            _id = str(_id)
+        endpoint = _id
+        log.debug("Starting deactivation for " + endpoint)
+        payload = kwargs
+        method = "PATCH"
+        try:
+            log.debug(
+                "Updating user status to deactivate for user " + endpoint)
+            make_http_request(conn_id="http_user_deactivation_url",
+                              method=method,
+                              endpoint=endpoint,
+                              payload=payload)
+        except Exception as e:
+            log.error(e)
+            log.error("Deactivation failed for " + endpoint)
