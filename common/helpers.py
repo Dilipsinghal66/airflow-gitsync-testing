@@ -560,7 +560,6 @@ def deactivate_patients(**kwargs):
     if not len(deactivation_list):
         log.info("No patients to deactivate. Nothing to do.")
         return
-    deactivation_list = deactivation_list.split(",")
     log.debug("Patients to be deactivated " + json.dumps(deactivation_list))
     _filter = {
         "patientId": {"$in": deactivation_list}
