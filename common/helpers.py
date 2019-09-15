@@ -562,7 +562,8 @@ def deactivate_patients(**kwargs):
         return
     log.debug("Patients to be deactivated " + json.dumps(deactivation_list))
     _filter = {
-        "patientId": {"$in": deactivation_list}
+        "patientId": {"$in": deactivation_list},
+        "userStatus": {"$ne": 3}
     }
     projection = {
         "_id": 1
