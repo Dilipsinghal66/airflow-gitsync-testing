@@ -13,63 +13,65 @@ meditation_schedule = Variable().get(key="meditation_schedule",
 
 message_times = get_dynamic_scheduled_message_time()
 if message_times:
-    for k, v in message_times:
-        hh, mm = k.split(":")
-        time_string = k.replace(":", "_")
-        cron_time = mm + " " + hh + " * * *"
-        reminder_type = None
-        reminder_callable = None
-        meditation = False
-        if v == 1:
-            reminder_type = "reporting"
-            reminder_callable = ""
-        elif v == 2:
-            reminder_type = "vitals"
-            reminder_callable = ""
-        elif v == 3:
-            reminder_type = "tasks"
-            reminder_callable = ""
-        elif v == 4:
-            reminder_type = "dynamic"
-            reminder_callable = send_dynamic
-            meditation = True
-        if not reminder_type:
-            continue
-        if not reminder_callable:
-            continue
-        dag_id = reminder_type + "_reminder_" + time_string
-        task_id = reminder_type + "_reminder_" + time_string + "_task"
-        dag = DAG(
-            dag_id=dag_id,
-            default_args=default_args,
-            schedule_interval=cron_time,
-            catchup=False,
-            start_date=datetime(year=2019, month=10, day=4, hour=0, minute=0,
-                                second=0, microsecond=0, tzinfo=local_tz),
-            concurrency=1
-        )
-        task = PythonOperator(
-            task_id=task_id,
-            task_concurrency=1,
-            python_callable=reminder_callable,
-            dag=dag,
-            op_kwargs={"time": k, "reminder_type": v},
-            pool="task_reminder_pool",
-            retry_exponential_backoff=True,
-            provide_context=False
-
-        )
-        if meditation:
-            meditation_content_21_45_task = PythonOperator(
-                task_id="meditation_content_21_45_task",
+    for message in message_times:
+        for k, v in message.items():
+            hh, mm = k.split(":")
+            time_string = k.replace(":", "_")
+            cron_time = mm + " " + hh + " * * *"
+            reminder_type = None
+            reminder_callable = None
+            meditation = False
+            if v == 1:
+                reminder_type = "reporting"
+                reminder_callable = ""
+            elif v == 2:
+                reminder_type = "vitals"
+                reminder_callable = ""
+            elif v == 3:
+                reminder_type = "tasks"
+                reminder_callable = ""
+            elif v == 4:
+                reminder_type = "dynamic"
+                reminder_callable = send_dynamic
+                meditation = True
+            if not reminder_type:
+                continue
+            if not reminder_callable:
+                continue
+            dag_id = reminder_type + "_reminder_" + time_string
+            task_id = reminder_type + "_reminder_" + time_string + "_task"
+            dag = DAG(
+                dag_id=dag_id,
+                default_args=default_args,
+                schedule_interval=cron_time,
+                catchup=False,
+                start_date=datetime(year=2019, month=10, day=4, hour=0,
+                                    minute=0,
+                                    second=0, microsecond=0, tzinfo=local_tz),
+                concurrency=1
+            )
+            task = PythonOperator(
+                task_id=task_id,
                 task_concurrency=1,
-                python_callable=send_meditation,
+                python_callable=reminder_callable,
                 dag=dag,
-                op_kwargs={"schedule": meditation_schedule},
+                op_kwargs={"time": k, "reminder_type": v},
                 pool="task_reminder_pool",
                 retry_exponential_backoff=True,
-                provide_context=True
+                provide_context=False
+
             )
+            if meditation:
+                meditation_content_21_45_task = PythonOperator(
+                    task_id="meditation_content_21_45_task",
+                    task_concurrency=1,
+                    python_callable=send_meditation,
+                    dag=dag,
+                    op_kwargs={"schedule": meditation_schedule},
+                    pool="task_reminder_pool",
+                    retry_exponential_backoff=True,
+                    provide_context=True
+                )
 
 # dynamic_reminder_21_45_dag = DAG(
 #     dag_id="dynamic_reminder_21_45",
