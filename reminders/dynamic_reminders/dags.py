@@ -40,6 +40,7 @@ if message_times:
                 continue
             dag_id = reminder_type + "_reminder_" + time_string
             task_id = reminder_type + "_reminder_" + time_string + "_task"
+            print(dag_id)
             globals()[reminder_type] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
@@ -50,6 +51,7 @@ if message_times:
                                     second=0, microsecond=0, tzinfo=local_tz),
                 concurrency=1
             )
+            print(task_id)
             task = PythonOperator(
                 task_id=task_id,
                 task_concurrency=1,
