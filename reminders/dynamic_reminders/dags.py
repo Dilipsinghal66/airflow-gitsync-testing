@@ -23,13 +23,13 @@ if message_times:
             meditation = False
             if v == 1:
                 reminder_type = "reporting"
-                reminder_callable = ""
+                reminder_callable = send_dynamic
             elif v == 2:
                 reminder_type = "vitals"
-                reminder_callable = ""
+                reminder_callable = send_dynamic
             elif v == 3:
                 reminder_type = "tasks"
-                reminder_callable = ""
+                reminder_callable = send_dynamic
             elif v == 4:
                 reminder_type = "dynamic"
                 reminder_callable = send_dynamic
