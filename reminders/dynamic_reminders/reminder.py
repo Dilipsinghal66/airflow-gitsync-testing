@@ -92,7 +92,7 @@ def send_notifications(time=None, reminder_type=None):
 def send_dynamic(time=None, reminder_type=None):
     if not time or not reminder_type:
         return
-    time_data_endpoint = "21:45/messages/4"
+    time_data_endpoint = time + "/messages/" + str(reminder_type)
     status, time_data = make_http_request(conn_id="http_statemachine_url",
                                           endpoint=time_data_endpoint,
                                           method="GET")

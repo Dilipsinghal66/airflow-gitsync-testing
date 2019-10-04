@@ -48,7 +48,7 @@ if message_times:
             globals()[reminder_type] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
-                schedule_interval=cron_time,
+                schedule_interval="@evey_5_minutes",
                 catchup=False,
                 start_date=datetime(year=2019, month=10, day=4, hour=0,
                                     minute=0,
