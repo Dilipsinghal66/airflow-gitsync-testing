@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from http import HTTPStatus
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
@@ -600,3 +601,16 @@ def deactivate_patients(**kwargs):
         except Exception as e:
             log.error(e)
             log.error("Deactivation failed for " + endpoint)
+
+
+def get_dynamic_scheduled_message_time():
+    endpoint = "time/list"
+    status, data = make_http_request("http_statemachine_url",
+                                     endpoint=endpoint)
+    if status == HTTPStatus.OK:
+        schedulables = data.get("schedulable_times")
+        return schedulables
+    else:
+        log.error(status)
+        log.error(data)
+        return None
