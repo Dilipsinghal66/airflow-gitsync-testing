@@ -41,7 +41,7 @@ if message_times:
             dag_id = reminder_type + "_reminder_" + time_string
             task_id = reminder_type + "_reminder_" + time_string + "_task"
             print(dag_id)
-            globals()[reminder_type] = DAG(
+            dag = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
                 schedule_interval=cron_time,
@@ -56,7 +56,7 @@ if message_times:
                 task_id=task_id,
                 task_concurrency=1,
                 python_callable=reminder_callable,
-                dag=globals()[reminder_type],
+                dag=dag,
                 op_kwargs={"time": k, "reminder_type": v},
                 pool="task_reminder_pool",
                 retry_exponential_backoff=True,
@@ -68,42 +68,9 @@ if message_times:
                     task_id="meditation_content_21_45_task",
                     task_concurrency=1,
                     python_callable=send_meditation,
-                    dag=globals()[reminder_type],
+                    dag=dag,
                     op_kwargs={"schedule": meditation_schedule},
                     pool="task_reminder_pool",
                     retry_exponential_backoff=True,
                     provide_context=True
                 )
-
-# dynamic_reminder_21_45_dag = DAG(
-#     dag_id="dynamic_reminder_21_45",
-#     default_args=default_args,
-#     schedule_interval="45 21 * * *",
-#     catchup=False,
-#     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
-#                         microsecond=0, tzinfo=local_tz),
-#     dagrun_timeout=timedelta(minutes=1),
-#     concurrency=2
-# )
-#
-# dynamic_reminder_21_45_task = PythonOperator(
-#     task_id="dynamic_reminder_21_45_task",
-#     task_concurrency=1,
-#     python_callable=send_dynamic,
-#     dag=dynamic_reminder_21_45_dag,
-#     op_kwargs={},
-#     pool="task_reminder_pool",
-#     retry_exponential_backoff=True,
-#     provide_context=True
-# )
-#
-# meditation_content_21_45_task = PythonOperator(
-#     task_id="meditation_content_21_45_task",
-#     task_concurrency=1,
-#     python_callable=send_meditation,
-#     dag=dynamic_reminder_21_45_dag,
-#     op_kwargs={"schedule": meditation_schedule},
-#     pool="task_reminder_pool",
-#     retry_exponential_backoff=True,
-#     provide_context=True
-# )
