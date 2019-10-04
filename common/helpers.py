@@ -23,11 +23,11 @@ def send_chat_message(user_id=None, payload=None):
     try:
         endpoint = "user/" + str(
             round(user_id)) + "/message"
-        print(endpoint)
+        log.info(endpoint)
         status, body = make_http_request(
             conn_id="http_chat_service_url",
             endpoint=endpoint, method="POST", payload=payload)
-        print(status, body)
+        log.info(status, body)
     except Exception as e:
         raise ValueError(str(e))
 
@@ -109,7 +109,7 @@ def process_dynamic_task(**kwargs):
                 mongo_filter_field = "_id"
             patient_id = patient.get(mongo_filter_field)
             patient_id_list.append(patient_id)
-    print(patient_id_list)
+    log.info(patient_id_list)
     _filter = {
         mongo_filter_field: {"$in": patient_id_list}
     }
@@ -151,19 +151,19 @@ def process_health_plan_not_created(patient_list):
     health_plan_missing = set(patient_list).difference(p_list)
     if health_plan_missing:
         for patient_id in health_plan_missing:
-            print("Creating health plan for ", patient_id)
+            log.info("Creating health plan for ", patient_id)
             payload = {
                 "patientId": patient_id
             }
             make_http_request(conn_id="http_healthplan_url", method="POST",
                               payload=payload)
     else:
-        print("Health plan created for all patients. Nothing to do. ")
+        log.info("Health plan created for all patients. Nothing to do. ")
     return patient_list
 
 
 def find_patients_not_level_jumped(patient_list):
-    print("Starting level jump of patients. ")
+    log.info("Starting level jump of patients. ")
     _filter = {"current_level": {"$in": ["Level 1", "Level 2"]},
                "patientId": {"$in": patient_list}}
     projection = {
@@ -176,10 +176,10 @@ def find_patients_not_level_jumped(patient_list):
     for data in health_plan_data:
         patient_id = data.get("patientId")
         if patient_id:
-            print("Adding patient id  " + str(patient_id) + " for level jump")
+            log.info("Adding patient id  " + str(patient_id) + " for level jump")
             patient_list.append(patient_id)
     if not patient_list:
-        print("No level jump required. All done. ")
+        log.info("No level jump required. All done. ")
     return patient_list
 
 
@@ -217,21 +217,21 @@ def get_deactivated_patients():
 
 def level_jump_patient():
     patient_list = get_patients_activated_today()
-    print("Activated patients ", patient_list)
+    log.info("Activated patients ", patient_list)
     process_health_plan_not_created(patient_list=patient_list)
     patient_list = find_patients_not_level_jumped(patient_list=patient_list)
     payload = {
         "level": "Level 3"
     }
     if not patient_list:
-        print("No patients received for level jump")
+        log.info("No patients received for level jump")
     for patient in patient_list:
         endpoint = str(patient) + "/level"
-        print("Level jump for ", endpoint)
+        log.info("Level jump for ", endpoint)
         status, data = make_http_request(conn_id="http_healthplan_url",
                                          method="PATCH",
                                          payload=payload, endpoint=endpoint)
-        print(status, data)
+        log.info(status, data)
 
 
 def switch_active_cm():
@@ -253,14 +253,14 @@ def switch_active_cm():
                               endpoint=user_endpoint, payload=payload)
             update_redis = True
         except Exception as e:
-            print(e)
+            log.info(e)
             sleep(5)
             try:
                 make_http_request(conn_id="http_user_url", method="PATCH",
                                   endpoint=user_endpoint, payload=payload)
                 update_redis = True
             except Exception as e:
-                print(e)
+                log.info(e)
                 sleep(5)
                 try:
                     make_http_request(conn_id="http_user_url",
@@ -269,13 +269,13 @@ def switch_active_cm():
                                       payload=payload)
                     update_redis = True
                 except Exception as e:
-                    print(e)
-                    print("Failed to update channel for " + user_endpoint)
+                    log.info(e)
+                    log.info("Failed to update channel for " + user_endpoint)
     if update_redis:
         try:
             refresh_active_user_redis()
         except Exception as e:
-            print(e)
+            log.info(e)
 
 
 def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
@@ -287,13 +287,13 @@ def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
     :param channel_sid: twilio channel specific to user
     :return: None
     """
-    print("Cleaning up twilio channel " + channel_sid + " of all members.")
+    log.info("Cleaning up twilio channel " + channel_sid + " of all members.")
     channel = twilio_service.channels.get(sid=channel_sid)
     members = channel.members.list()
     if members:
         for member in members:
             member.delete()
-    print(channel_sid + " cleaned of all members.")
+    log.info(channel_sid + " cleaned of all members.")
 
 
 def twilio_delete_user(twilio_service=None, user_sid=None):
@@ -304,10 +304,10 @@ def twilio_delete_user(twilio_service=None, user_sid=None):
     :param user_sid: twilio user sid of the user
     :return:
     """
-    print("Deleting deactivated twilio user " + user_sid)
+    log.info("Deleting deactivated twilio user " + user_sid)
     user = twilio_service.users.get(user_sid)
     user.delete()
-    print("Deleted deactivated twilio user" + user_sid)
+    log.info("Deleted deactivated twilio user" + user_sid)
 
 
 def mark_user_deleted(_id):
@@ -317,9 +317,9 @@ def mark_user_deleted(_id):
     :param _id: ObjectId mongo _id of the user to be deleted
     :return: None
     """
-    print("Marking user with id " + _id + " as deleted in user service")
+    log.info("Marking user with id " + _id + " as deleted in user service")
     make_http_request(conn_id="http_user_url", method="DELETE", endpoint=_id)
-    print("User with id " + _id + " marked as deleted in user service")
+    log.info("User with id " + _id + " marked as deleted in user service")
 
 
 def twilio_cleanup():
@@ -338,44 +338,44 @@ def twilio_cleanup():
 
     :return: None
     """
-    print("Fetching users deactivated but not deleted. ")
+    log.info("Fetching users deactivated but not deleted. ")
     users_deactivated = get_deactivated_patients()
     if users_deactivated:
-        print("Deactivated users fetched. Proceeding to deletion")
+        log.info("Deactivated users fetched. Proceeding to deletion")
         twilio_service = get_twilio_service()
     else:
-        print("No new deleted users found. Nothing to do")
+        log.info("No new deleted users found. Nothing to do")
         return
     for user in users_deactivated:
         patient_id = user.get("patient_id")
         _id = str(user.get("_id"))
-        print("Processing deletion for deactivated patient " + str(
+        log.info("Processing deletion for deactivated patient " + str(
             patient_id) + " with id " + _id)
         chat_information = user.get("chatInformation", {})
         provider_data = chat_information.get("providerData", {})
         channel_sid = provider_data.get("channelSid", None)
         if not channel_sid:
-            print("Error in user data for " + str(
+            log.info("Error in user data for " + str(
                 patient_id) + ". Missing channel information")
         user_sid = provider_data.get("userSid", None)
         if not user_sid:
-            print("Error in user data for " + str(
+            log.info("Error in user data for " + str(
                 patient_id) + ". Missing twilio user information")
         try:
             twilio_cleanup_channel(twilio_service=twilio_service,
                                    channel_sid=channel_sid)
         except Exception as e:
-            print(e)
+            log.error(e)
         try:
             twilio_delete_user(twilio_service=twilio_service,
                                user_sid=user_sid)
         except Exception as e:
-            print(e)
+            log.error(e)
         try:
             mark_user_deleted(_id=_id)
         except Exception as e:
-            print(e)
-    print("Finished processing deactivated users for deletion. ")
+            log.error(e)
+    log.info("Finished processing deactivated users for deletion. ")
 
 
 def sanitize_data(data):
