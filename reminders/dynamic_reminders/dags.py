@@ -66,7 +66,7 @@ if message_times:
                     task_id="meditation_content_21_45_task",
                     task_concurrency=1,
                     python_callable=send_meditation,
-                    dag=dag,
+                    dag=globals()[reminder_type],
                     op_kwargs={"schedule": meditation_schedule},
                     pool="task_reminder_pool",
                     retry_exponential_backoff=True,
