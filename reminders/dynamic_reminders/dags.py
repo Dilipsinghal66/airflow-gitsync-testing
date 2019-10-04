@@ -48,7 +48,7 @@ if message_times:
             globals()[reminder_type] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
-                schedule_interval="@every_5_minutes",
+                schedule_interval=cron_time,
                 catchup=False,
                 start_date=datetime(year=2019, month=10, day=4, hour=0,
                                     minute=0,
