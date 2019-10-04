@@ -21,6 +21,7 @@ if message_times:
             reminder_type = None
             reminder_callable = None
             meditation = False
+            print(time_string)
             if v == 1:
                 reminder_type = "reporting"
                 reminder_callable = send_dynamic
@@ -34,6 +35,9 @@ if message_times:
                 reminder_type = "dynamic"
                 reminder_callable = send_dynamic
                 meditation = True
+            elif v == 5:
+                reminder_type = "notifications"
+                reminder_callable = send_dynamic
             if not reminder_type:
                 continue
             if not reminder_callable:
