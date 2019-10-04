@@ -606,7 +606,7 @@ def deactivate_patients(**kwargs):
 def get_dynamic_scheduled_message_time():
     endpoint = "time/list"
     status, data = make_http_request("http_statemachine_url",
-                                     endpoint=endpoint)
+                                     endpoint=endpoint, method="GET")
     if status == HTTPStatus.OK:
         schedulables = data.get("schedulable_times")
         return schedulables
