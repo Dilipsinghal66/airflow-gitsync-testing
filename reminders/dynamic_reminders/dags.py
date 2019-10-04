@@ -21,7 +21,6 @@ if message_times:
             reminder_type = None
             reminder_callable = None
             meditation = False
-            print(time_string)
             if v == 1:
                 reminder_type = "reporting"
                 reminder_callable = send_dynamic
@@ -45,7 +44,7 @@ if message_times:
             dag_id = reminder_type + "_reminder_" + time_string
             task_id = reminder_type + "_reminder_" + time_string + "_task"
             print(dag_id)
-            dag = DAG(
+            globals()[reminder_type] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
                 schedule_interval=cron_time,
@@ -60,7 +59,7 @@ if message_times:
                 task_id=task_id,
                 task_concurrency=1,
                 python_callable=reminder_callable,
-                dag=dag,
+                dag=globals()[reminder_type],
                 op_kwargs={"time": k, "reminder_type": v},
                 pool="task_reminder_pool",
                 retry_exponential_backoff=True,
@@ -72,7 +71,7 @@ if message_times:
                     task_id="meditation_content_21_45_task",
                     task_concurrency=1,
                     python_callable=send_meditation,
-                    dag=dag,
+                    dag=globals()[reminder_type],
                     op_kwargs={"schedule": meditation_schedule},
                     pool="task_reminder_pool",
                     retry_exponential_backoff=True,
