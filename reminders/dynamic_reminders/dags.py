@@ -40,7 +40,7 @@ if message_times:
                 continue
             dag_id = reminder_type + "_reminder_" + time_string
             task_id = reminder_type + "_reminder_" + time_string + "_task"
-            dag = DAG(
+            globals()[reminder_type] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
                 schedule_interval=cron_time,
@@ -54,7 +54,7 @@ if message_times:
                 task_id=task_id,
                 task_concurrency=1,
                 python_callable=reminder_callable,
-                dag=dag,
+                dag=globals()[reminder_type],
                 op_kwargs={"time": k, "reminder_type": v},
                 pool="task_reminder_pool",
                 retry_exponential_backoff=True,
