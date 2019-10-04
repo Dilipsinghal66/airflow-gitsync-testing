@@ -176,7 +176,8 @@ def find_patients_not_level_jumped(patient_list):
     for data in health_plan_data:
         patient_id = data.get("patientId")
         if patient_id:
-            log.info("Adding patient id  " + str(patient_id) + " for level jump")
+            log.info(
+                "Adding patient id  " + str(patient_id) + " for level jump")
             patient_list.append(patient_id)
     if not patient_list:
         log.info("No level jump required. All done. ")
