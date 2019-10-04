@@ -1,4 +1,5 @@
 import calendar
+import random
 from datetime import date
 from time import sleep
 
@@ -41,7 +42,56 @@ def refresh_daily_message():
     return dynamic_message_list
 
 
-def send_reminder(**kwargs):
+def send_notifications(time=None, reminder_type=None):
+    if not time or not reminder_type:
+        return
+    time_data_endpoint = time + "/messages/" + str(reminder_type)
+    status, time_data = make_http_request(conn_id="http_statemachine_url",
+                                          endpoint=time_data_endpoint,
+                                          method="GET")
+    messages = time_data.get("messages")
+    message = random.choice(messages)
+    action = time_data.get("action")
+    test_user_id = int(Variable.get("test_user_id", '0'))
+    exclude_user_list = list(
+        map(int, Variable.get("exclude_user_ids", "0").split(",")))
+    payload = {
+        "action": action,
+        "message": message,
+        "is_notification": False
+    }
+    user_filter = {
+        "userStatus": {"$in": [11, 12]}
+    }
+    if test_user_id:
+        user_filter["userId"] = test_user_id
+    user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+                                 filter=user_filter, batch_size=100)
+    request_count = 0
+    while user_data.alive:
+        for user in user_data:
+            user_id = user.get("userId")
+            if test_user_id and int(user_id) != test_user_id:
+                continue
+            if int(user_id) in exclude_user_list:
+                continue
+            payload["message"] = message
+            try:
+                send_chat_message(user_id=user_id, payload=payload)
+            except Exception as e:
+                print(e)
+            if request_count >= count_threshold:
+                print("Request limit reached. Stopping for " + str(
+                    time_delay) + " milliseconds")
+                sleep(time_delay / 1000)
+                request_count = 0
+            else:
+                request_count += 1
+
+
+def send_dynamic(time=None, reminder_type=None):
+    if not time or not reminder_type:
+        return
     time_data_endpoint = "21:45/messages/4"
     status, time_data = make_http_request(conn_id="http_statemachine_url",
                                           endpoint=time_data_endpoint,
