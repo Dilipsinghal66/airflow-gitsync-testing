@@ -7,6 +7,7 @@ from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
 from dateutil import parser
+from twilio.base.exceptions import TwilioRestException
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
@@ -294,7 +295,9 @@ def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
     if members:
         for member in members:
             member.delete()
-    log.info(channel_sid + " cleaned of all members.")
+        log.info(channel_sid + " cleaned of all members.")
+    else:
+        log.info(channel_sid + " has no members to delete.")
 
 
 def twilio_delete_user(twilio_service=None, user_sid=None):
@@ -319,8 +322,12 @@ def mark_user_deleted(_id):
     :return: None
     """
     log.info("Marking user with id " + _id + " as deleted in user service")
-    make_http_request(conn_id="http_user_url", method="DELETE", endpoint=_id)
-    log.info("User with id " + _id + " marked as deleted in user service")
+    try:
+        make_http_request(conn_id="http_user_url", method="DELETE",
+                          endpoint=_id)
+        log.info("User with id " + _id + " marked as deleted in user service")
+    except Exception as e:
+        log.error(e, exc_info=True)
 
 
 def twilio_cleanup():
@@ -348,7 +355,7 @@ def twilio_cleanup():
         log.info("No new deleted users found. Nothing to do")
         return
     for user in users_deactivated:
-        patient_id = user.get("patient_id")
+        patient_id = user.get("patientId")
         _id = str(user.get("_id"))
         log.info("Processing deletion for deactivated patient " + str(
             patient_id) + " with id " + _id)
@@ -370,6 +377,8 @@ def twilio_cleanup():
         try:
             twilio_delete_user(twilio_service=twilio_service,
                                user_sid=user_sid)
+        except TwilioRestException as e:
+            log.error(e.msg)
         except Exception as e:
             log.error(e)
         try:
