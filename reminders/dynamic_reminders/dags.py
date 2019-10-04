@@ -6,7 +6,8 @@ from airflow.operators.python_operator import PythonOperator
 
 from common.helpers import get_dynamic_scheduled_message_time
 from config import local_tz, default_args
-from reminders.dynamic_reminders.reminder import send_dynamic, send_meditation
+from reminders.dynamic_reminders.reminder import send_dynamic, send_meditation, \
+    send_notifications
 
 meditation_schedule = Variable().get(key="meditation_schedule",
                                      deserialize_json=True)
@@ -36,7 +37,7 @@ if message_times:
                 meditation = True
             elif v == 5:
                 reminder_type = "notifications"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             if not reminder_type:
                 continue
             if not reminder_callable:
