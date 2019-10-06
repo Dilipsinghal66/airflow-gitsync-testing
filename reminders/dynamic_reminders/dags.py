@@ -30,7 +30,7 @@ if message_times:
                 reminder_callable = send_dynamic
             elif v == 3:
                 reminder_type = "tasks"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             elif v == 4:
                 reminder_type = "dynamic"
                 reminder_callable = send_dynamic
@@ -53,7 +53,7 @@ if message_times:
                 start_date=datetime(year=2019, month=10, day=3, hour=0,
                                     minute=0,
                                     second=0, microsecond=0, tzinfo=local_tz),
-                concurrency=1
+                concurrency=2
             )
             print(task_id)
             task = PythonOperator(
