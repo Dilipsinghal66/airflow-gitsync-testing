@@ -65,7 +65,6 @@ def send_notifications(time=None, reminder_type=None):
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
-    print(user_filter)
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=user_filter, batch_size=100)
     request_count = 0

@@ -13,6 +13,12 @@ meditation_schedule = Variable().get(key="meditation_schedule",
                                      deserialize_json=True)
 
 message_times = get_dynamic_scheduled_message_time()
+
+def generate_dag(k, v):
+    pass
+
+dag_list = []
+
 if message_times:
     for message in message_times:
         for k, v in message.items():
@@ -44,8 +50,7 @@ if message_times:
                 continue
             dag_id = reminder_type + "_reminder_" + time_string
             task_id = reminder_type + "_reminder_" + time_string + "_task"
-            print(dag_id)
-            globals()[reminder_type] = DAG(
+            globals()[dag_id] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
                 schedule_interval=cron_time,
@@ -55,7 +60,6 @@ if message_times:
                                     second=0, microsecond=0, tzinfo=local_tz),
                 concurrency=2
             )
-            print(task_id)
             task = PythonOperator(
                 task_id=task_id,
                 task_concurrency=1,
