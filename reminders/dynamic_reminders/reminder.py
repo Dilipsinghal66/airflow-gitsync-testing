@@ -95,9 +95,6 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
                                  filter=user_filter, batch_size=100)
     request_count = 0
     while user_data.alive:
-        print(
-            "sending messages to " + user_data.collection.count_documents() +
-            " patients")
         for user in user_data:
             if index_by_days:
                 message_index = get_patient_on_trial_days(patient=user)
