@@ -1,6 +1,6 @@
 import calendar
 import random
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from time import sleep
 
 from airflow.models import Variable
@@ -84,7 +84,7 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
     }
     notification_filter_by_days = int(
         Variable.get("notification_filter_by_days", '15'))
-    filter_date = date.today() - timedelta(days=notification_filter_by_days)
+    filter_date = datetime.utcnow() - timedelta(days=notification_filter_by_days)
     user_filter = {
         "userStatus": {"$in": [11, 12]},
         "_created": {"$gt": filter_date}
