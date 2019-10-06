@@ -17,6 +17,7 @@ from common.twilio_helpers import get_twilio_service, \
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
+enable_message = bool(int(Variable.get("enable_message", "1")))
 
 log = LoggingMixin().log
 
@@ -26,10 +27,11 @@ def send_chat_message(user_id=None, payload=None):
         endpoint = "user/" + str(
             round(user_id)) + "/message"
         log.info(endpoint)
-        status, body = make_http_request(
-            conn_id="http_chat_service_url",
-            endpoint=endpoint, method="POST", payload=payload)
-        log.info(status, body)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_chat_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status, body)
     except Exception as e:
         raise ValueError(str(e))
 
