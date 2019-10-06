@@ -1,6 +1,6 @@
 import calendar
 import random
-from datetime import date
+from datetime import date, timedelta
 from time import sleep
 
 from airflow.models import Variable
@@ -42,7 +42,29 @@ def refresh_daily_message():
     return dynamic_message_list
 
 
-def send_notifications(time=None, reminder_type=None):
+def get_patient_on_trial_days(patient):
+    days = None
+    status_transition = patient.get("statusTransition", [])
+    if not status_transition:
+        return days
+    day_on_trial = [d for d in status_transition if
+                    d.get("status", None) == 11]
+    if not day_on_trial:
+        return days
+    day_on_trial = day_on_trial[0]
+    transition_time = day_on_trial.get("transitionTime", None)
+    if not transition_time:
+        return days
+    if isinstance(transition_time, str):
+        transition_time = parser.parse(transition_time)
+    transition_date = transition_time.date()
+    today = date.today()
+    date_diff = today - transition_date
+    days = date_diff.days + 1
+    return days
+
+
+def send_notifications(time=None, reminder_type=None, index_by_days=False):
     if not time or not reminder_type:
         return
     time_data_endpoint = time + "/messages/" + str(reminder_type)
@@ -60,8 +82,12 @@ def send_notifications(time=None, reminder_type=None):
         "message": message,
         "is_notification": False
     }
+    notification_filter_by_days = int(
+        Variable.get("notification_filter_by_days", '15'))
+    filter_date = date.today() - timedelta(days=notification_filter_by_days)
     user_filter = {
-        "userStatus": {"$in": [11, 12]}
+        "userStatus": {"$in": [11, 12]},
+        "_created": {"$gt": filter_date}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
@@ -70,6 +96,17 @@ def send_notifications(time=None, reminder_type=None):
     request_count = 0
     while user_data.alive:
         for user in user_data:
+            if index_by_days:
+                message_index = get_patient_on_trial_days(patient=user)
+                message_index -= 1
+                if -1 < message_index < len(messages):
+                    try:
+                        message = message[message_index]
+                    except Exception as e:
+                        print(e)
+                        continue
+                else:
+                    continue
             user_id = user.get("userId")
             if test_user_id and int(user_id) != test_user_id:
                 continue

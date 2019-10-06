@@ -30,10 +30,10 @@ if message_times:
             meditation = False
             if v == 1:
                 reminder_type = "reporting"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             elif v == 2:
                 reminder_type = "vitals"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             elif v == 3:
                 reminder_type = "tasks"
                 reminder_callable = send_notifications
