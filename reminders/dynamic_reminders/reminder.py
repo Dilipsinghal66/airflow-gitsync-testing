@@ -84,7 +84,8 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
     }
     notification_filter_by_days = int(
         Variable.get("notification_filter_by_days", '15'))
-    filter_date = datetime.utcnow() - timedelta(days=notification_filter_by_days)
+    filter_date = datetime.utcnow() - timedelta(
+        days=notification_filter_by_days)
     user_filter = {
         "userStatus": {"$in": [11, 12]},
         "_created": {"$gt": filter_date}
@@ -126,7 +127,7 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
                 request_count += 1
 
 
-def send_dynamic(time=None, reminder_type=None):
+def send_dynamic(time=None, reminder_type=None, index_by_days=False):
     if not time or not reminder_type:
         return
     time_data_endpoint = time + "/messages/" + str(reminder_type)
