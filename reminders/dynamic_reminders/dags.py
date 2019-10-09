@@ -13,6 +13,14 @@ meditation_schedule = Variable().get(key="meditation_schedule",
                                      deserialize_json=True)
 
 message_times = get_dynamic_scheduled_message_time()
+
+
+def generate_dag(k, v):
+    pass
+
+
+dag_list = []
+
 if message_times:
     for message in message_times:
         for k, v in message.items():
@@ -24,13 +32,13 @@ if message_times:
             meditation = False
             if v == 1:
                 reminder_type = "reporting"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             elif v == 2:
                 reminder_type = "vitals"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             elif v == 3:
                 reminder_type = "tasks"
-                reminder_callable = send_dynamic
+                reminder_callable = send_notifications
             elif v == 4:
                 reminder_type = "dynamic"
                 reminder_callable = send_dynamic
@@ -44,8 +52,7 @@ if message_times:
                 continue
             dag_id = reminder_type + "_reminder_" + time_string
             task_id = reminder_type + "_reminder_" + time_string + "_task"
-            print(dag_id)
-            globals()[reminder_type] = DAG(
+            globals()[dag_id] = DAG(
                 dag_id=dag_id,
                 default_args=default_args,
                 schedule_interval=cron_time,
@@ -53,15 +60,15 @@ if message_times:
                 start_date=datetime(year=2019, month=10, day=3, hour=0,
                                     minute=0,
                                     second=0, microsecond=0, tzinfo=local_tz),
-                concurrency=1
+                concurrency=2
             )
-            print(task_id)
             task = PythonOperator(
                 task_id=task_id,
                 task_concurrency=1,
                 python_callable=reminder_callable,
-                dag=globals()[reminder_type],
-                op_kwargs={"time": k, "reminder_type": v},
+                dag=globals()[dag_id],
+                op_kwargs={"time": k, "reminder_type": v,
+                           "index_by_days": True},
                 pool="task_reminder_pool",
                 retry_exponential_backoff=True,
                 provide_context=False
@@ -72,7 +79,7 @@ if message_times:
                     task_id="meditation_content_21_45_task",
                     task_concurrency=1,
                     python_callable=send_meditation,
-                    dag=globals()[reminder_type],
+                    dag=globals()[dag_id],
                     op_kwargs={"schedule": meditation_schedule},
                     pool="task_reminder_pool",
                     retry_exponential_backoff=True,

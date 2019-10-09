@@ -1,5 +1,6 @@
+import calendar
 import json
-from datetime import datetime
+from datetime import datetime, date
 from http import HTTPStatus
 from time import sleep
 
@@ -17,6 +18,8 @@ from common.twilio_helpers import get_twilio_service, \
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
+enable_message = bool(int(Variable.get("enable_message", "1")))
+sales_cm_list = Variable().get(key="sales_cm_list", deserialize_json=True)
 
 log = LoggingMixin().log
 
@@ -26,10 +29,11 @@ def send_chat_message(user_id=None, payload=None):
         endpoint = "user/" + str(
             round(user_id)) + "/message"
         log.info(endpoint)
-        status, body = make_http_request(
-            conn_id="http_chat_service_url",
-            endpoint=endpoint, method="POST", payload=payload)
-        log.info(status, body)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_chat_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status, body)
     except Exception as e:
         raise ValueError(str(e))
 
@@ -235,6 +239,22 @@ def level_jump_patient():
                                          method="PATCH",
                                          payload=payload, endpoint=endpoint)
         log.info(status, data)
+
+
+def add_sales_cm():
+    service = get_twilio_service()
+    _filter = {"userStatus": {"$in": [11, 12]},
+               "salesCm": {"$nin": sales_cm_list},
+               "processedSales": False
+               }
+    switchable_users = get_data_from_db(conn_id="mongo_user_db",
+                                        filter=_filter, collection="user")
+    update_redis = False
+    pass
+
+
+def remove_sales_cm():
+    pass
 
 
 def switch_active_cm():
@@ -614,3 +634,66 @@ def get_dynamic_scheduled_message_time():
         log.error(status)
         log.error(data)
         return None
+
+
+def get_patient_on_trial_days(patient):
+    days = None
+    status_transition = patient.get("statusTransition", [])
+    if not status_transition:
+        return days
+    day_on_trial = [d for d in status_transition if
+                    d.get("status", None) == 11]
+    if not day_on_trial:
+        return days
+    day_on_trial = day_on_trial[0]
+    transition_time = day_on_trial.get("transitionTime", None)
+    if not transition_time:
+        return days
+    if isinstance(transition_time, str):
+        transition_time = parser.parse(transition_time)
+    transition_date = transition_time.date()
+    today = date.today()
+    date_diff = today - transition_date
+    days = date_diff.days + 1
+    return days
+
+
+def get_patient_days(patient):
+    days = None
+    activated_on = patient.get("userFlags", {}).get("active", {}).get(
+        "activatedOn", None)
+    if not activated_on:
+        return days
+    if isinstance(activated_on, str):
+        activated_on = parser.parse(activated_on)
+    activated_date = activated_on.date()
+    today = date.today()
+    date_diff = today - activated_date
+    days = date_diff.days
+    days = days + 1
+    return days
+
+
+def get_meditation_for_today(meditation_schedule=None):
+    today = date.today()
+    month_calendar = calendar.monthcalendar(today.year, today.month)
+    day_today = today.day
+    week_of_month = 0
+    day_of_week = 0
+    for i in range(len(month_calendar)):
+        if day_today in month_calendar[i]:
+            day_of_week = month_calendar[i].index(day_today)
+    for i in range(len(month_calendar)):
+        if month_calendar[i][day_of_week] and month_calendar[i][day_of_week] \
+                < day_today:
+            week_of_month += 1
+    meditation = meditation_schedule[week_of_month][day_of_week]
+    return meditation
+
+
+def refresh_daily_message():
+    dynamic_message_endpoint = "dynamic/message/today"
+    status, dynamic_message_list = make_http_request(
+        conn_id="http_statemachine_url", endpoint=dynamic_message_endpoint,
+        method="GET")
+    return dynamic_message_list

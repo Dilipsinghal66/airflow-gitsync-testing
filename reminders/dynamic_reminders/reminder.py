@@ -1,13 +1,13 @@
 import calendar
 import random
-from datetime import date
+from datetime import timedelta, datetime
 from time import sleep
 
 from airflow.models import Variable
-from dateutil import parser
 
 from common.db_functions import get_data_from_db
-from common.helpers import send_chat_message
+from common.helpers import send_chat_message, get_patient_on_trial_days, \
+    get_patient_days, get_meditation_for_today, refresh_daily_message
 from common.http_functions import make_http_request
 
 calendar.setfirstweekday(6)
@@ -18,31 +18,7 @@ time_delay = int(
     Variable().get(key="request_time_delay", deserialize_json=True))
 
 
-def get_patient_days(patient):
-    days = None
-    activated_on = patient.get("userFlags", {}).get("active", {}).get(
-        "activatedOn", None)
-    if not activated_on:
-        return days
-    if isinstance(activated_on, str):
-        activated_on = parser.parse(activated_on)
-    activated_date = activated_on.date()
-    today = date.today()
-    date_diff = today - activated_date
-    days = date_diff.days
-    days = days + 1
-    return days
-
-
-def refresh_daily_message():
-    dynamic_message_endpoint = "dynamic/message/today"
-    status, dynamic_message_list = make_http_request(
-        conn_id="http_statemachine_url", endpoint=dynamic_message_endpoint,
-        method="GET")
-    return dynamic_message_list
-
-
-def send_notifications(time=None, reminder_type=None):
+def send_notifications(time=None, reminder_type=None, index_by_days=False):
     if not time or not reminder_type:
         return
     time_data_endpoint = time + "/messages/" + str(reminder_type)
@@ -60,8 +36,13 @@ def send_notifications(time=None, reminder_type=None):
         "message": message,
         "is_notification": False
     }
+    notification_filter_by_days = int(
+        Variable.get("notification_filter_by_days", '15'))
+    filter_date = datetime.utcnow() - timedelta(
+        days=notification_filter_by_days)
     user_filter = {
-        "userStatus": {"$in": [11, 12]}
+        "userStatus": {"$in": [11, 12]},
+        "_created": {"$gt": filter_date}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
@@ -70,6 +51,17 @@ def send_notifications(time=None, reminder_type=None):
     request_count = 0
     while user_data.alive:
         for user in user_data:
+            if index_by_days:
+                message_index = get_patient_on_trial_days(patient=user)
+                message_index -= 1
+                if -1 < message_index < len(messages):
+                    try:
+                        message = message[message_index]
+                    except Exception as e:
+                        print(e)
+                        continue
+                else:
+                    continue
             user_id = user.get("userId")
             if test_user_id and int(user_id) != test_user_id:
                 continue
@@ -89,7 +81,7 @@ def send_notifications(time=None, reminder_type=None):
                 request_count += 1
 
 
-def send_dynamic(time=None, reminder_type=None):
+def send_dynamic(time=None, reminder_type=None, index_by_days=False):
     if not time or not reminder_type:
         return
     time_data_endpoint = time + "/messages/" + str(reminder_type)
@@ -142,24 +134,6 @@ def send_dynamic(time=None, reminder_type=None):
                 request_count = 0
             else:
                 request_count += 1
-
-
-def get_meditation_for_today(meditation_schedule=None):
-    today = date.today()
-    month_calendar = calendar.monthcalendar(today.year, today.month)
-    day_today = today.day
-    week_of_month = 0
-    day_of_week = 0
-    for i in range(len(month_calendar)):
-        if day_today in month_calendar[i]:
-            day_of_week = month_calendar[i].index(day_today)
-    for i in range(len(month_calendar)):
-        if month_calendar[i][day_of_week] and month_calendar[i][
-            day_of_week] < day_today:
-            week_of_month += 1
-    print(day_of_week, week_of_month)
-    meditation = meditation_schedule[week_of_month][day_of_week]
-    return meditation
 
 
 def send_meditation(**kwargs):
