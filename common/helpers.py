@@ -244,7 +244,7 @@ def level_jump_patient():
 def add_sales_cm():
     service = get_twilio_service()
     _filter = {"userStatus": {"$in": [11, 12]},
-               "salesCm": {"$nin": sales_cm_list},
+               "salesCm": {"$nin": sales_cm_list, "$exists": False},
                "processedSales": False
                }
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
