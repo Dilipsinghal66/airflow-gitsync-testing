@@ -275,7 +275,7 @@ def add_sales_cm():
     update_redis = False
     for user in eligible_users:
         check_and_add_cm(user=user, service=service, cm=sales_cm)
-        endpoint = user.get("_id")
+        endpoint = str(user.get("_id"))
         cm_id = sales_cm.get("cmId")
         payload = {
             "assignedCmType": "sales",
