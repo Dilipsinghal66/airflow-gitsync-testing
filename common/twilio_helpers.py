@@ -79,7 +79,7 @@ def swap_cm_with_active(old_cm=None, channel=None):
 def add_cm(cm_identity=None, channel=None):
     channel.members.create(
         cm_identity,
-        attributes=json.dumps(active_cm_attributes)
+        attributes=json.dumps(sales_cm_attributes)
     )
     return cm_identity
 
@@ -127,5 +127,5 @@ def check_and_add_cm(user=None, service=None, cm=None):
             ". Nothing to do.")
         return False
     print("Sales cm is not assigned. Processing further. ")
-    sales_cm = add_cm(cm_identity="a", channel=channel)
+    sales_cm = add_cm(cm_identity=cm_identity, channel=channel)
     return sales_cm
