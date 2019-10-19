@@ -274,14 +274,24 @@ def add_sales_cm():
                                       filter=_filter, collection="user")
     update_redis = False
     for user in eligible_users:
-        print(user)
-        continue
         check_and_add_cm(user=user, service=service, cm=sales_cm)
         endpoint = user.get("_id")
         cm_id = sales_cm.get("cmId")
         payload = {
-            ""
+            "assignedCmType": "sales",
+            "cmId": cm_id
         }
+        status, body = make_http_request(conn_id="http_user_url",
+                                         payload=payload, endpoint=endpoint,
+                                         method="PATCH")
+        if status != HTTPStatus.OK:
+            print("failed to update sales cm for user ")
+        update_redis = True
+    if update_redis:
+        try:
+            refresh_sales_user_redis()
+        except Exception as e:
+            log.info(e)
 
 
 def remove_sales_cm():
@@ -468,6 +478,22 @@ def refresh_active_user_redis():
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
+
+
+def refresh_sales_user_redis():
+    cm_list = get_sales_cm_list()
+    cm_list = [i.get("cmId") for i in cm_list]
+    redis_hook = RedisHook(redis_conn_id="redis_sales_users_chat")
+    redis_conn = redis_hook.get_conn()
+    for cm in cm_list:
+        _filter = {"assignedCmType": "sales", "processedSales": {"$ne": True}}
+        cacheable_users = get_data_from_db(conn_id="mongo_user_db",
+                                           filter=_filter, collection="user")
+        if cacheable_users:
+            redis_conn.delete("sales_users_" + str(cm))
+        for user in cacheable_users:
+            sanitized_data = json.dumps(sanitize_data(user))
+            redis_conn.rpush("sales_users_" + str(cm), sanitized_data)
 
 
 def get_care_managers():
