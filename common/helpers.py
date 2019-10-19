@@ -16,6 +16,7 @@ from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
     process_switch, check_and_add_cm
+from config import local_tz
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -261,17 +262,26 @@ def get_sales_cm_list():
 def add_sales_cm():
     cm_list = get_sales_cm_list()
     sales_cm = choice(cm_list)
-    print(sales_cm)
     service = get_twilio_service()
-    _filter = {"userStatus": {"$in": [11, 12]},
-               "assignedCmType": "sales",
-               "processedSales": {"$ne": True}
-               }
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0,
+                                      microsecond=0, tzinfo=local_tz)
+    _filter = {
+        "assignedCmType": {"$ne": "sales"},
+        "processedSales": {"$ne": True},
+        "_created": {"$gt": today}
+    }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
     update_redis = False
     for user in eligible_users:
-        cm = check_and_add_cm(user=user, service=service, cm=sales_cm)
+        print(user)
+        continue
+        check_and_add_cm(user=user, service=service, cm=sales_cm)
+        endpoint = user.get("_id")
+        cm_id = sales_cm.get("cmId")
+        payload = {
+            ""
+        }
 
 
 def remove_sales_cm():
