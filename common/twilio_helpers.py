@@ -55,7 +55,7 @@ def if_exists_cm_by_type(user_channel=None, user_identity=None, service=None,
     if len(members) < 1:
         raise ValueError("Something is wrong with channel " + user_channel)
     for member in members:
-        if not int(member.identity) == int(user_identity):
+        if not str(member.identity) == str(user_identity):
             attributes = json.loads(member.attributes)
             active_cm = attributes.get(cm_type)
             if active_cm:
