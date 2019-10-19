@@ -250,13 +250,17 @@ def get_sales_cm_list():
     }
 
     sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,
-                                projection=projection, collection="careManager")
-    for cm in sales_cm:
-        print(cm)
+                                projection=projection,
+                                collection="careManager")
+    cm_list = [
+        i.get("chatInformation", {}).get("providerData", {}).get("identity")
+        for i in sales_cm]
+    return cm_list
 
 
 def add_sales_cm():
-    get_sales_cm_list()
+    cm_list = get_sales_cm_list()
+    print(cm_list)
     service = get_twilio_service()
     _filter = {"userStatus": {"$in": [11, 12]},
                "assignedCmType": "sales",
