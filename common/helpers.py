@@ -249,8 +249,7 @@ def get_sales_cm_list():
         "_id": 0
     }
 
-    sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,
-                                projection=projection, collection="careManger")
+    sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,collection="careManger")
     for cm in sales_cm:
         print(cm)
 
