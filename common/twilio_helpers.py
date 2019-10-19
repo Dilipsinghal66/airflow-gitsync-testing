@@ -77,10 +77,10 @@ def swap_cm_with_active(old_cm=None, channel=None):
 
 
 def add_cm(cm_identity=None, channel=None):
-    channel.members.create(
-        cm_identity,
-        attributes=json.dumps(active_cm_attributes)
-    )
+    # channel.members.create(
+    #     cm_identity,
+    #     attributes=json.dumps(active_cm_attributes)
+    # )
     return cm_identity
 
 
@@ -105,7 +105,11 @@ def process_switch(user=None, service=None):
     return active_cm
 
 
-def check_and_add_cm(user=None, service=None):
+def check_and_add_cm(user=None, service=None, cm=None):
+    cm_identity = cm.get("chatInformation", {}).get("providerData", {}).get(
+        "identity", None)
+    if not cm_identity:
+        raise ValueError("Care manager can not be null.")
     if not user:
         raise ValueError("User can not be null. ")
     if not service:

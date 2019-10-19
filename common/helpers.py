@@ -2,6 +2,7 @@ import calendar
 import json
 from datetime import datetime, date
 from http import HTTPStatus
+from random import choice
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
@@ -14,7 +15,7 @@ from twilio.base.exceptions import TwilioRestException
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
-    process_switch
+    process_switch, check_and_add_cm
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -246,21 +247,21 @@ def get_sales_cm_list():
     }
     projection = {
         "chatInformation.providerData.identity": 1,
+        "cmId": 1,
         "_id": 0
     }
 
     sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,
                                 projection=projection,
                                 collection="careManager")
-    cm_list = [
-        i.get("chatInformation", {}).get("providerData", {}).get("identity")
-        for i in sales_cm]
+    cm_list = [i for i in sales_cm]
     return cm_list
 
 
 def add_sales_cm():
     cm_list = get_sales_cm_list()
-    print(cm_list)
+    sales_cm = choice(cm_list)
+    print(sales_cm)
     service = get_twilio_service()
     _filter = {"userStatus": {"$in": [11, 12]},
                "assignedCmType": "sales",
@@ -270,7 +271,7 @@ def add_sales_cm():
                                       filter=_filter, collection="user")
     update_redis = False
     for user in eligible_users:
-        pass
+        cm = check_and_add_cm(user=user, service=service, cm=sales_cm)
 
 
 def remove_sales_cm():
