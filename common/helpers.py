@@ -19,7 +19,6 @@ from common.twilio_helpers import get_twilio_service, \
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
 enable_message = bool(int(Variable.get("enable_message", "1")))
-sales_cm_list = Variable().get(key="sales_cm_list", deserialize_json=True)
 
 log = LoggingMixin().log
 
