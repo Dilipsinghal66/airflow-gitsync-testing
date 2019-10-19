@@ -240,7 +240,23 @@ def level_jump_patient():
         log.info(status, data)
 
 
+def get_sales_cm_list():
+    _filter = {
+        "cmType": "sales"
+    }
+    projection = {
+        "chatInformation.providerData.identity": 1,
+        "_id": 0
+    }
+
+    sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,
+                                projection=projection, collection="careManger")
+    for cm in sales_cm:
+        print(cm)
+
+
 def add_sales_cm():
+    get_sales_cm_list()
     service = get_twilio_service()
     _filter = {"userStatus": {"$in": [11, 12]},
                "assignedCmType": "sales",
@@ -248,8 +264,9 @@ def add_sales_cm():
                }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
+    update_redis = False
     for user in eligible_users:
-        print(user)
+        pass
 
 
 def remove_sales_cm():
