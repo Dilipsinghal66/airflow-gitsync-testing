@@ -1,13 +1,13 @@
 import calendar
 import random
-from datetime import date, timedelta, datetime
+from datetime import timedelta, datetime
 from time import sleep
 
 from airflow.models import Variable
-from dateutil import parser
 
 from common.db_functions import get_data_from_db
-from common.helpers import send_chat_message
+from common.helpers import send_chat_message, get_patient_on_trial_days, \
+    get_patient_days, get_meditation_for_today, refresh_daily_message
 from common.http_functions import make_http_request
 
 calendar.setfirstweekday(6)
@@ -16,52 +16,6 @@ count_threshold = int(Variable().get(key="request_count_threshold",
                                      deserialize_json=True))
 time_delay = int(
     Variable().get(key="request_time_delay", deserialize_json=True))
-
-
-def get_patient_days(patient):
-    days = None
-    activated_on = patient.get("userFlags", {}).get("active", {}).get(
-        "activatedOn", None)
-    if not activated_on:
-        return days
-    if isinstance(activated_on, str):
-        activated_on = parser.parse(activated_on)
-    activated_date = activated_on.date()
-    today = date.today()
-    date_diff = today - activated_date
-    days = date_diff.days
-    days = days + 1
-    return days
-
-
-def refresh_daily_message():
-    dynamic_message_endpoint = "dynamic/message/today"
-    status, dynamic_message_list = make_http_request(
-        conn_id="http_statemachine_url", endpoint=dynamic_message_endpoint,
-        method="GET")
-    return dynamic_message_list
-
-
-def get_patient_on_trial_days(patient):
-    days = None
-    status_transition = patient.get("statusTransition", [])
-    if not status_transition:
-        return days
-    day_on_trial = [d for d in status_transition if
-                    d.get("status", None) == 11]
-    if not day_on_trial:
-        return days
-    day_on_trial = day_on_trial[0]
-    transition_time = day_on_trial.get("transitionTime", None)
-    if not transition_time:
-        return days
-    if isinstance(transition_time, str):
-        transition_time = parser.parse(transition_time)
-    transition_date = transition_time.date()
-    today = date.today()
-    date_diff = today - transition_date
-    days = date_diff.days + 1
-    return days
 
 
 def send_notifications(time=None, reminder_type=None, index_by_days=False):
@@ -182,24 +136,6 @@ def send_dynamic(time=None, reminder_type=None, index_by_days=False):
                 request_count = 0
             else:
                 request_count += 1
-
-
-def get_meditation_for_today(meditation_schedule=None):
-    today = date.today()
-    month_calendar = calendar.monthcalendar(today.year, today.month)
-    day_today = today.day
-    week_of_month = 0
-    day_of_week = 0
-    for i in range(len(month_calendar)):
-        if day_today in month_calendar[i]:
-            day_of_week = month_calendar[i].index(day_today)
-    for i in range(len(month_calendar)):
-        if month_calendar[i][day_of_week] and month_calendar[i][
-            day_of_week] < day_today:
-            week_of_month += 1
-    print(day_of_week, week_of_month)
-    meditation = meditation_schedule[week_of_month][day_of_week]
-    return meditation
 
 
 def send_meditation(**kwargs):

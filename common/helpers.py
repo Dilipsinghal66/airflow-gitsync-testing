@@ -1,6 +1,8 @@
+import calendar
 import json
-from datetime import datetime
+from datetime import datetime, date
 from http import HTTPStatus
+from random import choice
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
@@ -13,7 +15,8 @@ from twilio.base.exceptions import TwilioRestException
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
-    process_switch
+    process_switch, check_and_add_cm
+from config import local_tz
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
@@ -239,6 +242,62 @@ def level_jump_patient():
         log.info(status, data)
 
 
+def get_sales_cm_list():
+    _filter = {
+        "cmType": "sales"
+    }
+    projection = {
+        "chatInformation.providerData.identity": 1,
+        "cmId": 1,
+        "_id": 0
+    }
+
+    sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,
+                                projection=projection,
+                                collection="careManager")
+    cm_list = [i for i in sales_cm]
+    return cm_list
+
+
+def add_sales_cm():
+    cm_list = get_sales_cm_list()
+    sales_cm = choice(cm_list)
+    service = get_twilio_service()
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0,
+                                      microsecond=0, tzinfo=local_tz)
+    _filter = {
+        "assignedCmType": {"$ne": "sales"},
+        "processedSales": {"$ne": True},
+        "_created": {"$gt": today}
+    }
+    eligible_users = get_data_from_db(conn_id="mongo_user_db",
+                                      filter=_filter, collection="user")
+    update_redis = False
+    for user in eligible_users:
+        check_and_add_cm(user=user, service=service, cm=sales_cm)
+        endpoint = str(user.get("_id"))
+        cm_id = sales_cm.get("cmId")
+        payload = {
+            "assignedCmType": "sales",
+            "assignedCm": cm_id
+        }
+        status, body = make_http_request(conn_id="http_user_url",
+                                         payload=payload, endpoint=endpoint,
+                                         method="PATCH")
+        if status != HTTPStatus.OK:
+            print("failed to update sales cm for user ")
+        update_redis = True
+    if update_redis:
+        try:
+            refresh_sales_user_redis()
+        except Exception as e:
+            log.info(e)
+
+
+def remove_sales_cm():
+    pass
+
+
 def switch_active_cm():
     service = get_twilio_service()
     _filter = {"userStatus": 4, "assignedCm": {"$nin": active_cm_list}}
@@ -419,6 +478,22 @@ def refresh_active_user_redis():
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
+
+
+def refresh_sales_user_redis():
+    cm_list = get_sales_cm_list()
+    cm_list = [i.get("cmId") for i in cm_list]
+    redis_hook = RedisHook(redis_conn_id="redis_sales_users_chat")
+    redis_conn = redis_hook.get_conn()
+    for cm in cm_list:
+        _filter = {"assignedCmType": "sales", "processedSales": {"$ne": True}}
+        cacheable_users = get_data_from_db(conn_id="mongo_user_db",
+                                           filter=_filter, collection="user")
+        if cacheable_users:
+            redis_conn.delete("sales_users_" + str(cm))
+        for user in cacheable_users:
+            sanitized_data = json.dumps(sanitize_data(user))
+            redis_conn.rpush("sales_users_" + str(cm), sanitized_data)
 
 
 def get_care_managers():
@@ -616,3 +691,66 @@ def get_dynamic_scheduled_message_time():
         log.error(status)
         log.error(data)
         return None
+
+
+def get_patient_on_trial_days(patient):
+    days = None
+    status_transition = patient.get("statusTransition", [])
+    if not status_transition:
+        return days
+    day_on_trial = [d for d in status_transition if
+                    d.get("status", None) == 11]
+    if not day_on_trial:
+        return days
+    day_on_trial = day_on_trial[0]
+    transition_time = day_on_trial.get("transitionTime", None)
+    if not transition_time:
+        return days
+    if isinstance(transition_time, str):
+        transition_time = parser.parse(transition_time)
+    transition_date = transition_time.date()
+    today = date.today()
+    date_diff = today - transition_date
+    days = date_diff.days + 1
+    return days
+
+
+def get_patient_days(patient):
+    days = None
+    activated_on = patient.get("userFlags", {}).get("active", {}).get(
+        "activatedOn", None)
+    if not activated_on:
+        return days
+    if isinstance(activated_on, str):
+        activated_on = parser.parse(activated_on)
+    activated_date = activated_on.date()
+    today = date.today()
+    date_diff = today - activated_date
+    days = date_diff.days
+    days = days + 1
+    return days
+
+
+def get_meditation_for_today(meditation_schedule=None):
+    today = date.today()
+    month_calendar = calendar.monthcalendar(today.year, today.month)
+    day_today = today.day
+    week_of_month = 0
+    day_of_week = 0
+    for i in range(len(month_calendar)):
+        if day_today in month_calendar[i]:
+            day_of_week = month_calendar[i].index(day_today)
+    for i in range(len(month_calendar)):
+        if month_calendar[i][day_of_week] and month_calendar[i][day_of_week] \
+                < day_today:
+            week_of_month += 1
+    meditation = meditation_schedule[week_of_month][day_of_week]
+    return meditation
+
+
+def refresh_daily_message():
+    dynamic_message_endpoint = "dynamic/message/today"
+    status, dynamic_message_list = make_http_request(
+        conn_id="http_statemachine_url", endpoint=dynamic_message_endpoint,
+        method="GET")
+    return dynamic_message_list
