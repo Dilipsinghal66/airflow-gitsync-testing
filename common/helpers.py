@@ -2,6 +2,7 @@ import calendar
 import json
 from datetime import datetime, date
 from http import HTTPStatus
+from random import choice
 from time import sleep
 
 from airflow.contrib.hooks.redis_hook import RedisHook
@@ -14,12 +15,12 @@ from twilio.base.exceptions import TwilioRestException
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
-    process_switch
+    process_switch, check_and_add_cm
+from config import local_tz
 
 active_cm_list = Variable().get(key="active_cm_list",
                                 deserialize_json=True)
 enable_message = bool(int(Variable.get("enable_message", "1")))
-sales_cm_list = Variable().get(key="sales_cm_list", deserialize_json=True)
 
 log = LoggingMixin().log
 
@@ -241,16 +242,56 @@ def level_jump_patient():
         log.info(status, data)
 
 
+def get_sales_cm_list():
+    _filter = {
+        "cmType": "sales"
+    }
+    projection = {
+        "chatInformation.providerData.identity": 1,
+        "cmId": 1,
+        "_id": 0
+    }
+
+    sales_cm = get_data_from_db(conn_id="mongo_user_db", filter=_filter,
+                                projection=projection,
+                                collection="careManager")
+    cm_list = [i for i in sales_cm]
+    return cm_list
+
+
 def add_sales_cm():
+    cm_list = get_sales_cm_list()
+    sales_cm = choice(cm_list)
     service = get_twilio_service()
-    _filter = {"userStatus": {"$in": [11, 12]},
-               "assignedCmType": "sales",
-               "processedSales": {"$ne": True}
-               }
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0,
+                                      microsecond=0, tzinfo=local_tz)
+    _filter = {
+        "assignedCmType": {"$ne": "sales"},
+        "processedSales": {"$ne": True},
+        "_created": {"$gt": today}
+    }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
+    update_redis = False
     for user in eligible_users:
-        print(user)
+        check_and_add_cm(user=user, service=service, cm=sales_cm)
+        endpoint = str(user.get("_id"))
+        cm_id = sales_cm.get("cmId")
+        payload = {
+            "assignedCmType": "sales",
+            "assignedCm": cm_id
+        }
+        status, body = make_http_request(conn_id="http_user_url",
+                                         payload=payload, endpoint=endpoint,
+                                         method="PATCH")
+        if status != HTTPStatus.OK:
+            print("failed to update sales cm for user ")
+        update_redis = True
+    if update_redis:
+        try:
+            refresh_sales_user_redis()
+        except Exception as e:
+            log.info(e)
 
 
 def remove_sales_cm():
@@ -437,6 +478,22 @@ def refresh_active_user_redis():
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
             redis_conn.rpush("active_users_" + str(cm), sanitized_data)
+
+
+def refresh_sales_user_redis():
+    cm_list = get_sales_cm_list()
+    cm_list = [i.get("cmId") for i in cm_list]
+    redis_hook = RedisHook(redis_conn_id="redis_sales_users_chat")
+    redis_conn = redis_hook.get_conn()
+    for cm in cm_list:
+        _filter = {"assignedCmType": "sales", "processedSales": {"$ne": True}}
+        cacheable_users = get_data_from_db(conn_id="mongo_user_db",
+                                           filter=_filter, collection="user")
+        if cacheable_users:
+            redis_conn.delete("sales_users_" + str(cm))
+        for user in cacheable_users:
+            sanitized_data = json.dumps(sanitize_data(user))
+            redis_conn.rpush("sales_users_" + str(cm), sanitized_data)
 
 
 def get_care_managers():
