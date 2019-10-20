@@ -279,7 +279,7 @@ def add_sales_cm():
         cm_id = sales_cm.get("cmId")
         payload = {
             "assignedCmType": "sales",
-            "cmId": cm_id
+            "assignedCm": cm_id
         }
         status, body = make_http_request(conn_id="http_user_url",
                                          payload=payload, endpoint=endpoint,
