@@ -4,8 +4,6 @@ from random import choice
 from airflow.hooks.http_hook import HttpHook
 from twilio.rest import Client
 
-from common.helpers import get_cm_list_by_type
-
 active_cm_attributes = {
     "isCm": True,
     "activeCm": True
@@ -67,6 +65,7 @@ def if_exists_cm_by_type(user_channel=None, user_identity=None, service=None,
 
 
 def swap_cm_with_active(old_cm=None, channel=None):
+    from common.helpers import get_cm_list_by_type
     active_cm_list = get_cm_list_by_type(cm_type="active")
     active_cm = choice(active_cm_list)
     cm_identity = active_cm.get("identity")
