@@ -18,8 +18,6 @@ from common.twilio_helpers import get_twilio_service, \
     process_switch, check_and_add_cm
 from config import local_tz
 
-active_cm_list = Variable().get(key="active_cm_list",
-                                deserialize_json=True)
 enable_message = bool(int(Variable.get("enable_message", "1")))
 
 log = LoggingMixin().log
@@ -242,9 +240,9 @@ def level_jump_patient():
         log.info(status, data)
 
 
-def get_sales_cm_list():
+def get_cm_list_by_type(cm_type="active"):
     _filter = {
-        "cmType": "sales"
+        "cmType": cm_type
     }
     projection = {
         "chatInformation.providerData.identity": 1,
@@ -259,14 +257,14 @@ def get_sales_cm_list():
     return cm_list
 
 
-def add_sales_cm():
-    cm_list = get_sales_cm_list()
+def add_sales_cm(cm_type):
+    cm_list = get_cm_list_by_type(cm_type=cm_type)
     sales_cm = choice(cm_list)
     service = get_twilio_service()
     today = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                       microsecond=0, tzinfo=local_tz)
     _filter = {
-        "assignedCmType": {"$ne": "sales"},
+        "assignedCmType": "normal",
         "processedSales": {"$ne": True},
         "_created": {"$gt": today}
     }
@@ -289,16 +287,14 @@ def add_sales_cm():
         update_redis = True
     if update_redis:
         try:
-            refresh_sales_user_redis()
+            refresh_cm_type_user_redis(cm_type=cm_type)
         except Exception as e:
             log.info(e)
 
 
-def remove_sales_cm():
-    pass
-
-
-def switch_active_cm():
+def switch_active_cm(cm_type):
+    cm_list = get_cm_list_by_type(cm_type=cm_type)
+    active_cm_list = [i.get("cmId") for i in cm_list]
     service = get_twilio_service()
     _filter = {"userStatus": 4, "assignedCm": {"$nin": active_cm_list}}
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
@@ -311,7 +307,9 @@ def switch_active_cm():
         user_endpoint = str(user.get("_id"))
         try:
             payload = {
-                "assignedCm": active_cm
+                "assignedCm": active_cm,
+                "assignedCmType": "active",
+                "processedSales": True
             }
             make_http_request(conn_id="http_user_url", method="PATCH",
                               endpoint=user_endpoint, payload=payload)
@@ -337,7 +335,7 @@ def switch_active_cm():
                     log.info("Failed to update channel for " + user_endpoint)
     if update_redis:
         try:
-            refresh_active_user_redis()
+            refresh_cm_type_user_redis(cm_type=cm_type)
         except Exception as e:
             log.info(e)
 
@@ -466,47 +464,33 @@ def sanitize_data(data):
     return data
 
 
-def refresh_active_user_redis():
-    redis_hook = RedisHook(redis_conn_id="redis_active_users_chat")
-    redis_conn = redis_hook.get_conn()
-    for cm in active_cm_list:
-        _filter = {"userStatus": 4, "assignedCm": cm}
-        cacheable_users = get_data_from_db(conn_id="mongo_user_db",
-                                           filter=_filter, collection="user")
-        if cacheable_users:
-            redis_conn.delete("active_users_" + str(cm))
-        for user in cacheable_users:
-            sanitized_data = json.dumps(sanitize_data(user))
-            redis_conn.rpush("active_users_" + str(cm), sanitized_data)
-
-
-def refresh_sales_user_redis():
-    cm_list = get_sales_cm_list()
+def refresh_cm_type_user_redis(cm_type="active"):
+    cm_list = get_cm_list_by_type(cm_type=cm_type)
     cm_list = [i.get("cmId") for i in cm_list]
     redis_hook = RedisHook(redis_conn_id="redis_sales_users_chat")
     redis_conn = redis_hook.get_conn()
     for cm in cm_list:
-        _filter = {"assignedCmType": "sales", "processedSales": {"$ne": True}}
+        redis_key = cm_type + "_users_" + str(cm)
+        _filter = {"assignedCmType": cm_type}
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
         if cacheable_users:
-            redis_conn.delete("sales_users_" + str(cm))
+            redis_conn.delete(redis_key)
         for user in cacheable_users:
             sanitized_data = json.dumps(sanitize_data(user))
-            redis_conn.rpush("sales_users_" + str(cm), sanitized_data)
+            redis_conn.rpush(redis_key, sanitized_data)
 
 
 def get_care_managers():
     _filter = {
-        "isCm": True,
-        "cmId": {"$gt": 99999}
+        "cmType": "normal"
     }
     projection = {
         "cmId": 1,
-        "_id": 0
+        "_id": 0,
     }
     cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
-                               filter=_filter, projection=projection)
+                               projection=projection, filter=_filter)
     return cm_data
 
 
@@ -589,11 +573,12 @@ def add_care_manager():
     log.debug("Twilio service object init successful ")
     cm_slot_list = []
     for cm in cm_data:
-        identity = int(round(cm.get("cmId")))
+        identity = cm.get("chatInformation", {}).get("providerData", {}).get(
+            "identity", None)
         log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
-            twilio_user = twilio_service.users.get(str(identity))
+            twilio_user = twilio_service.users.get(identity)
             log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
@@ -602,10 +587,6 @@ def add_care_manager():
                 log.error(
                     "Twilio user for " + str(identity) + " failed to fetch")
                 log.warning("Continuing as nothing to do")
-                continue
-            if identity in active_cm_list:
-                log.warning(
-                    str(identity) + " is in active cm list. Nothing to do")
                 continue
             cm_joined_channels = twilio_user.joined_channels_count
             log.debug("Total channels joined by cm " + str(cm_joined_channels))
