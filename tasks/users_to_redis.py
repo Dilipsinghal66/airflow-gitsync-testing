@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from common.helpers import refresh_active_user_redis, refresh_sales_user_redis
+from common.helpers import refresh_cm_type_user_redis
 from config import local_tz, default_args
 
 users_to_redis_dag = DAG(
@@ -19,9 +19,9 @@ users_to_redis_dag = DAG(
 active_to_redis_task = PythonOperator(
     task_id="active_to_redis_task",
     task_concurrency=2,
-    python_callable=refresh_active_user_redis,
+    python_callable=refresh_cm_type_user_redis,
     dag=users_to_redis_dag,
-    op_kwargs={},
+    op_kwargs={"cm_type": "active"},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
 )
@@ -29,9 +29,9 @@ active_to_redis_task = PythonOperator(
 sales_to_redis_task = PythonOperator(
     task_id="sales_to_redis_task",
     task_concurrency=2,
-    python_callable=refresh_sales_user_redis,
+    python_callable=refresh_cm_type_user_redis,
     dag=users_to_redis_dag,
-    op_kwargs={},
+    op_kwargs={"cm_type": "sales"},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
 )

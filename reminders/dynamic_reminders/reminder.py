@@ -56,7 +56,9 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
                 message_index -= 1
                 if -1 < message_index < len(messages):
                     try:
-                        message = message[message_index]
+                        message = messages[message_index]
+                        if not message or message == "null":
+                            continue
                     except Exception as e:
                         print(e)
                         continue
