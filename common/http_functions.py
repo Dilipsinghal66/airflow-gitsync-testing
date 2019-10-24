@@ -2,7 +2,8 @@ import json
 
 from airflow.hooks.http_hook import HttpHook
 
-from config import payload_required_methods, extra_http_options
+from config import payload_required_methods, extra_http_options, \
+    disable_response_check_methods
 
 
 def make_http_request(conn_id=None, method=None, payload=None, endpoint=""):
@@ -17,6 +18,9 @@ def make_http_request(conn_id=None, method=None, payload=None, endpoint=""):
         payload = json.dumps(payload)
         response = hook_obj.run(endpoint=endpoint, data=payload,
                                 extra_options=extra_http_options)
+    elif method in disable_response_check_methods:
+        response = hook_obj.run(endpoint=endpoint)
+        return response
     else:
         response = hook_obj.run(endpoint=endpoint,
                                 extra_options=extra_http_options)

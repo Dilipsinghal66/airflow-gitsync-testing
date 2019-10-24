@@ -34,3 +34,4 @@ extra_http_options = {
 }
 
 payload_required_methods = ["POST", "PATCH", "PUT"]
+disable_response_check_methods = ["DELETE"]

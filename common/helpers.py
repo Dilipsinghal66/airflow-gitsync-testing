@@ -591,11 +591,13 @@ def add_care_manager():
                         method="DELETE",
                         endpoint=mongo_id
                     )
+                    continue
                 except Exception as e:
                     log.warning(e)
                     log.warning(
                         "Failed to delete " + str(
                             identity) + " from cm database")
+                    continue
             except Exception as e:
                 log.error(e)
                 log.error(
