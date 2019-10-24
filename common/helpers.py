@@ -569,6 +569,8 @@ def add_care_manager():
     for cm in cm_data:
         identity = cm.get("chatInformation", {}).get("providerData", {}).get(
             "identity", None)
+        if not isinstance(identity, str):
+            identity = str(identity)
         mongo_id = cm.get("_id")
         log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
@@ -580,8 +582,8 @@ def add_care_manager():
             except NotFound as e:
                 log.warning(e)
                 log.warning(
-                    "Twilio user not found for cm identity " + identity)
-                log.warning("Deleting " + identity + " from cm database")
+                    "Twilio user not found for cm identity " + str(identity))
+                log.warning("Deleting " + str(identity) + " from cm database")
                 try:
                     make_http_request(
                         conn_id="http_cm_url",
@@ -591,7 +593,7 @@ def add_care_manager():
                 except Exception as e:
                     log.warning(e)
                     log.warning(
-                        "Failed to delete " + identity + " from cm database")
+                        "Failed to delete " + str(identity) + " from cm database")
             except Exception as e:
                 log.error(e)
                 log.error(
@@ -603,7 +605,7 @@ def add_care_manager():
             cm_open_slots = 1000 - cm_joined_channels
             log.debug(
                 "Open slots for " + str(identity) + " : " + str(cm_open_slots))
-            log.info("Updating joined channel count for cm " + identity)
+            log.info("Updating joined channel count for cm " + str(identity))
             try:
                 payload = {
                     "joinedChannelsCount": cm_joined_channels
