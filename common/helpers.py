@@ -572,6 +572,8 @@ def add_care_manager():
         if not isinstance(identity, str):
             identity = str(identity)
         mongo_id = cm.get("_id")
+        if not isinstance(mongo_id, str):
+            mongo_id = str(mongo_id)
         log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
