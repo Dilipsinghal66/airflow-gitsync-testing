@@ -69,7 +69,9 @@ def swap_cm_with_active(old_cm=None, channel=None):
     active_cm_list = get_cm_list_by_type(cm_type="active")
     print(active_cm_list)
     active_cm = choice(active_cm_list)
-    cm_identity = active_cm.get("identity")
+    cm_identity = active_cm.get("chatInformation", {}).get("providerData",
+                                                           {}).get("identity",
+                                                                   None)
     active_cm = active_cm.get("cmId")
     if old_cm:
         old_cm.delete()
