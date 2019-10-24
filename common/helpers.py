@@ -11,7 +11,6 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
 from dateutil import parser
 from twilio.base.exceptions import TwilioRestException
-from werkzeug.exceptions import NotFound
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
@@ -581,7 +580,7 @@ def add_care_manager():
             log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
-            except NotFound as e:
+            except TwilioRestException as e:
                 log.warning(e)
                 log.warning(
                     "Twilio user not found for cm identity " + str(identity))
@@ -595,7 +594,8 @@ def add_care_manager():
                 except Exception as e:
                     log.warning(e)
                     log.warning(
-                        "Failed to delete " + str(identity) + " from cm database")
+                        "Failed to delete " + str(
+                            identity) + " from cm database")
             except Exception as e:
                 log.error(e)
                 log.error(
