@@ -490,7 +490,7 @@ def get_care_managers():
         "cmType": "normal",
         "joinedChannelsCount": {
             "$exists": True,
-            "$gt": 1000 - per_cm_slot_threshold
+            "$lt": 1000 - per_cm_slot_threshold
         },
         "deleted": {"$ne": True}
     }
