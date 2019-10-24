@@ -706,15 +706,20 @@ def get_dynamic_scheduled_message_time():
 def get_patient_on_trial_days(patient):
     days = None
     status_transition = patient.get("statusTransition", [])
+    patient_id = str(patient.get("patientId"))
     if not status_transition:
+        log.warning(
+            "patient id " + patient_id + " has no status transition field ")
         return days
     day_on_trial = [d for d in status_transition if
                     d.get("status", None) == 11]
     if not day_on_trial:
+        log.warning("status transition missing for patient " + patient_id)
         return days
     day_on_trial = day_on_trial[0]
     transition_time = day_on_trial.get("transitionTime", None)
     if not transition_time:
+        log.warning("status transition time missing for patient " + patient_id)
         return days
     if isinstance(transition_time, str):
         transition_time = parser.parse(transition_time)
