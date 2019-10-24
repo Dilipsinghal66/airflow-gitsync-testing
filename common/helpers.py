@@ -490,7 +490,7 @@ def get_care_managers():
         "cmId": 1,
         "_id": 0,
     }
-    cm_data = get_data_from_db(conn_id="mongo_user_db",
+    cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager",
                                projection=projection, filter=_filter)
     return cm_data
