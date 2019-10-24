@@ -32,7 +32,7 @@ def send_chat_message(user_id=None, payload=None):
             status, body = make_http_request(
                 conn_id="http_chat_service_url",
                 endpoint=endpoint, method="POST", payload=payload)
-            log.info(status, body)
+            log.info(status)
     except Exception as e:
         raise ValueError(str(e))
 
