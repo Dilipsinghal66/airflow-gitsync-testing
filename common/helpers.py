@@ -266,6 +266,7 @@ def add_sales_cm(cm_type):
     _filter = {
         "assignedCmType": "normal",
         "processedSales": {"$ne": True},
+        "userStatus": {"$ne": 4},
         "_created": {"$gt": today}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
@@ -489,7 +490,8 @@ def get_care_managers():
         "cmId": 1,
         "_id": 0,
     }
-    cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+    cm_data = get_data_from_db(conn_id="mongo_user_db",
+                               collection="careManager",
                                projection=projection, filter=_filter)
     return cm_data
 
@@ -499,20 +501,9 @@ def create_cm(cm, tries=3):
     cm_id = cm.get("cmId")
     cm_id_new = cm_id - 1
     log.debug("New care manager id " + str(cm_id_new))
-    cm_payload = {"phoneNo": cm_id_new,
-                  "userId": cm_id_new,
-                  "firstName": "Zyla",
-                  "lastName": "Care",
-                  "age": 0,
-                  "email": "zyla@zyla.in",
-                  "gender": 1,
-                  "patientId": cm_id_new,
-                  "userStatus": 6,
-                  "isCm": True,
-                  "existing": False,
-                  "cmId": cm_id_new}
+    cm_payload = {}
     try:
-        make_http_request(conn_id="http_chat_service_url", method="POST",
+        make_http_request(conn_id="http_create_cm_url", method="POST",
                           payload=cm_payload)
     except Exception as e:
         log.error(e)
