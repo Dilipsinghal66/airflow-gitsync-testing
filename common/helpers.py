@@ -11,6 +11,7 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
 from dateutil import parser
 from twilio.base.exceptions import TwilioRestException
+from werkzeug.exceptions import NotFound
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
@@ -483,15 +484,18 @@ def refresh_cm_type_user_redis(cm_type="active"):
 
 
 def get_care_managers():
+    per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
+                                           deserialize_json=True)
     _filter = {
-        "cmType": "normal"
-    }
-    projection = {
-        "_id": 0
+        "cmType": "normal",
+        "joinedChannelsCount": {
+            "$exists": True,
+            "$gt": 1000 - per_cm_slot_threshold
+        },
+        "deleted": {"$ne": True}
     }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
-                               collection="careManager",
-                               projection=projection, filter=_filter)
+                               collection="careManager", filter=_filter)
     return cm_data
 
 
@@ -565,6 +569,7 @@ def add_care_manager():
     for cm in cm_data:
         identity = cm.get("chatInformation", {}).get("providerData", {}).get(
             "identity", None)
+        mongo_id = cm.get("_id")
         log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
@@ -572,6 +577,21 @@ def add_care_manager():
             log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
+            except NotFound as e:
+                log.warning(e)
+                log.warning(
+                    "Twilio user not found for cm identity " + identity)
+                log.warning("Deleting " + identity + " from cm database")
+                try:
+                    make_http_request(
+                        conn_id="http_cm_url",
+                        method="DELETE",
+                        endpoint=mongo_id
+                    )
+                except Exception as e:
+                    log.warning(e)
+                    log.warning(
+                        "Failed to delete " + identity + " from cm database")
             except Exception as e:
                 log.error(e)
                 log.error(
@@ -583,6 +603,19 @@ def add_care_manager():
             cm_open_slots = 1000 - cm_joined_channels
             log.debug(
                 "Open slots for " + str(identity) + " : " + str(cm_open_slots))
+            log.info("Updating joined channel count for cm " + identity)
+            try:
+                payload = {
+                    "joinedChannelsCount": cm_joined_channels
+                }
+                make_http_request(
+                    conn_id="http_cm_url",
+                    method="PATCH",
+                    payload=payload,
+                    endpoint=mongo_id
+                )
+            except Exception as e:
+                log.warning(e)
 
         cm_slot_list.append({
             "cmId": identity,
