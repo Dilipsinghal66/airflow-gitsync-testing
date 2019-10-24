@@ -266,6 +266,7 @@ def add_sales_cm(cm_type):
     _filter = {
         "assignedCmType": "normal",
         "processedSales": {"$ne": True},
+        "userStatus": {"$ne": 4},
         "_created": {"$gt": today}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
@@ -489,7 +490,8 @@ def get_care_managers():
         "cmId": 1,
         "_id": 0,
     }
-    cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
+    cm_data = get_data_from_db(conn_id="mongo_user_db",
+                               collection="careManager",
                                projection=projection, filter=_filter)
     return cm_data
 
