@@ -487,8 +487,7 @@ def get_care_managers():
         "cmType": "normal"
     }
     projection = {
-        "cmId": 1,
-        "_id": 0,
+        "_id": 0
     }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager",
