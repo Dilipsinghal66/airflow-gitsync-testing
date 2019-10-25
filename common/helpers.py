@@ -265,7 +265,7 @@ def add_sales_cm(cm_type):
                                       microsecond=0, tzinfo=local_tz)
     yesterday = today - timedelta(days=1)
     _filter = {
-        "assignedCmType": {"$ne": "sales"},
+        "assignedCmType": "normal",
         "processedSales": {"$ne": True},
         "userStatus": {"$ne": 4},
         "_created": {"$gt": yesterday}
