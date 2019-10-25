@@ -4,6 +4,7 @@ from datetime import timedelta, datetime
 from time import sleep
 
 from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
 
 from common.db_functions import get_data_from_db
 from common.helpers import send_chat_message, get_patient_on_trial_days, \
@@ -11,6 +12,7 @@ from common.helpers import send_chat_message, get_patient_on_trial_days, \
 from common.http_functions import make_http_request
 
 calendar.setfirstweekday(6)
+log = LoggingMixin().log
 
 count_threshold = int(Variable().get(key="request_count_threshold",
                                      deserialize_json=True))
@@ -53,6 +55,11 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
         for user in user_data:
             if index_by_days:
                 message_index = get_patient_on_trial_days(patient=user)
+                patient_id = str(user.get("patientId"))
+                if not message_index:
+                    log.warning(
+                        "Failed to get patient days for patient " + patient_id)
+                    continue
                 message_index -= 1
                 if -1 < message_index < len(messages):
                     try:

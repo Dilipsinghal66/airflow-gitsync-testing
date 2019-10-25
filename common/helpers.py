@@ -1,6 +1,6 @@
 import calendar
 import json
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from http import HTTPStatus
 from random import choice
 from time import sleep
@@ -32,7 +32,7 @@ def send_chat_message(user_id=None, payload=None):
             status, body = make_http_request(
                 conn_id="http_chat_service_url",
                 endpoint=endpoint, method="POST", payload=payload)
-            log.info(status, body)
+            log.info(status)
     except Exception as e:
         raise ValueError(str(e))
 
@@ -263,10 +263,12 @@ def add_sales_cm(cm_type):
     service = get_twilio_service()
     today = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                       microsecond=0, tzinfo=local_tz)
+    yesterday = today - timedelta(days=1)
     _filter = {
         "assignedCmType": "normal",
         "processedSales": {"$ne": True},
-        "_created": {"$gt": today}
+        "userStatus": {"$ne": 4},
+        "_created": {"$gt": yesterday}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
@@ -482,15 +484,18 @@ def refresh_cm_type_user_redis(cm_type="active"):
 
 
 def get_care_managers():
+    per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
+                                           deserialize_json=True)
     _filter = {
-        "cmType": "normal"
+        "cmType": "normal",
+        "joinedChannelsCount": {
+            "$exists": True,
+            "$lt": 1000 - per_cm_slot_threshold
+        },
+        "deleted": {"$ne": True}
     }
-    projection = {
-        "cmId": 1,
-        "_id": 0,
-    }
-    cm_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
-                               projection=projection, filter=_filter)
+    cm_data = get_data_from_db(conn_id="mongo_cm_db",
+                               collection="careManager", filter=_filter)
     return cm_data
 
 
@@ -499,20 +504,9 @@ def create_cm(cm, tries=3):
     cm_id = cm.get("cmId")
     cm_id_new = cm_id - 1
     log.debug("New care manager id " + str(cm_id_new))
-    cm_payload = {"phoneNo": cm_id_new,
-                  "userId": cm_id_new,
-                  "firstName": "Zyla",
-                  "lastName": "Care",
-                  "age": 0,
-                  "email": "zyla@zyla.in",
-                  "gender": 1,
-                  "patientId": cm_id_new,
-                  "userStatus": 6,
-                  "isCm": True,
-                  "existing": False,
-                  "cmId": cm_id_new}
+    cm_payload = {}
     try:
-        make_http_request(conn_id="http_chat_service_url", method="POST",
+        make_http_request(conn_id="http_create_cm_url", method="POST",
                           payload=cm_payload)
     except Exception as e:
         log.error(e)
@@ -575,6 +569,11 @@ def add_care_manager():
     for cm in cm_data:
         identity = cm.get("chatInformation", {}).get("providerData", {}).get(
             "identity", None)
+        if not isinstance(identity, str):
+            identity = str(identity)
+        mongo_id = cm.get("_id")
+        if not isinstance(mongo_id, str):
+            mongo_id = str(mongo_id)
         log.debug("Computing open slots for cmid " + str(identity))
         cm_open_slots = 0
         if identity:
@@ -582,6 +581,24 @@ def add_care_manager():
             log.debug("Fetched twilio user for cm " + str(identity))
             try:
                 twilio_user = twilio_user.fetch()
+            except TwilioRestException as e:
+                log.warning(e)
+                log.warning(
+                    "Twilio user not found for cm identity " + str(identity))
+                log.warning("Deleting " + str(identity) + " from cm database")
+                try:
+                    make_http_request(
+                        conn_id="http_cm_url",
+                        method="DELETE",
+                        endpoint=mongo_id
+                    )
+                    continue
+                except Exception as e:
+                    log.warning(e)
+                    log.warning(
+                        "Failed to delete " + str(
+                            identity) + " from cm database")
+                    continue
             except Exception as e:
                 log.error(e)
                 log.error(
@@ -593,6 +610,19 @@ def add_care_manager():
             cm_open_slots = 1000 - cm_joined_channels
             log.debug(
                 "Open slots for " + str(identity) + " : " + str(cm_open_slots))
+            log.info("Updating joined channel count for cm " + str(identity))
+            try:
+                payload = {
+                    "joinedChannelsCount": cm_joined_channels
+                }
+                make_http_request(
+                    conn_id="http_cm_url",
+                    method="PATCH",
+                    payload=payload,
+                    endpoint=mongo_id
+                )
+            except Exception as e:
+                log.warning(e)
 
         cm_slot_list.append({
             "cmId": identity,
@@ -677,15 +707,20 @@ def get_dynamic_scheduled_message_time():
 def get_patient_on_trial_days(patient):
     days = None
     status_transition = patient.get("statusTransition", [])
+    patient_id = str(patient.get("patientId"))
     if not status_transition:
+        log.warning(
+            "patient id " + patient_id + " has no status transition field ")
         return days
     day_on_trial = [d for d in status_transition if
                     d.get("status", None) == 11]
     if not day_on_trial:
+        log.warning("status transition missing for patient " + patient_id)
         return days
     day_on_trial = day_on_trial[0]
     transition_time = day_on_trial.get("transitionTime", None)
     if not transition_time:
+        log.warning("status transition time missing for patient " + patient_id)
         return days
     if isinstance(transition_time, str):
         transition_time = parser.parse(transition_time)
