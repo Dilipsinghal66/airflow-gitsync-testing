@@ -4,8 +4,6 @@ from random import choice
 from airflow.hooks.http_hook import HttpHook
 from twilio.rest import Client
 
-from common.helpers import get_cm_list_by_type
-
 active_cm_attributes = {
     "isCm": True,
     "activeCm": True
