@@ -1,6 +1,6 @@
 import calendar
 import json
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from http import HTTPStatus
 from random import choice
 from time import sleep
@@ -263,11 +263,12 @@ def add_sales_cm(cm_type):
     service = get_twilio_service()
     today = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                       microsecond=0, tzinfo=local_tz)
+    yesterday = today - timedelta(days=1)
     _filter = {
-        "assignedCmType": "normal",
+        "assignedCmType": {"$ne": "sales"},
         "processedSales": {"$ne": True},
         "userStatus": {"$ne": 4},
-        "_created": {"$gt": today}
+        "_created": {"$gt": yesterday}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
