@@ -487,12 +487,23 @@ def get_care_managers():
     per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
                                            deserialize_json=True)
     _filter = {
+        "$or":
+            [
+                {
+                    "joinedChannelsCount": {
+                        "$exists": False
+                    }
+                },
+                {
+                    "joinedChannelsCount": {
+                        "$lt": 1000 - per_cm_slot_threshold
+                    }
+                }
+            ],
         "cmType": "normal",
-        "joinedChannelsCount": {
-            "$exists": True,
-            "$lt": 1000 - per_cm_slot_threshold
-        },
-        "deleted": {"$ne": True}
+        "deleted": {
+            "$ne": True
+        }
     }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager", filter=_filter)
