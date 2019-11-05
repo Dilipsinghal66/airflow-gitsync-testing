@@ -643,8 +643,10 @@ def add_care_manager():
     try:
         have_enough_slots = enough_open_slots(cm_list=cm_by_priority)
         have_enough_cms = enough_available_cm(cm_list=cm_by_priority)
-        if not (have_enough_slots and have_enough_cms):
+        if not have_enough_slots:
             raise ValueError("There are not enough slots. Create new CM")
+        if not have_enough_cms:
+            raise ValueError("There are not enough CMs, Create new CM")
         log.info("we have enough cm slots.Nothing to do further")
     except Exception as e:
         log.error(e)
