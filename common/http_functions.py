@@ -11,8 +11,6 @@ def make_http_request(conn_id=None, method=None, payload=None, endpoint=""):
         return False
     if not method:
         return False
-    if method in payload_required_methods and not payload:
-        return False
     hook_obj = HttpHook(method=method, http_conn_id=conn_id)
     if method in payload_required_methods:
         payload = json.dumps(payload)
