@@ -542,6 +542,14 @@ def enough_open_slots(cm_list):
     return enough_slots
 
 
+def enough_available_cm(cm_list):
+    min_available_cm = Variable().get(key="min_available_cm",
+                                      deserialize_json=True)
+    if min_available_cm > len(cm_list):
+        return False
+    return True
+
+
 def compute_cm_priority(cm_list):
     per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
                                            deserialize_json=True)
@@ -634,7 +642,8 @@ def add_care_manager():
     cm_by_priority = compute_cm_priority(cm_list=cm_slot_list)
     try:
         have_enough_slots = enough_open_slots(cm_list=cm_by_priority)
-        if not have_enough_slots:
+        have_enough_cms = enough_available_cm(cm_list=cm_by_priority)
+        if not (have_enough_slots and have_enough_cms):
             raise ValueError("There are not enough slots. Create new CM")
         log.info("we have enough cm slots.Nothing to do further")
     except Exception as e:
