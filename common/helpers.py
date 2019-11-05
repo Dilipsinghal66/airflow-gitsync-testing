@@ -501,9 +501,6 @@ def get_care_managers():
 
 def create_cm(cm, tries=3):
     log.debug("Creating new cm on the basis of " + json.dumps(cm))
-    cm_id = cm.get("cmId")
-    cm_id_new = cm_id - 1
-    log.debug("New care manager id " + str(cm_id_new))
     cm_payload = {}
     try:
         make_http_request(conn_id="http_create_cm_url", method="POST",
