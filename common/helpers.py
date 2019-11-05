@@ -499,8 +499,8 @@ def get_care_managers():
     return cm_data
 
 
-def create_cm(cm, tries=3):
-    log.debug("Creating new cm on the basis of " + json.dumps(cm))
+def create_cm(tries=3):
+    log.info("Creating new cm on the basis")
     cm_payload = {}
     try:
         make_http_request(conn_id="http_create_cm_url", method="POST",
@@ -509,7 +509,7 @@ def create_cm(cm, tries=3):
         log.error(e)
         if tries:
             retry = tries - 1
-            create_cm(cm, tries=retry)
+            create_cm(tries=retry)
         raise ValueError("Care Manager create failed. ")
 
 
@@ -647,9 +647,7 @@ def add_care_manager():
         log.info("we have enough cm slots.Nothing to do further")
     except Exception as e:
         log.error(e)
-        log.warning("We do not have enough open slots. Creating new CM")
-        cm_top_priority = cm_by_priority[-1:][0]
-        create_cm(cm=cm_top_priority)
+        create_cm()
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
     redis_conn.delete("cm:inactive_pool")
