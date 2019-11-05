@@ -542,9 +542,7 @@ def enough_open_slots(cm_list):
 def enough_available_cm(cm_list):
     min_available_cm = Variable().get(key="min_available_cm",
                                       deserialize_json=True)
-    if min_available_cm > len(cm_list):
-        return False
-    return True
+    return min_available_cm < len(cm_list)
 
 
 def compute_cm_priority(cm_list):
