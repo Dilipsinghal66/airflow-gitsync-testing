@@ -583,6 +583,7 @@ def add_care_manager():
     for cm in cm_data:
         identity = cm.get("chatInformation", {}).get("providerData", {}).get(
             "identity", None)
+        cm_id = cm.get("cmId")
         if not isinstance(identity, str):
             identity = str(identity)
         mongo_id = cm.get("_id")
@@ -639,7 +640,7 @@ def add_care_manager():
                 log.warning(e)
 
         cm_slot_list.append({
-            "cmId": identity,
+            "cmId": cm_id,
             "openSlots": cm_open_slots
         })
     log.debug("Care managers with slots opened for further processing")
