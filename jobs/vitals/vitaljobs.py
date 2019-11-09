@@ -5,7 +5,7 @@ from config import local_tz
 
 PAGE_SIZE = 1000
 
-def isRecommended(param, fortoday):
+def isRecommended1(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
     timedelta = datetime.timedelta(hours=5, minutes=30)
@@ -40,6 +40,43 @@ def isRecommended(param, fortoday):
 
     return ret
 
+
+
+
+def isRecommended(param, fortoday):
+    ret = 0
+    date = datetime.datetime.today()
+    timedelta = datetime.timedelta(hours=5, minutes=30)
+    todaydate = date + timedelta
+    day = todaydate.weekday()
+
+
+    if fortoday==False:
+        day = 0 if day==6 else day+1
+
+    #elif day == 0:
+    #    if param == 5:
+    #       ret = 1
+    if day == 1:
+        if param == 5:
+            ret = 1
+    #elif day == 2:
+    #    if param == 5:
+    #        ret = 1
+    elif day == 3:
+        if param == 70:
+            ret = 1
+    #elif day == 4:
+    #    if param == 5:
+    #        ret = 1
+    elif day == 5:
+        if param in [27, 10, 18]:
+            ret = 1
+    elif day == 6:
+        if param == 58:
+            ret = 1
+
+    return ret
 
 def create_vitals_func():
     try:
