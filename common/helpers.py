@@ -641,7 +641,8 @@ def add_care_manager():
 
         cm_slot_list.append({
             "cmId": cm_id,
-            "openSlots": cm_open_slots
+            "openSlots": cm_open_slots,
+            "cmIdentity": identity
         })
     log.debug("Care managers with slots opened for further processing")
     log.debug(cm_slot_list)
