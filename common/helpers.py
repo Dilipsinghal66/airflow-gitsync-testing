@@ -812,35 +812,19 @@ def continue_statemachine():
             )
             for user in users:
                 user_status = user.get("userStatus")
-                current_action = sm_action_map.get(str(user_status), None)
+                action_key = sm_action_map.get(str(user_status), None)
+                message = "none"
                 log.info(sm_action_map)
-                payload = {
-                    "action": current_action
-                }
-                if current_action:
-                    _, sm_data = make_http_request(
-                        conn_id="http_transition_url", method="POST",
-                        payload=payload
-                    )
-                    action_key = None
-                    message = "none"
-                    log.info(sm_data)
-                    if sm_data:
-                        possible_actions = sm_data.get("possibleActions", {})
-                        log.info(possible_actions)
-                        if possible_actions:
-                            action_key = possible_actions.keys()[0]
-                            log.info(action_key)
-                    if action_key:
-                        chat_message_payload = {
-                            "action": action_key,
-                            "message": message
-                        }
-                        log.info(chat_message_payload)
-                        # make_http_request(
-                        #     conn_id="http_chat_service_url",
-                        #     method="POST",
-                        #     payload=chat_message_payload
-                        # )
+                if action_key:
+                    chat_message_payload = {
+                        "action": action_key,
+                        "message": message
+                    }
+                    log.info(chat_message_payload)
+                    # make_http_request(
+                    #     conn_id="http_chat_service_url",
+                    #     method="POST",
+                    #     payload=chat_message_payload
+                    # )
         except Exception as e:
             log.error(e)
