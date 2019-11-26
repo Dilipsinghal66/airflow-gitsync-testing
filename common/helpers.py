@@ -817,7 +817,7 @@ def continue_statemachine():
                     "action": current_action
                 }
                 if current_action:
-                    sm_data = make_http_request(
+                    _, sm_data = make_http_request(
                         conn_id="http_transition_url", method="POST",
                         payload=payload
                     )
