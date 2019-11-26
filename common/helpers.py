@@ -823,10 +823,13 @@ def continue_statemachine():
                     )
                     action_key = None
                     message = "none"
+                    log.info(sm_data)
                     if sm_data:
                         possible_actions = sm_data.get("possibleActions", {})
+                        log.info(possible_actions)
                         if possible_actions:
                             action_key = possible_actions.keys()[0]
+                            log.info(action_key)
                     if action_key:
                         chat_message_payload = {
                             "action": action_key,
