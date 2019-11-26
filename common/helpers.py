@@ -800,6 +800,7 @@ def continue_statemachine():
         }
         user_data = get_data_from_db(
             conn_id="mongo_user_db",
+            collection="user",
             **_filter
         )
         log.info(user_data)
