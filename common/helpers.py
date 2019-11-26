@@ -813,6 +813,7 @@ def continue_statemachine():
             for user in users:
                 user_status = user.get("userStatus")
                 current_action = sm_action_map.get(str(user_status), None)
+                log.info(sm_action_map)
                 payload = {
                     "action": current_action
                 }
