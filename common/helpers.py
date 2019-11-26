@@ -801,7 +801,7 @@ def continue_statemachine():
         try:
             _filter = {
                 "userId": {"$in": user_list},
-                "processedSales": False
+                "processedSales": {"$ne": True}
             }
             log.info("Fetching user with filter " + json.dumps(_filter))
             users = get_data_from_db(
