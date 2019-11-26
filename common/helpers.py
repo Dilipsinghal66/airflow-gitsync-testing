@@ -794,13 +794,19 @@ def continue_statemachine():
     redis_conn = redis_hook.get_conn()
     redis_key = "chat::sm_continue"
     while redis_conn.scard(redis_key):
-        user_id = redis_conn.srandmember(redis_key)
-        _filter = {
-            "userId": user_id
-        }
-        user_data = get_data_from_db(
-            conn_id="mongo_user_db",
-            collection="user",
-            filter=_filter
-        )
-        log.info(user_data)
+        user_id = redis_conn.spop(redis_key)
+        try:
+            _filter = {
+                "userId": user_id
+            }
+            users = get_data_from_db(
+                conn_id="mongo_user_db",
+                collection="user",
+                filter=_filter
+            )
+            for user in users:
+                log.info(user)
+        except Exception as e:
+            log.error(e)
+
+
