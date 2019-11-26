@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from common.helpers import add_sales_cm
+from common.helpers import continue_statemachine
 from config import local_tz, default_args
 
 sm_continue_dag = DAG(
@@ -19,7 +19,7 @@ sm_continue_dag = DAG(
 add_sales_cm_task = PythonOperator(
     task_id="continue_sm_task",
     task_concurrency=1,
-    python_callable=add_sales_cm,
+    python_callable=continue_statemachine,
     dag=sm_continue_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",
