@@ -795,10 +795,12 @@ def continue_statemachine():
     redis_key = "chat::sm_continue"
     while redis_conn.scard(redis_key):
         user_id = redis_conn.spop(redis_key)
+        log.info("Processing sm continue for user" + str(user_id))
         try:
             _filter = {
                 "userId": user_id
             }
+            log.info("Fetching user with filter " + json.dumps(_filter))
             users = get_data_from_db(
                 conn_id="mongo_user_db",
                 collection="user",
@@ -808,5 +810,3 @@ def continue_statemachine():
                 log.info(user)
         except Exception as e:
             log.error(e)
-
-
