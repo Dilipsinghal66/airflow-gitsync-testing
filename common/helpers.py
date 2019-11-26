@@ -791,6 +791,7 @@ def refresh_daily_message():
 
 def continue_statemachine():
     redis_hook = RedisHook(redis_conn_id="redis_continue_statemachine")
+    sm_action_map = Variable.get("sm_action_map", deserialize_json=True)
     redis_conn = redis_hook.get_conn()
     redis_key = "chat::sm_continue"
     while redis_conn.scard(redis_key):
@@ -810,6 +811,32 @@ def continue_statemachine():
                 filter=_filter
             )
             for user in users:
-                log.info(user)
+                user_status = user.get("userStatus")
+                current_action = sm_action_map.get(str(user_status), None)
+                payload = {
+                    "action": current_action
+                }
+                if current_action:
+                    sm_data = make_http_request(
+                        conn_id="http_transition_url", method="POST",
+                        payload=payload
+                    )
+                    action_key = None
+                    message = "none"
+                    if sm_data:
+                        possible_actions = sm_data.get("possibleActions", {})
+                        if possible_actions:
+                            action_key = possible_actions.keys()[0]
+                    if action_key:
+                        chat_message_payload = {
+                            "action": action_key,
+                            "message": message
+                        }
+                        log.info(chat_message_payload)
+                        # make_http_request(
+                        #     conn_id="http_chat_service_url",
+                        #     method="POST",
+                        #     payload=chat_message_payload
+                        # )
         except Exception as e:
             log.error(e)
