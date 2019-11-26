@@ -794,11 +794,11 @@ def continue_statemachine():
     redis_conn = redis_hook.get_conn()
     redis_key = "chat::sm_continue"
     while redis_conn.scard(redis_key):
-        user_id = redis_conn.spop(redis_key)
-        log.info("Processing sm continue for user" + str(user_id))
+        user_list = redis_conn.spop(redis_key, redis_conn.scard(redis_key))
+        log.info("Processing sm continue for users ")
         try:
             _filter = {
-                "userId": user_id
+                "userId": {"$in": user_list},
             }
             log.info("Fetching user with filter " + json.dumps(_filter))
             users = get_data_from_db(
