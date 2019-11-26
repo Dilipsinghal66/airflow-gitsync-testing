@@ -795,7 +795,7 @@ def continue_statemachine():
     redis_conn = redis_hook.get_conn()
     redis_key = "chat::sm_continue"
     while redis_conn.scard(redis_key):
-        user_list = redis_conn.spop(redis_key, redis_conn.scard(redis_key))
+        user_list = redis_conn.srandmember(redis_key, redis_conn.scard(redis_key))
         log.info("Processing sm continue for users ")
         user_list = [int(i.decode()) if isinstance(i, bytes) else int(i) for i
                      in user_list]
