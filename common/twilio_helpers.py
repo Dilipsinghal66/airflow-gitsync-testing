@@ -152,6 +152,6 @@ def remove_cm_by_type(service=None, cm_type=None, user=None):
         service=service, cm_type="salesCm")
     if has_sales_cm:
         print(cm_type + " cm exists. Need to delete")
-        # cm_member.delete()
+        cm_member.delete()
         print(cm_type + " cm deleted. ")
     return True
