@@ -275,12 +275,12 @@ def remove_sales_cm(cm_type):
         }
         log.info("updating user care manager")
         log.info(payload)
-        # status, body = make_http_request(conn_id="http_user_url",
-        #                                  payload=payload, endpoint=endpoint,
-        #                                  method="PATCH")
-        # if status != HTTPStatus.OK:
-        #     print("failed to update sales cm for user ")
-        # update_redis = True
+        status, body = make_http_request(conn_id="http_user_url",
+                                         payload=payload, endpoint=endpoint,
+                                         method="PATCH")
+        if status != HTTPStatus.OK:
+            print("failed to update sales cm for user ")
+        update_redis = True
     if update_redis:
         try:
             refresh_cm_type_user_redis(cm_type=cm_type)
