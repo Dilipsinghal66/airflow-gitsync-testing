@@ -846,6 +846,8 @@ def continue_statemachine():
                 user_status = user.get("userStatus")
                 action_key = sm_action_map.get(str(user_status), None)
                 message = "none"
+                log.info(user.get("_id"))
+                log.info(user_status)
                 log.info(sm_action_map)
                 if action_key:
                     chat_message_payload = {
