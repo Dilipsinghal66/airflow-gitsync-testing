@@ -836,6 +836,9 @@ def continue_statemachine():
                 "userId": {"$in": user_list},
                 "processedSales": {"$ne": True}
             }
+            sales_processed_payload = {
+                "processedSales": True
+            }
             log.info("Fetching user with filter " + json.dumps(_filter))
             users = get_data_from_db(
                 conn_id="mongo_user_db",
@@ -845,6 +848,7 @@ def continue_statemachine():
             for user in users:
                 user_status = user.get("userStatus")
                 user_id = user.get("userId")
+                _id = str(user.get("_id"))
                 action_key = sm_action_map.get(str(user_status), None)
                 message = "none"
                 if action_key:
@@ -856,10 +860,20 @@ def continue_statemachine():
                         "User Id: " + str(user_id) + " User Status: " + str(
                             user_status) + " " + json.dumps(
                             chat_message_payload))
-                    # make_http_request(
-                    #     conn_id="http_chat_service_url",
-                    #     method="POST",
-                    #     payload=chat_message_payload
-                    # )
+                    status, _ = make_http_request(
+                        conn_id="http_chat_service_url",
+                        method="POST",
+                        payload=chat_message_payload
+                    )
+                    if status == HTTPStatus.OK:
+                        log.info("Marking user " + str(
+                            user_id) + " as sales processed")
+                        status, _ = make_http_request(
+                            conn_id="http_user_url",
+                            payload=sales_processed_payload, endpoint=_id,
+                            method="PATCH")
+                        if status == HTTPStatus.OK:
+                            log.info("Marked as sales processed. ")
+
         except Exception as e:
             log.error(e)
