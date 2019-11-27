@@ -304,20 +304,24 @@ def add_sales_cm(cm_type):
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
     update_redis = False
-    for user in eligible_users:
-        check_and_add_cm(user=user, service=service, cm=sales_cm)
-        endpoint = str(user.get("_id"))
-        cm_id = sales_cm.get("cmId")
-        payload = {
-            "assignedCmType": "sales",
-            "assignedCm": cm_id
-        }
-        status, body = make_http_request(conn_id="http_user_url",
-                                         payload=payload, endpoint=endpoint,
-                                         method="PATCH")
-        if status != HTTPStatus.OK:
-            print("failed to update sales cm for user ")
-        update_redis = True
+    try:
+        for user in eligible_users:
+            check_and_add_cm(user=user, service=service, cm=sales_cm)
+            endpoint = str(user.get("_id"))
+            cm_id = sales_cm.get("cmId")
+            payload = {
+                "assignedCmType": "sales",
+                "assignedCm": cm_id
+            }
+            status, body = make_http_request(conn_id="http_user_url",
+                                             payload=payload,
+                                             endpoint=endpoint,
+                                             method="PATCH")
+            if status != HTTPStatus.OK:
+                print("failed to update sales cm for user ")
+            update_redis = True
+    except Exception as e:
+        log.error(e)
     if update_redis:
         try:
             refresh_cm_type_user_redis(cm_type=cm_type)
