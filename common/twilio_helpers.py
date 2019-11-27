@@ -135,3 +135,23 @@ def check_and_add_cm(user=None, service=None, cm=None):
     print("Sales cm is not assigned. Processing further. ")
     sales_cm = add_cm(cm_identity=cm_identity, channel=channel)
     return sales_cm
+
+
+def remove_cm_by_type(service=None, cm_type=None, user=None):
+    if not cm_type:
+        raise ValueError("Care manager type can not be null.")
+    if not user:
+        raise ValueError("User can not be null. ")
+    if not service:
+        raise ValueError("Service can not be null. ")
+    user_channel, user_identity = get_twilio_user_details_from_db(
+        user=user)
+    has_sales_cm, cm_member, channel = if_exists_cm_by_type(
+        user_channel=user_channel,
+        user_identity=user_identity,
+        service=service, cm_type="salesCm")
+    if has_sales_cm:
+        print(cm_type + " cm exists. Need to delete")
+        # cm_member.delete()
+        print(cm_type + " cm deleted. ")
+    return True

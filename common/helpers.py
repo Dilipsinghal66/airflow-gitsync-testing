@@ -15,7 +15,7 @@ from twilio.base.exceptions import TwilioRestException
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
 from common.twilio_helpers import get_twilio_service, \
-    process_switch, check_and_add_cm
+    process_switch, check_and_add_cm, remove_cm_by_type
 from config import local_tz
 
 enable_message = bool(int(Variable.get("enable_message", "1")))
@@ -255,6 +255,37 @@ def get_cm_list_by_type(cm_type="active"):
                                 collection="careManager")
     cm_list = [i for i in sales_cm]
     return cm_list
+
+
+def remove_sales_cm(cm_type):
+    service = get_twilio_service()
+    _filter = {
+        "assignedCmType": cm_type,
+        "processedSales": True,
+        "userStatus": {"$ne": 4}
+    }
+    eligible_users = get_data_from_db(conn_id="mongo_user_db",
+                                      filter=_filter, collection="user")
+    update_redis = False
+    for user in eligible_users:
+        remove_cm_by_type(user=user, service=service, cm_type=cm_type)
+        endpoint = str(user.get("_id"))
+        payload = {
+            "assignedCmType": "normal"
+        }
+        log.info("updating user care manager")
+        log.info(payload)
+        # status, body = make_http_request(conn_id="http_user_url",
+        #                                  payload=payload, endpoint=endpoint,
+        #                                  method="PATCH")
+        # if status != HTTPStatus.OK:
+        #     print("failed to update sales cm for user ")
+        # update_redis = True
+    if update_redis:
+        try:
+            refresh_cm_type_user_redis(cm_type=cm_type)
+        except Exception as e:
+            log.info(e)
 
 
 def add_sales_cm(cm_type):
@@ -795,7 +826,8 @@ def continue_statemachine():
     redis_conn = redis_hook.get_conn()
     redis_key = "chat::sm_continue"
     while redis_conn.scard(redis_key):
-        user_list = redis_conn.srandmember(redis_key, redis_conn.scard(redis_key))
+        user_list = redis_conn.srandmember(redis_key,
+                                           redis_conn.scard(redis_key))
         log.info("Processing sm continue for users ")
         user_list = [int(i.decode()) if isinstance(i, bytes) else int(i) for i
                      in user_list]
