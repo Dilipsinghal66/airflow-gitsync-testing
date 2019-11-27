@@ -844,17 +844,18 @@ def continue_statemachine():
             )
             for user in users:
                 user_status = user.get("userStatus")
+                user_id = user.get("userId")
                 action_key = sm_action_map.get(str(user_status), None)
                 message = "none"
-                log.info(user.get("_id"))
-                log.info(user_status)
-                log.info(sm_action_map)
                 if action_key:
                     chat_message_payload = {
                         "action": action_key,
                         "message": message
                     }
-                    log.info(chat_message_payload)
+                    log.info(
+                        "User Id: " + str(user_id) + " User Status: " + str(
+                            user_status) + " " + json.dumps(
+                            chat_message_payload))
                     # make_http_request(
                     #     conn_id="http_chat_service_url",
                     #     method="POST",
