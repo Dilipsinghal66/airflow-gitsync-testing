@@ -859,10 +859,12 @@ def continue_statemachine():
                         "User Id: " + str(user_id) + " User Status: " + str(
                             user_status) + " " + json.dumps(
                             chat_message_payload))
+                    message_endpoint = str(user_id)+"/message"
                     status, _ = make_http_request(
                         conn_id="http_chat_service_url",
                         method="POST",
-                        payload=chat_message_payload
+                        payload=chat_message_payload,
+                        endpoint=message_endpoint
                     )
                     if status == HTTPStatus.OK:
                         log.info("Marking user " + str(
