@@ -1,0 +1,121 @@
+def FAILURE_REASON
+def FAILURE_STAGE
+pipeline {
+	agent {
+		kubernetes {
+			label 'JenkinsPythonBuild'
+			defaultContainer 'chat-service'
+		}
+	}
+	environment {
+		GH_LABEL_DESCRIPTION_MISSING = "Missing/Description"
+		GH_LABEL_TASK_MISSING = "Missing/Phabricator"
+	}
+	stages {
+		stage('Validate PR Description') {
+			steps {
+				script {
+					def pr_body = pullRequest.body
+					if (pr_body.length() < 1) {
+						error GH_LABEL_DESCRIPTION_MISSING
+					}
+				}
+			}
+			when {
+				changeRequest()
+				beforeAgent true
+			}
+			post {
+				failure {
+					// One or more steps need to be included within each condition's block.
+					script {
+						pullRequest.addLabel(GH_LABEL_DESCRIPTION_MISSING)
+						FAILURE_STAGE = env.STAGE_NAME
+						error GH_LABEL_DESCRIPTION_MISSING
+					}
+				}
+				success {
+					script {
+						try {
+							pullRequest.removeLabel(GH_LABEL_DESCRIPTION_MISSING)
+						} catch (Exception e) {
+							echo "Label doesn't exist. Nothing to do"
+						}
+					}
+				}
+			}
+		}
+		stage("Phabricator Task Assigned") {
+			steps {
+				script {
+					def pr_body = pullRequest.body
+					def is_task_assigned = (pr_body =~ /TASKID\ \:\ TASK\-\d*/).find()
+					if (is_task_assigned != true) {
+						error GH_LABEL_TASK_MISSING
+						FAILURE_STAGE = env.STAGE_NAME
+					}
+				}
+			}
+			when {
+				changeRequest()
+				beforeAgent true
+			}
+
+			post {
+				failure {
+					// One or more steps need to be included within each condition's block.
+					script {
+						pullRequest.addLabel(GH_LABEL_TASK_MISSING)
+						FAILURE_STAGE = env.STAGE_NAME
+						error GH_LABEL_TASK_MISSING
+					}
+
+				}
+				success {
+					script {
+						try {
+							pullRequest.removeLabel(GH_LABEL_TASK_MISSING)
+						} catch (Exception e) {
+							echo "Label doesn't exist. Nothing to do"
+						}
+					}
+
+				}
+			}
+		}
+		stage('Install Dependencies') {
+			steps {
+				sh "echo TODO"
+			}
+
+		}
+		stage("TestAndLint") {
+			steps {
+				sh "echo TODO"
+			}
+
+		}
+		stage('Build App') {
+			when {
+				anyOf {
+					branch 'development'
+					environment name: 'CHANGE_TARGET', value: 'release'
+					tag 'v*'
+
+				}
+			}
+			steps {
+
+				sh "echo TODO"
+			}
+		}
+		stage('Deploy App') {
+			when {
+				tag 'v*'
+			}
+			steps {
+				echo "Deploy to production"
+			}
+		}
+	}
+}
