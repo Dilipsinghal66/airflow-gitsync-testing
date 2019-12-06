@@ -1,0 +1,25 @@
+# Add 'repo' label to any root file changes
+feature:
+  - api.py
+  - helper.py
+  - logger.py
+  - api_schemas/*
+  - api_schemas/**/*
+
+dependencies:
+  - requirements.txt
+
+ci:
+  - Makefile
+  - Dockerfile
+  - Dockerfile.base
+  - .github/*
+  - .github/**/*
+
+docs:
+  - README.md
+  - schema/*
+  - schema/**/*
+
+chore:
+  - .gitignore
