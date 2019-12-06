@@ -85,13 +85,13 @@ pipeline {
 		}
 		stage('Install Dependencies') {
 			steps {
-				sh "TODO"
+				sh "echo TODO"
 			}
 
 		}
 		stage("TestAndLint") {
 			steps {
-				sh "TODO"
+				sh "echo TODO"
 			}
 
 		}
@@ -106,7 +106,7 @@ pipeline {
 			}
 			steps {
 
-				sh "TODO"
+				sh "echo TODO"
 			}
 		}
 		stage('Deploy App') {
