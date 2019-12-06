@@ -5,12 +5,23 @@ feature:
   - logger.py
   - api_schemas/*
   - api_schemas/**/*
+  - common/*
+  - common/**/*
+  - config/*
+  - config/**/*
+  - jobs/*
+  - jobs/**/*
+  - reminders/*
+  - reminders/**/*
+  - tasks/*
+  - tasks/**/*
 
 dependencies:
   - requirements.txt
 
 ci:
   - Makefile
+  - JenkinsFile
   - Dockerfile
   - Dockerfile.base
   - .github/*
