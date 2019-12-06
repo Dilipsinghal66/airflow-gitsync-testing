@@ -509,8 +509,11 @@ def add_user_activity_data(user_list):
         activity_data = get_data_from_db(conn_id="mongo_user_db",
                                          filter=_filter,
                                          collection="user_activity")
+        activity_data = list(activity_data)
         if not activity_data:
             activity_data = dict()
+        else:
+            activity_data = activity_data[0]
         user["activity_data"] = activity_data
         processed_users.append(user)
     return processed_users
@@ -526,6 +529,8 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {"assignedCmType": cm_type}
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
+        if cacheable_users:
+            cacheable_users = list(cacheable_users)
         cacheable_users = add_user_activity_data(user_list=cacheable_users)
         if cacheable_users:
             redis_conn.delete(redis_key)
