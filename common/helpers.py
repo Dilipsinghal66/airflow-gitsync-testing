@@ -501,6 +501,21 @@ def sanitize_data(data):
     return data
 
 
+def add_user_activity_data(user_list):
+    processed_users = []
+    for user in user_list:
+        _id = user.get("_id")
+        _filter = {"_id": _id}
+        activity_data = get_data_from_db(conn_id="mongo_user_db",
+                                         filter=_filter,
+                                         collection="user_activity")
+        if not activity_data:
+            activity_data = dict()
+        user["activity_data"] = activity_data
+        processed_users.append(user)
+    return processed_users
+
+
 def refresh_cm_type_user_redis(cm_type="active"):
     cm_list = get_cm_list_by_type(cm_type=cm_type)
     cm_list = [i.get("cmId") for i in cm_list]
@@ -511,6 +526,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {"assignedCmType": cm_type}
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
+        cacheable_users = add_user_activity_data(user_list=cacheable_users)
         if cacheable_users:
             redis_conn.delete(redis_key)
         for user in cacheable_users:
