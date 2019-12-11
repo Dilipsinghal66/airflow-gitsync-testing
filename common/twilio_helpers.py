@@ -3,6 +3,9 @@ from random import choice
 
 from airflow.hooks.http_hook import HttpHook
 from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
+from airflow.utils.log.logging_mixin import LoggingMixin
+log = LoggingMixin().log
 
 active_cm_attributes = {
     "isCm": True,
@@ -50,7 +53,11 @@ def if_exists_cm_by_type(user_channel=None, user_identity=None, service=None,
                          cm_type="activeCm"):
     active_cm_exists = False
     cm_member = None
-    channel = service.channels(user_channel).fetch()
+    try:
+        channel = service.channels(user_channel).fetch()
+    except TwilioRestException as e:
+        log.error(e)
+        raise e
     members = channel.members.list()
     if len(members) < 1:
         raise ValueError("Something is wrong with channel " + user_channel)
