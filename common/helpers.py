@@ -550,6 +550,9 @@ def refresh_cm_type_user_redis(cm_type="active"):
             cacheable_users = list(cacheable_users)
         cacheable_users = add_user_activity_data(user_list=cacheable_users)
         if cacheable_users:
+            cacheable_users = list(cacheable_users)
+        cacheable_users = add_user_activity_data(user_list=cacheable_users)
+        if cacheable_users:
             redis_conn.delete(redis_key)
         for user in cacheable_users:
             sanitized_data = json.dumps(
