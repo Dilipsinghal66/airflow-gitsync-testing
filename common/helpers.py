@@ -273,7 +273,7 @@ def remove_sales_cm(cm_type):
         except TwilioRestException as e:
             log.warning(e)
             continue
-        endpoint = str(user.get("_id"))
+        endpoint = "phone/" + str(user.get("_id"))
         payload = {
             "assignedCmType": "normal"
         }
