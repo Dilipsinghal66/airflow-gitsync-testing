@@ -529,6 +529,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {"assignedCmType": cm_type}
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
+        cacheable_users = add_user_activity_data(user_list=cacheable_users)
         if cacheable_users:
             cacheable_users = list(cacheable_users)
         cacheable_users = add_user_activity_data(user_list=cacheable_users)
