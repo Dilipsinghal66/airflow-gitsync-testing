@@ -531,6 +531,7 @@ def add_user_activity_data(user_list):
 def refresh_cm_type_user_redis(cm_type="active"):
     """
     date_format : Tue, 10 Dec 2019 15:54:48 GMT
+    
     :param cm_type:
     :return:
     """
