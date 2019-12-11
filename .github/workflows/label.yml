@@ -12,6 +12,8 @@ on:
       - master
       - release
       - development
+  pull_request_review:
+    types: [submitted, edited]
 
 jobs:
   label:
