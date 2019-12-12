@@ -917,9 +917,9 @@ def continue_statemachine():
             try:
                 created_days_users = get_created_users_by_cm_by_days(
                     cm_type="sales")
-                if created_days_users:
-                    users = list(users)
-                    users.extend(created_days_users)
+                # if created_days_users:
+                #     users = list(users)
+                #     users.extend(created_days_users)
             except Exception as e:
                 log.warning(e)
             for user in users:
