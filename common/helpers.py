@@ -907,16 +907,15 @@ def continue_statemachine():
                         payload=chat_message_payload,
                         endpoint=message_endpoint
                     )
-                    if status == HTTPStatus.OK:
-                        log.info("Marking user " + str(
-                            user_id) + " as sales processed")
-                        status, _ = make_http_request(
-                            conn_id="http_user_url",
-                            payload=sales_processed_payload, endpoint=_id,
-                            method="PATCH")
-                        if status == HTTPStatus.OK:
-                            log.info("Marked as sales processed. ")
-                            user_list.remove(user_id)
+                log.info("Marking user " + str(
+                    user_id) + " as sales processed")
+                status, _ = make_http_request(
+                    conn_id="http_user_url",
+                    payload=sales_processed_payload, endpoint=_id,
+                    method="PATCH")
+                if status == HTTPStatus.OK:
+                    log.info("Marked as sales processed. ")
+                    user_list.remove(user_id)
         except Exception as e:
             log.error(e)
             log.error(user_list)
