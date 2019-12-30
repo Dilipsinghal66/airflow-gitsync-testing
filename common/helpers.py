@@ -751,7 +751,9 @@ def deactivate_patients(**kwargs):
     log.debug("Patients to be deactivated " + json.dumps(deactivation_list))
     _filter = {
         "patientId": {"$in": deactivation_list},
-        "userStatus": {"$ne": 3}
+        "userStatus": {"$ne": 3},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     projection = {
         "_id": 1
@@ -874,7 +876,9 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
         "_created": {
             "$lt": cm_remove_date
         },
-        "assignedCmType": cm_type
+        "assignedCmType": cm_type,
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     users = get_data_from_db(
         conn_id="mongo_user_db",
@@ -903,10 +907,14 @@ def continue_statemachine():
         try:
             remove_filter = {
                 "userId": {"$in": user_list},
-                "processedSales": {"$ne": True}
+                "processedSales": {"$ne": True},
+                "countryCode": {"$in": [91]},
+                "docCode": {"$regex": "/^ZH/"}
             }
             sales_processed_payload = {
-                "processedSales": True
+                "processedSales": True,
+                "countryCode": {"$in": [91]},
+                "docCode": {"$regex": "/^ZH/"}
             }
             log.info("Fetching user with filter " + json.dumps(remove_filter))
             users = get_data_from_db(
