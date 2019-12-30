@@ -26,5 +26,6 @@ switch_active_cm_task = PythonOperator(
     dag=create_vitals_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",
-    retry_exponential_backoff=True
+    retry_exponential_backoff=True,
+    provide_context=True
 )
