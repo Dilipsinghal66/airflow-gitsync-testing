@@ -121,7 +121,8 @@ def process_switch(user=None, service=None):
     if has_active_cm:
         print(
             "Active cm " + str(cm_member.identity) + " is assigned to " + str(
-                user_identity) + "in channel " + user_channel + ". Nothing to do.")
+                user_identity) + "in channel " +
+            user_channel + ". Nothing to do.")
         return False
     print("Active cm is not assigned. Processing further. ")
     active_cm = swap_cm_with_active(old_cm=cm_member, channel=channel)

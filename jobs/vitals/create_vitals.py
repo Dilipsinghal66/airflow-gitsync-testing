@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from airflow.models import Variable
+
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.vitals.vitaljobs import create_vitals_func
 from config import local_tz, default_args
+from jobs.vitals.vitaljobs import create_vitals_func
 
 create_vital_interval = str(Variable.get("create_vital_interval", '0 * * * *'))
 
