@@ -16,12 +16,22 @@ populate_cm_dag = DAG(
     dagrun_timeout=timedelta(minutes=1),
 )
 
-switch_active_cm_task = PythonOperator(
-    task_id="populate_cm",
+add_normal_cm_task = PythonOperator(
+    task_id="populate_normal_cm",
     task_concurrency=1,
     python_callable=add_care_manager,
     dag=populate_cm_dag,
-    op_kwargs={},
+    op_kwargs={"check_cm_type": "normal"},
+    pool="scheduled_jobs_pool",
+    retry_exponential_backoff=True
+)
+
+add_az_cm_task = PythonOperator(
+    task_id="populate_az_cm",
+    task_concurrency=1,
+    python_callable=add_care_manager,
+    dag=populate_cm_dag,
+    op_kwargs={"check_cm_type": "az"},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
 )
