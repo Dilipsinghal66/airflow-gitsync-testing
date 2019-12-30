@@ -670,6 +670,9 @@ def compute_cm_priority(cm_list):
 
 
 def add_care_manager(check_cm_type="normal"):
+    redis_key = "cm:inactive_pool"
+    if check_cm_type != "normal":
+        redis_key = "cm:" + check_cm_type + "_pool"
     log.debug("Fetching care manager data from db. ")
     cm_data = get_care_managers(cm_type=check_cm_type)
     log.debug("Care managers fetched from db")
@@ -761,10 +764,10 @@ def add_care_manager(check_cm_type="normal"):
         create_cm(cm_type=check_cm_type)
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
-    redis_conn.delete("cm:inactive_pool")
+    redis_conn.delete(redis_key)
     for cm in cm_by_priority:
         cm_data = json.dumps(cm)
-        redis_conn.rpush("cm:inactive_pool", cm_data)
+        redis_conn.rpush(redis_key, cm_data)
 
 
 def deactivate_patients(**kwargs):
