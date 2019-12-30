@@ -44,7 +44,9 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
         days=notification_filter_by_days)
     user_filter = {
         "userStatus": {"$in": [11, 12]},
-        "_created": {"$gt": filter_date}
+        "_created": {"$gt": filter_date},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
@@ -110,7 +112,9 @@ def send_dynamic(time=None, reminder_type=None, index_by_days=False):
         "is_notification": False
     }
     user_filter = {
-        "userStatus": {"$in": [4]}
+        "userStatus": {"$in": [4]},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
@@ -160,7 +164,9 @@ def send_meditation(**kwargs):
     }
     print(payload)
     user_filter = {
-        "userStatus": {"$in": [4]}
+        "userStatus": {"$in": [4]},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
