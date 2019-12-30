@@ -85,13 +85,13 @@ pipeline {
 		}
 		stage('Install Dependencies') {
 			steps {
-				sh "echo TODO"
+				sh "pip install flake8"
 			}
 
 		}
 		stage("TestAndLint") {
 			steps {
-				sh "echo TODO"
+				sh "flake8 ./"
 			}
 
 		}
