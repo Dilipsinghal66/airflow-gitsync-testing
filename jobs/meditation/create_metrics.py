@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
-from airflow.models import Variable
+
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.meditation.metricjobs import create_meditation_metrics
 from config import local_tz, default_args
+from jobs.meditation.metricjobs import create_meditation_metrics
 
-create_meditation_interval = str(Variable.get("create_meditation_interval", '0 0 * * *'))
+create_meditation_interval = str(
+    Variable.get("create_meditation_interval", '0 0 * * *'))
 
 create_metric_dag = DAG(
     dag_id="create_meditation_metrics",

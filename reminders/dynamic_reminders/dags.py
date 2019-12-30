@@ -6,8 +6,8 @@ from airflow.operators.python_operator import PythonOperator
 
 from common.helpers import get_dynamic_scheduled_message_time
 from config import local_tz, default_args
-from reminders.dynamic_reminders.reminder import send_dynamic, send_meditation, \
-    send_notifications
+from reminders.dynamic_reminders.reminder import send_dynamic, \
+    send_meditation, send_notifications
 
 meditation_schedule = Variable().get(key="meditation_schedule",
                                      deserialize_json=True)

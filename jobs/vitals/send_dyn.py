@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from airflow.models import Variable
+
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.vitals.dynjobs import send_dyn_func
 from config import local_tz, default_args
+from jobs.vitals.dynjobs import send_dyn_func
 
 send_dyn_interval = str(Variable.get("send_dyn_interval", '0 30 08 * * ?'))
 

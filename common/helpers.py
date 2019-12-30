@@ -551,7 +551,6 @@ def add_user_activity_data(user_list):
 def refresh_cm_type_user_redis(cm_type="active"):
     """
     date_format : Tue, 10 Dec 2019 15:54:48 GMT
-    
     :param cm_type:
     :return:
     """
@@ -599,8 +598,8 @@ def get_care_managers():
         "cmType": "normal",
         "deleted": {
             "$ne": True
+            }
         }
-    }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager", filter=_filter)
     return cm_data
@@ -947,7 +946,7 @@ def continue_statemachine():
                 filter=remove_filter
             )
             try:
-                created_days_users = get_created_users_by_cm_by_days(
+                created_days_users = get_created_users_by_cm_by_days( # noqa F841
                     cm_type="sales")
                 # if created_days_users:
                 #     users = list(users)

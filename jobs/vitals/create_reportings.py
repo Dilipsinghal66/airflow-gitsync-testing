@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
-from airflow.models import Variable
+
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
-from jobs.vitals.reportingjobs import create_reportings_func
 from config import local_tz, default_args
+from jobs.vitals.reportingjobs import create_reportings_func
 
-create_reporting_interval = str(Variable.get("create_reporting_interval", '30 18 * * *'))
+create_reporting_interval = str(
+    Variable.get("create_reporting_interval", '30 18 * * *'))
 
 create_reportings_dag = DAG(
     dag_id="create_reportings_func",
