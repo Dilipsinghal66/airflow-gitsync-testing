@@ -116,7 +116,9 @@ def process_dynamic_task(**kwargs):
             patient_id_list.append(patient_id)
     log.info(patient_id_list)
     _filter = {
-        mongo_filter_field: {"$in": patient_id_list}
+        mongo_filter_field: {"$in": patient_id_list},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     projection = {
         "userId": 1, "patientId": 1, "_id": 0
@@ -192,8 +194,12 @@ def find_patients_not_level_jumped(patient_list):
 def get_patients_activated_today():
     today = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                       microsecond=0)
-    _filter = {"userStatus": 4,
-               "userFlags.active.activatedOn": {"$gt": today}}
+    _filter = {
+        "userStatus": 4,
+        "userFlags.active.activatedOn": {"$gt": today},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
+    }
     projection = {"patientId": 1, "_id": 0}
     sort = [["userFlags.active.activatedOn", -1]]
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
@@ -214,7 +220,9 @@ def get_deactivated_patients():
     """
     _filter = {
         "userStatus": 3,
-        "deleted": False
+        "deleted": False,
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter)
@@ -262,7 +270,9 @@ def remove_sales_cm(cm_type):
     _filter = {
         "assignedCmType": cm_type,
         "processedSales": True,
-        "userStatus": {"$ne": 4}
+        "userStatus": {"$ne": 4},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
@@ -338,7 +348,13 @@ def switch_active_cm(cm_type):
     cm_list = get_cm_list_by_type(cm_type=cm_type)
     active_cm_list = [i.get("cmId") for i in cm_list]
     service = get_twilio_service()
-    _filter = {"userStatus": 4, "assignedCm": {"$nin": active_cm_list}}
+    _filter = {
+        "userStatus": 4,
+        "assignedCm": {"$nin": active_cm_list},
+        "countryCode": {"$in": [91]},
+        "docCode": {"$regex": "/^ZH/"}
+
+    }
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
                                         filter=_filter, collection="user")
     update_redis = False
@@ -514,7 +530,11 @@ def add_user_activity_data(user_list):
     processed_users = []
     for user in user_list:
         _id = user.get("_id")
-        _filter = {"_id": _id}
+        _filter = {
+            "_id": _id,
+            "countryCode": {"$in": [91]},
+            "docCode": {"$regex": "/^ZH/"}
+        }
         activity_data = get_data_from_db(conn_id="mongo_user_db",
                                          filter=_filter,
                                          collection="user_activity")
@@ -542,7 +562,11 @@ def refresh_cm_type_user_redis(cm_type="active"):
     redis_conn = redis_hook.get_conn()
     for cm in cm_list:
         redis_key = cm_type + "_users_" + str(cm)
-        _filter = {"assignedCmType": cm_type}
+        _filter = {
+            "assignedCmType": cm_type,
+            "countryCode": {"$in": [91]},
+            "docCode": {"$regex": "/^ZH/"}
+        }
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
         cacheable_users = add_user_activity_data(user_list=cacheable_users)
