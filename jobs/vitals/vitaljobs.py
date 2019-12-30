@@ -89,14 +89,16 @@ def create_vitals_func(**kwargs):
         timedelta = datetime.timedelta(hours=5, minutes=30)
         todayDate = date + timedelta
 
-        retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func', key='return_value')
+        retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func',
+                                          key='return_value')
         if not retValue:
             retValue = 'X,' + str(todayDate)
 
         switchArr = retValue.split(",")
         switch = switchArr[0]
         dateTimeStr = switchArr[1]
-        dateTimeObj = datetime.datetime.strptime(dateTimeStr, '%Y-%m-%d %H:%M:%S.%f')
+        dateTimeObj = datetime.datetime.strptime(dateTimeStr,
+                                                 '%Y-%m-%d %H:%M:%S.%f')
 
         weekday = todayDate.weekday()
         switchDaysDiff = (todayDate - dateTimeObj).days
