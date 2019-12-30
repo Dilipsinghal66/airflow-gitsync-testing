@@ -7,7 +7,7 @@ from common.db_functions import get_data_from_db
 PAGE_SIZE = 1000
 
 
-def isRecommended1(param, fortoday):
+def isRecommendedY(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
     timedelta = datetime.timedelta(hours=5, minutes=30)
@@ -42,7 +42,7 @@ def isRecommended1(param, fortoday):
     return ret
 
 
-def isRecommended(param, fortoday):
+def isRecommendedX(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
     timedelta = datetime.timedelta(hours=5, minutes=30)
@@ -77,12 +77,42 @@ def isRecommended(param, fortoday):
     return ret
 
 
-def create_vitals_func():
+def create_vitals_func(**kwargs):
+    retValue = ''
     try:
 
         vital_create_flag = int(Variable.get("vital_create_flag", '0'))
         if vital_create_flag == 1:
-            return
+            return retValue
+
+        date = datetime.datetime.today()
+        timedelta = datetime.timedelta(hours=5, minutes=30)
+        todayDate = date + timedelta
+
+        retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func', key='return_value')
+        if not retValue:
+            retValue = 'X,' + str(todayDate)
+
+        switchArr = retValue.split(",")
+        switch = switchArr[0]
+        dateTimeStr = switchArr[1]
+        dateTimeObj = datetime.datetime.strptime(dateTimeStr, '%Y-%m-%d %H:%M:%S.%f')
+
+        weekday = todayDate.weekday()
+        switchDaysDiff = (todayDate - dateTimeObj).days
+
+        if weekday == 5 and switchDaysDiff >= 4:
+            if switch == 'X':
+                switch = 'Y'
+            else:
+                switch = 'X'
+            retValue = str(switch) + ',' + str(todayDate)
+
+        if switch == 'X':
+            isRecommended = isRecommendedX
+        else:
+            isRecommended = isRecommendedY
+
         # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
         # print("starting create vitals job")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
@@ -180,3 +210,5 @@ def create_vitals_func():
     except Exception as e:
         print("Error Exception raised")
         print(e)
+
+    return retValue
