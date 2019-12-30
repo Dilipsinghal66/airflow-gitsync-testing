@@ -273,7 +273,7 @@ def remove_sales_cm(cm_type):
         except TwilioRestException as e:
             log.warning(e)
             continue
-        endpoint = str(user.get("_id"))
+        endpoint = "phone/" + str(user.get("_id"))
         payload = {
             "assignedCmType": "normal"
         }
@@ -495,7 +495,7 @@ def sanitize_data(data, date_format=None):
         return str(data)
     if isinstance(data, datetime):
         if date_format:
-            pass
+            data = data.strftime(fmt=date_format)
         else:
             data = str(data)
         return data
@@ -548,11 +548,6 @@ def refresh_cm_type_user_redis(cm_type="active"):
         cacheable_users = add_user_activity_data(user_list=cacheable_users)
         if cacheable_users:
             cacheable_users = list(cacheable_users)
-        cacheable_users = add_user_activity_data(user_list=cacheable_users)
-        if cacheable_users:
-            cacheable_users = list(cacheable_users)
-        cacheable_users = add_user_activity_data(user_list=cacheable_users)
-        if cacheable_users:
             redis_conn.delete(redis_key)
         for user in cacheable_users:
             sanitized_data = json.dumps(
@@ -866,6 +861,35 @@ def refresh_daily_message():
     return dynamic_message_list
 
 
+def get_created_users_by_cm_by_days(cm_type="sales"):
+    cm_remove_days = None
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    if cm_type == "sales":
+        cm_remove_days = Variable.get("sales_remove_created_before_days",
+                                      deserialize_json=True)
+    if not cm_remove_days:
+        return None
+    cm_remove_date = today - timedelta(days=cm_remove_days)
+    created_before_days_filter = {
+        "_created": {
+            "$lt": cm_remove_date
+        },
+        "assignedCmType": cm_type
+    }
+    users = get_data_from_db(
+        conn_id="mongo_user_db",
+        collection="user",
+        filter=created_before_days_filter
+    )
+    if not users:
+        return False
+    users = list(users)
+    log.info("old users")
+    log.info(len(users))
+    log.info(users)
+    return users
+
+
 def continue_statemachine():
     redis_hook = RedisHook(redis_conn_id="redis_continue_statemachine")
     sm_action_map = Variable.get("sm_action_map", deserialize_json=True)
@@ -877,19 +901,27 @@ def continue_statemachine():
         user_list = [int(i.decode()) if isinstance(i, bytes) else int(i) for i
                      in user_list]
         try:
-            _filter = {
+            remove_filter = {
                 "userId": {"$in": user_list},
                 "processedSales": {"$ne": True}
             }
             sales_processed_payload = {
                 "processedSales": True
             }
-            log.info("Fetching user with filter " + json.dumps(_filter))
+            log.info("Fetching user with filter " + json.dumps(remove_filter))
             users = get_data_from_db(
                 conn_id="mongo_user_db",
                 collection="user",
-                filter=_filter
+                filter=remove_filter
             )
+            try:
+                created_days_users = get_created_users_by_cm_by_days(
+                    cm_type="sales")
+                # if created_days_users:
+                #     users = list(users)
+                #     users.extend(created_days_users)
+            except Exception as e:
+                log.warning(e)
             for user in users:
                 user_status = user.get("userStatus")
                 user_id = user.get("userId")
@@ -912,16 +944,15 @@ def continue_statemachine():
                         payload=chat_message_payload,
                         endpoint=message_endpoint
                     )
-                    if status == HTTPStatus.OK:
-                        log.info("Marking user " + str(
-                            user_id) + " as sales processed")
-                        status, _ = make_http_request(
-                            conn_id="http_user_url",
-                            payload=sales_processed_payload, endpoint=_id,
-                            method="PATCH")
-                        if status == HTTPStatus.OK:
-                            log.info("Marked as sales processed. ")
-                            user_list.remove(user_id)
+                log.info("Marking user " + str(
+                    user_id) + " as sales processed")
+                status, _ = make_http_request(
+                    conn_id="http_user_url",
+                    payload=sales_processed_payload, endpoint=_id,
+                    method="PATCH")
+                if status == HTTPStatus.OK:
+                    log.info("Marked as sales processed. ")
+                    user_list.remove(user_id)
         except Exception as e:
             log.error(e)
             log.error(user_list)

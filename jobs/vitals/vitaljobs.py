@@ -5,7 +5,7 @@ from config import local_tz
 
 PAGE_SIZE = 1000
 
-def isRecommended(param, fortoday):
+def isRecommended1(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
     timedelta = datetime.timedelta(hours=5, minutes=30)
@@ -43,7 +43,7 @@ def isRecommended(param, fortoday):
 
 
 
-def isRecommended1(param, fortoday):
+def isRecommended(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
     timedelta = datetime.timedelta(hours=5, minutes=30)
