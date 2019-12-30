@@ -2,9 +2,10 @@ import json
 from random import choice
 
 from airflow.hooks.http_hook import HttpHook
-from twilio.rest import Client
-from twilio.base.exceptions import TwilioRestException
 from airflow.utils.log.logging_mixin import LoggingMixin
+from twilio.base.exceptions import TwilioRestException
+from twilio.rest import Client
+
 log = LoggingMixin().log
 
 active_cm_attributes = {
@@ -15,6 +16,16 @@ active_cm_attributes = {
 sales_cm_attributes = {
     "isCm": True,
     "salesCm": True
+}
+
+normal_cm_attributes = {
+    "isCm": True,
+    "normalCm": True
+}
+
+az_cm_attributes = {
+    "isCm": True,
+    "azCm": True
 }
 
 
