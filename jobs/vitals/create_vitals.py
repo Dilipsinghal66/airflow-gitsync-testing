@@ -10,7 +10,7 @@ from jobs.vitals.vitaljobs import create_vitals_func
 create_vital_interval = str(Variable.get("create_vital_interval", '0 * * * *'))
 
 create_vitals_dag = DAG(
-    dag_id="create_vitals_func",
+    dag_id="create_vitals_dag",
     default_args=default_args,
     schedule_interval=create_vital_interval,
     catchup=False,
