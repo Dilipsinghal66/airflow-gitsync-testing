@@ -9,6 +9,7 @@ PAGE_SIZE = 1000
 
 log = LoggingMixin().log
 
+
 def isRecommendedY(param, fortoday):
     ret = 0
     date = datetime.datetime.today()
@@ -97,7 +98,7 @@ def create_vitals_func(**kwargs):
         if not retValue:
             retValue = 'X,' + str(todayDate)
             log.info("Didn't get return value so today's date")
-            
+
         log.info("retValue = " + retValue)
         switchArr = retValue.split(",")
         switch = switchArr[0]
