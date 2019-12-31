@@ -101,7 +101,6 @@ def create_vitals_func(**kwargs):
         log.info(retValue1)
         log.info(retValue2)
 
-
         if not retValue:
             retValue = 'X,' + str(todayDate)
             log.info("Didn't get return value so today's date")
