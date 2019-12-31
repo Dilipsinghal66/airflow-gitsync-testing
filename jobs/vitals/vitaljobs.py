@@ -81,150 +81,143 @@ def isRecommendedX(param, fortoday):
 
 
 def create_vitals_func(**kwargs):
-    retValue = ''
     try:
+        disable_vital_create = int(Variable.get("disable_vital_create", '0'))
+        if not disable_vital_create:
+            date = datetime.datetime.today()
+            timedelta = datetime.timedelta(hours=5, minutes=30)
+            todayDate = date + timedelta
 
-        vital_create_flag = int(Variable.get("vital_create_flag", '0'))
-        if vital_create_flag == 1:
-            return retValue
+            vital_switch_flag = str(Variable.get("vital_switch_flag", ''))
 
-        date = datetime.datetime.today()
-        timedelta = datetime.timedelta(hours=5, minutes=30)
-        todayDate = date + timedelta
+            if not vital_switch_flag:
+                vital_switch_flag = 'X,' + str(todayDate)
+                log.info("Didn't get return value so today's date")
 
-        retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func',
-                                          key='return_value')
-        retValue1 = kwargs['ti'].xcom_pull(task_ids='create_vitals_func')
-        retValue2 = kwargs['ti'].xcom_pull()
+            log.info("vital_switch_flag = " + vital_switch_flag)
+            switchArr = vital_switch_flag.split(",")
+            switch = switchArr[0]
+            dateTimeStr = switchArr[1]
+            dateTimeObj = datetime.datetime.strptime(dateTimeStr,
+                                                     '%Y-%m-%d %H:%M:%S.%f')
 
-        log.info(kwargs)
-        log.info(retValue1)
-        log.info(retValue2)
+            weekday = todayDate.weekday()
+            switchDaysDiff = (todayDate - dateTimeObj).days
 
-        if not retValue:
-            retValue = 'X,' + str(todayDate)
-            log.info("Didn't get return value so today's date")
+            log.info("switch days diff " + str(switchDaysDiff))
+            if weekday == 5 and switchDaysDiff >= 4:
+                if switch == 'X':
+                    switch = 'Y'
+                else:
+                    switch = 'X'
+                vital_switch_flag = str(switch) + ',' + str(todayDate)
+                log.info("switch the recommendation" + vital_switch_flag)
 
-        log.info("retValue = " + retValue)
-        switchArr = retValue.split(",")
-        switch = switchArr[0]
-        dateTimeStr = switchArr[1]
-        dateTimeObj = datetime.datetime.strptime(dateTimeStr,
-                                                 '%Y-%m-%d %H:%M:%S.%f')
-
-        weekday = todayDate.weekday()
-        switchDaysDiff = (todayDate - dateTimeObj).days
-
-        log.info("switch days diff " + str(switchDaysDiff))
-        if weekday == 5 and switchDaysDiff >= 4:
             if switch == 'X':
-                switch = 'Y'
+                isRecommended = isRecommendedX
             else:
-                switch = 'X'
-            retValue = str(switch) + ',' + str(todayDate)
-            log.info("switch the recommendation" + retValue)
+                isRecommended = isRecommendedY
 
-        if switch == 'X':
-            isRecommended = isRecommendedX
-        else:
-            isRecommended = isRecommendedY
+            Variable.set(key="vital_switch_flag", value=vital_switch_flag)
+            # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
+            # print("starting create vitals job")
+            engine = get_data_from_db(db_type="mysql",
+                                      conn_id="mysql_monolith")
+            # print("got db connection from environment")
+            connection = engine.get_conn()
+            # print("got the connection no looking for cursor")
+            cursor = connection.cursor()
+            # print("got the cursor")
 
-        # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
-        # print("starting create vitals job")
-        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
-        # print("got db connection from environment")
-        connection = engine.get_conn()
-        # print("got the connection no looking for cursor")
-        cursor = connection.cursor()
-        # print("got the cursor")
-
-        cursor.execute(
-            "select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")  # noqa E303
-        totalcount = cursor.fetchone()[0]
-        # print(totalcount)
-        numberofPage = int(totalcount / PAGE_SIZE) + 1
-        print(numberofPage)
-        for i in range(numberofPage):
-            patientIdSqlQuerry = "select id from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(  # noqa E303
-                i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
-            cursor.execute(patientIdSqlQuerry)
-            patientIdList = []
-            patientIdDict = {}
-            for row in cursor.fetchall():
-                for id in row:
-                    patientIdList.append(id)
-
-            # print(patientIdList)
-
-            for patientid in patientIdList:
-                paramGroupSqlQuery = "select distinct(paramGroupId) from zylaapi.testReadings where patientid = " + str(  # noqa E303
-                    patientid)
-                cursor.execute(paramGroupSqlQuery)
-                patientIdParamGroupList = []
-                patientIdParamList = []
-
+            cursor.execute(
+                "select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")  # noqa E303
+            totalcount = cursor.fetchone()[0]
+            # print(totalcount)
+            numberofPage = int(totalcount / PAGE_SIZE) + 1
+            print(numberofPage)
+            for i in range(numberofPage):
+                patientIdSqlQuerry = "select id from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(  # noqa E303
+                    i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
+                cursor.execute(patientIdSqlQuerry)
+                patientIdList = []
+                patientIdDict = {}
                 for row in cursor.fetchall():
                     for id in row:
-                        patientIdParamGroupList.append(id)
+                        patientIdList.append(id)
 
-                # print(patientIdParamGroupList)
+                # print(patientIdList)
 
-                for paramGroupId in patientIdParamGroupList:
-                    paramSqlQuery = "select distinct(paramId) from zylaapi.paramGroupParams where paramGroupId = " + str(  # noqa E303
-                        paramGroupId)
-                    cursor.execute(paramSqlQuery)
+                for patientid in patientIdList:
+                    paramGroupSqlQuery = "select distinct(paramGroupId) from zylaapi.testReadings where patientid = " + str(  # noqa E303
+                        patientid)
+                    cursor.execute(paramGroupSqlQuery)
+                    patientIdParamGroupList = []
+                    patientIdParamList = []
 
                     for row in cursor.fetchall():
                         for id in row:
-                            patientIdParamList.append(id)
+                            patientIdParamGroupList.append(id)
 
-                # print("Patient Id " + str(patientid))
-                # print(patientIdParamList)
+                    # print(patientIdParamGroupList)
 
-                patientIdDict[str(patientid)] = patientIdParamList
+                    for paramGroupId in patientIdParamGroupList:
+                        paramSqlQuery = "select distinct(paramId) from zylaapi.paramGroupParams where paramGroupId = " + str(  # noqa E303
+                            paramGroupId)
+                        cursor.execute(paramSqlQuery)
 
-            # print(patientIdDict)
+                        for row in cursor.fetchall():
+                            for id in row:
+                                patientIdParamList.append(id)
 
-            for key, value in patientIdDict.items():
-                checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=CURDATE() and patientid = " + str(  # noqa E303
-                    key)
-                cursor.execute(checkSqlQuery)
-                paramInsertedToday = []
-                for row in cursor.fetchall():
-                    for id in row:
-                        paramInsertedToday.append(id)
+                    # print("Patient Id " + str(patientid))
+                    # print(patientIdParamList)
 
-                for param in value:
-                    recommend = isRecommended(param, True)
-                    if param not in paramInsertedToday:
-                        insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
-                            key) + ", " + str(param) + ", CURDATE(), b'" + str(
-                            recommend) + "')"
+                    patientIdDict[str(patientid)] = patientIdParamList
 
-                        cursor.execute(insertSqlQuery)
+                # print(patientIdDict)
 
-            for key, value in patientIdDict.items():
-                checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(  # noqa E303
-                    key)
-                cursor.execute(checkSqlQuery)
-                paramInsertedTom = []
-                for row in cursor.fetchall():
-                    for id in row:
-                        paramInsertedTom.append(id)
+                for key, value in patientIdDict.items():
+                    checkSqlQuery = "select distinct(paramId) from " \
+                                    "zylaapi.patientTestReadings " \
+                                    "where forDate=CURDATE() " \
+                                    "and patientid = " \
+                                    + str(key)
+                    cursor.execute(checkSqlQuery)
+                    paramInsertedToday = []
+                    for row in cursor.fetchall():
+                        for id in row:
+                            paramInsertedToday.append(id)
 
-                for param in value:
-                    recommend = isRecommended(param, False)
-                    if param not in paramInsertedTom:
-                        insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
-                            key) + ", " + str(
-                            param) + ", DATE_ADD(CURDATE(), INTERVAL +1 DAY), b'" + str(  # noqa E303
-                            recommend) + "')"
+                    for param in value:
+                        recommend = isRecommended(param, True)
+                        if param not in paramInsertedToday:
+                            insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
+                                key) + ", " \
+                                + str(param) + ", CURDATE(), b'" + str(
+                                recommend) + "')"
 
-                        cursor.execute(insertSqlQuery)
+                            cursor.execute(insertSqlQuery)
 
-            connection.commit()
+                for key, value in patientIdDict.items():
+                    checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=DATE_ADD(CURDATE(), INTERVAL +1 DAY) and patientid = " + str(  # noqa E303
+                        key)
+                    cursor.execute(checkSqlQuery)
+                    paramInsertedTom = []
+                    for row in cursor.fetchall():
+                        for id in row:
+                            paramInsertedTom.append(id)
+
+                    for param in value:
+                        recommend = isRecommended(param, False)
+                        if param not in paramInsertedTom:
+                            insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
+                                key) + ", " + str(
+                                param) + ", DATE_ADD(CURDATE(), INTERVAL +1 DAY), b'" + str(  # noqa E303
+                                recommend) + "')"
+
+                            cursor.execute(insertSqlQuery)
+
+                connection.commit()
     except Exception as e:
-        print("Error Exception raised")
-        print(e)
-
-    return retValue
+        log.error(e)
+        raise e
