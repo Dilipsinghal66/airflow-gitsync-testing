@@ -81,32 +81,24 @@ def isRecommendedX(param, fortoday):
 
 
 def create_vitals_func(**kwargs):
-    retValue = ''
     try:
 
         vital_create_flag = int(Variable.get("vital_create_flag", '0'))
         if vital_create_flag == 1:
-            return retValue
+            return
 
         date = datetime.datetime.today()
         timedelta = datetime.timedelta(hours=5, minutes=30)
         todayDate = date + timedelta
 
-        retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func',
-                                          key='return_value')
-        retValue1 = kwargs['ti'].xcom_pull(task_ids='create_vitals_func')
-        retValue2 = kwargs['ti'].xcom_pull()
+        vital_switch_flag = str(Variable.get("vital_switch_flag", ''))
 
-        log.info(kwargs)
-        log.info(retValue1)
-        log.info(retValue2)
-
-        if not retValue:
-            retValue = 'X,' + str(todayDate)
+        if not vital_switch_flag:
+            vital_switch_flag = 'X,' + str(todayDate)
             log.info("Didn't get return value so today's date")
 
-        log.info("retValue = " + retValue)
-        switchArr = retValue.split(",")
+        log.info("vital_switch_flag = " + vital_switch_flag)
+        switchArr = vital_switch_flag.split(",")
         switch = switchArr[0]
         dateTimeStr = switchArr[1]
         dateTimeObj = datetime.datetime.strptime(dateTimeStr,
@@ -121,14 +113,15 @@ def create_vitals_func(**kwargs):
                 switch = 'Y'
             else:
                 switch = 'X'
-            retValue = str(switch) + ',' + str(todayDate)
-            log.info("switch the recommendation" + retValue)
+            vital_switch_flag = str(switch) + ',' + str(todayDate)
+            log.info("switch the recommendation" + vital_switch_flag)
 
         if switch == 'X':
             isRecommended = isRecommendedX
         else:
             isRecommended = isRecommendedY
 
+        Variable.set(key="vital_switch_flag", value=vital_switch_flag)
         # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
         # print("starting create vitals job")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
@@ -227,4 +220,4 @@ def create_vitals_func(**kwargs):
         print("Error Exception raised")
         print(e)
 
-    return retValue
+    return
