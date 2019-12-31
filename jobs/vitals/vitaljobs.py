@@ -103,12 +103,14 @@ def create_vitals_func(**kwargs):
         weekday = todayDate.weekday()
         switchDaysDiff = (todayDate - dateTimeObj).days
 
+        print("switch days diff " + str(switchDaysDiff))
         if weekday == 5 and switchDaysDiff >= 4:
             if switch == 'X':
                 switch = 'Y'
             else:
                 switch = 'X'
             retValue = str(switch) + ',' + str(todayDate)
+            print("switch the recommendation" + retValue)
 
         if switch == 'X':
             isRecommended = isRecommendedX
