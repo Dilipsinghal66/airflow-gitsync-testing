@@ -1,10 +1,13 @@
 import datetime
 
 from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
 
 from common.db_functions import get_data_from_db
 
 PAGE_SIZE = 1000
+
+log = LoggingMixin().log
 
 
 def isRecommendedY(param, fortoday):
@@ -91,9 +94,12 @@ def create_vitals_func(**kwargs):
 
         retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func',
                                           key='return_value')
+
         if not retValue:
             retValue = 'X,' + str(todayDate)
+            log.info("Didn't get return value so today's date")
 
+        log.info("retValue = " + retValue)
         switchArr = retValue.split(",")
         switch = switchArr[0]
         dateTimeStr = switchArr[1]
@@ -103,12 +109,14 @@ def create_vitals_func(**kwargs):
         weekday = todayDate.weekday()
         switchDaysDiff = (todayDate - dateTimeObj).days
 
+        log.info("switch days diff " + str(switchDaysDiff))
         if weekday == 5 and switchDaysDiff >= 4:
             if switch == 'X':
                 switch = 'Y'
             else:
                 switch = 'X'
             retValue = str(switch) + ',' + str(todayDate)
+            log.info("switch the recommendation" + retValue)
 
         if switch == 'X':
             isRecommended = isRecommendedX
