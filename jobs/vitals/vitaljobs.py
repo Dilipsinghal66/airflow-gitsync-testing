@@ -121,7 +121,8 @@ def create_vitals_func(**kwargs):
             Variable.set(key="vital_switch_flag", value=vital_switch_flag)
             # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
             # print("starting create vitals job")
-            engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+            engine = get_data_from_db(db_type="mysql",
+                                      conn_id="mysql_monolith")
             # print("got db connection from environment")
             connection = engine.get_conn()
             # print("got the connection no looking for cursor")
@@ -176,8 +177,11 @@ def create_vitals_func(**kwargs):
                 # print(patientIdDict)
 
                 for key, value in patientIdDict.items():
-                    checkSqlQuery = "select distinct(paramId) from zylaapi.patientTestReadings where forDate=CURDATE() and patientid = " + str(  # noqa E303
-                        key)
+                    checkSqlQuery = "select distinct(paramId) from " \
+                                    "zylaapi.patientTestReadings " \
+                                    "where forDate=CURDATE() " \
+                                    "and patientid = " \
+                                    + str(key)
                     cursor.execute(checkSqlQuery)
                     paramInsertedToday = []
                     for row in cursor.fetchall():
@@ -188,7 +192,8 @@ def create_vitals_func(**kwargs):
                         recommend = isRecommended(param, True)
                         if param not in paramInsertedToday:
                             insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
-                                key) + ", " + str(param) + ", CURDATE(), b'" + str(
+                                key) + ", " \
+                                + str(param) + ", CURDATE(), b'" + str(
                                 recommend) + "')"
 
                             cursor.execute(insertSqlQuery)
