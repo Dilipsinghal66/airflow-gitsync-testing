@@ -94,6 +94,12 @@ def create_vitals_func(**kwargs):
 
         retValue = kwargs['ti'].xcom_pull(task_ids='create_vitals_func',
                                           key='return_value')
+        retValue1 = kwargs['ti'].xcom_pull(task_ids='create_vitals_func')
+        retValue2 = kwargs['ti'].xcom_pull()
+
+        log.info(kwargs)
+        log.info(retValue1)
+        log.info(retValue2)
 
         if not retValue:
             retValue = 'X,' + str(todayDate)
