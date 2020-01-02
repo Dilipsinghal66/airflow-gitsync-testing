@@ -578,7 +578,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
             redis_conn.rpush(redis_key, sanitized_data)
 
 
-def get_care_managers():
+def get_care_managers(cm_type="normal"):
     per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
                                            deserialize_json=True)
     _filter = {
@@ -595,22 +595,25 @@ def get_care_managers():
                     }
                 }
             ],
-        "cmType": "normal",
+        "cmType": cm_type,
         "deleted": {
             "$ne": True
-            }
         }
+    }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager", filter=_filter)
     return cm_data
 
 
-def create_cm(tries=3):
+def create_cm(cm_type="normal", tries=3):
     log.info("Creating new cm on the basis")
     cm_payload = {}
+    endpoint = ""
+    if cm_type != "normal":
+        endpoint = cm_type
     try:
         make_http_request(conn_id="http_create_cm_url", method="POST",
-                          payload=cm_payload)
+                          payload=cm_payload, endpoint=endpoint)
     except Exception as e:
         log.error(e)
         if tries:
@@ -666,9 +669,12 @@ def compute_cm_priority(cm_list):
     return cm_priority_list
 
 
-def add_care_manager():
+def add_care_manager(check_cm_type="normal"):
+    redis_key = "cm:inactive_pool"
+    if check_cm_type != "normal":
+        redis_key = "cm:" + check_cm_type + "_pool"
     log.debug("Fetching care manager data from db. ")
-    cm_data = get_care_managers()
+    cm_data = get_care_managers(cm_type=check_cm_type)
     log.debug("Care managers fetched from db")
     log.debug(cm_data)
     log.debug("Init twilio service object ")
@@ -679,6 +685,7 @@ def add_care_manager():
         identity = cm.get("chatInformation", {}).get("providerData", {}).get(
             "identity", None)
         cm_id = cm.get("cmId")
+        cm_type = cm.get("cmType")
         if not isinstance(identity, str):
             identity = str(identity)
         mongo_id = cm.get("_id")
@@ -737,7 +744,8 @@ def add_care_manager():
         cm_slot_list.append({
             "cmId": cm_id,
             "openSlots": cm_open_slots,
-            "cmIdentity": identity
+            "cmIdentity": identity,
+            'cmType': cm_type
         })
     log.debug("Care managers with slots opened for further processing")
     log.debug(cm_slot_list)
@@ -753,13 +761,13 @@ def add_care_manager():
         log.info("we have enough cm slots.Nothing to do further")
     except Exception as e:
         log.error(e)
-        create_cm()
+        create_cm(cm_type=check_cm_type)
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
-    redis_conn.delete("cm:inactive_pool")
+    redis_conn.delete(redis_key)
     for cm in cm_by_priority:
         cm_data = json.dumps(cm)
-        redis_conn.rpush("cm:inactive_pool", cm_data)
+        redis_conn.rpush(redis_key, cm_data)
 
 
 def deactivate_patients(**kwargs):
@@ -946,7 +954,8 @@ def continue_statemachine():
                 filter=remove_filter
             )
             try:
-                created_days_users = get_created_users_by_cm_by_days( # noqa F841
+                created_days_users = get_created_users_by_cm_by_days(
+                    # noqa F841
                     cm_type="sales")
                 # if created_days_users:
                 #     users = list(users)
