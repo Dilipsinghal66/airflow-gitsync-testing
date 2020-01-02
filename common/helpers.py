@@ -118,7 +118,7 @@ def process_dynamic_task(**kwargs):
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     projection = {
         "userId": 1, "patientId": 1, "_id": 0
@@ -198,7 +198,7 @@ def get_patients_activated_today():
         "userStatus": 4,
         "userFlags.active.activatedOn": {"$gt": today},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     projection = {"patientId": 1, "_id": 0}
     sort = [["userFlags.active.activatedOn", -1]]
@@ -222,7 +222,7 @@ def get_deactivated_patients():
         "userStatus": 3,
         "deleted": False,
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter)
@@ -272,7 +272,7 @@ def remove_sales_cm(cm_type):
         "processedSales": True,
         "userStatus": {"$ne": 4},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
@@ -352,7 +352,7 @@ def switch_active_cm(cm_type):
         "userStatus": 4,
         "assignedCm": {"$nin": active_cm_list},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
 
     }
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
@@ -533,7 +533,7 @@ def add_user_activity_data(user_list):
         _filter = {
             "_id": _id,
             "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "/^ZH/"}
+            "docCode": {"$regex": "^ZH"}
         }
         activity_data = get_data_from_db(conn_id="mongo_user_db",
                                          filter=_filter,
@@ -564,7 +564,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {
             "assignedCmType": cm_type,
             "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "/^ZH/"}
+            "docCode": {"$regex": "^ZH"}
         }
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
@@ -784,7 +784,7 @@ def deactivate_patients(**kwargs):
         "patientId": {"$in": deactivation_list},
         "userStatus": {"$ne": 3},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     projection = {
         "_id": 1
@@ -909,7 +909,7 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
         },
         "assignedCmType": cm_type,
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     users = get_data_from_db(
         conn_id="mongo_user_db",
@@ -940,12 +940,12 @@ def continue_statemachine():
                 "userId": {"$in": user_list},
                 "processedSales": {"$ne": True},
                 "countryCode": {"$in": [91]},
-                "docCode": {"$regex": "/^ZH/"}
+                "docCode": {"$regex": "^ZH"}
             }
             sales_processed_payload = {
                 "processedSales": True,
                 "countryCode": {"$in": [91]},
-                "docCode": {"$regex": "/^ZH/"}
+                "docCode": {"$regex": "^ZH"}
             }
             log.info("Fetching user with filter " + json.dumps(remove_filter))
             users = get_data_from_db(
