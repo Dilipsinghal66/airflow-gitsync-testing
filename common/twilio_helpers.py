@@ -2,9 +2,10 @@ import json
 from random import choice
 
 from airflow.hooks.http_hook import HttpHook
-from twilio.rest import Client
-from twilio.base.exceptions import TwilioRestException
 from airflow.utils.log.logging_mixin import LoggingMixin
+from twilio.base.exceptions import TwilioRestException
+from twilio.rest import Client
+
 log = LoggingMixin().log
 
 active_cm_attributes = {
@@ -15,6 +16,16 @@ active_cm_attributes = {
 sales_cm_attributes = {
     "isCm": True,
     "salesCm": True
+}
+
+normal_cm_attributes = {
+    "isCm": True,
+    "normalCm": True
+}
+
+az_cm_attributes = {
+    "isCm": True,
+    "azCm": True
 }
 
 
@@ -74,7 +85,6 @@ def if_exists_cm_by_type(user_channel=None, user_identity=None, service=None,
 def swap_cm_with_active(old_cm=None, channel=None):
     from common.helpers import get_cm_list_by_type
     active_cm_list = get_cm_list_by_type(cm_type="active")
-    print(active_cm_list)
     active_cm = choice(active_cm_list)
     cm_identity = active_cm.get("chatInformation", {}).get("providerData",
                                                            {}).get("identity",
@@ -111,7 +121,8 @@ def process_switch(user=None, service=None):
     if has_active_cm:
         print(
             "Active cm " + str(cm_member.identity) + " is assigned to " + str(
-                user_identity) + "in channel " + user_channel + ". Nothing to do.")
+                user_identity) + "in channel " +
+            user_channel + ". Nothing to do.")
         return False
     print("Active cm is not assigned. Processing further. ")
     active_cm = swap_cm_with_active(old_cm=cm_member, channel=channel)
