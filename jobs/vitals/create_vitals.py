@@ -10,7 +10,7 @@ from jobs.vitals.vitaljobs import create_vitals_func
 create_vital_interval = str(Variable.get("create_vital_interval", '0 * * * *'))
 
 create_vitals_dag = DAG(
-    dag_id="create_vitals_func",
+    dag_id="create_vitals_dag",
     default_args=default_args,
     schedule_interval=create_vital_interval,
     catchup=False,
@@ -24,7 +24,7 @@ switch_active_cm_task = PythonOperator(
     task_concurrency=1,
     python_callable=create_vitals_func,
     dag=create_vitals_dag,
-    op_kwargs={},
     pool="scheduled_jobs_pool",
-    retry_exponential_backoff=True
+    retry_exponential_backoff=True,
+    provide_context=True
 )
