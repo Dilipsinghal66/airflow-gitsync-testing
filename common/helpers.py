@@ -531,9 +531,7 @@ def add_user_activity_data(user_list):
     for user in user_list:
         _id = user.get("_id")
         _filter = {
-            "_id": _id,
-            "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "^ZH"}
+            "_id": _id
         }
         activity_data = get_data_from_db(conn_id="mongo_user_db",
                                          filter=_filter,
