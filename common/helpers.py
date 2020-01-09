@@ -552,6 +552,13 @@ def refresh_cm_type_user_redis(cm_type="active"):
     :param cm_type:
     :return:
     """
+    cm_doc_code_map = {
+        "active": "^ZH",
+        "normal": "^ZH",
+        "sales": "^ZH",
+        "az": "^AZ"
+    }
+    doc_code = cm_doc_code_map.get(cm_type)
     date_format = "%a, %d %b %Y %H:%M:%S %Z"
     cm_list = get_cm_list_by_type(cm_type=cm_type)
     cm_list = [i.get("cmId") for i in cm_list]
@@ -562,7 +569,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {
             "assignedCmType": cm_type,
             "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "^ZH"}
+            "docCode": {"$regex": doc_code}
         }
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
@@ -594,9 +601,10 @@ def get_care_managers(cm_type="normal"):
                 }
             ],
         "cmType": cm_type,
-        "deleted": {
-            "$ne": True
-        }
+        "deleted":
+            {
+                "$ne": True
+            }
     }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager", filter=_filter)
@@ -952,9 +960,10 @@ def continue_statemachine():
                 filter=remove_filter
             )
             try:
-                created_days_users = get_created_users_by_cm_by_days(
-                    # noqa F841
-                    cm_type="sales")
+                created_days_users = \
+                    get_created_users_by_cm_by_days(
+                        cm_type="sales")
+                log.debug(created_days_users)
                 # if created_days_users:
                 #     users = list(users)
                 #     users.extend(created_days_users)
