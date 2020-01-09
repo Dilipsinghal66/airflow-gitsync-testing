@@ -118,7 +118,7 @@ def process_dynamic_task(**kwargs):
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     projection = {
         "userId": 1, "patientId": 1, "_id": 0
@@ -198,7 +198,7 @@ def get_patients_activated_today():
         "userStatus": 4,
         "userFlags.active.activatedOn": {"$gt": today},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     projection = {"patientId": 1, "_id": 0}
     sort = [["userFlags.active.activatedOn", -1]]
@@ -222,7 +222,7 @@ def get_deactivated_patients():
         "userStatus": 3,
         "deleted": False,
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter)
@@ -272,7 +272,7 @@ def remove_sales_cm(cm_type):
         "processedSales": True,
         "userStatus": {"$ne": 4},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
@@ -352,7 +352,7 @@ def switch_active_cm(cm_type):
         "userStatus": 4,
         "assignedCm": {"$nin": active_cm_list},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
 
     }
     switchable_users = get_data_from_db(conn_id="mongo_user_db",
@@ -531,9 +531,7 @@ def add_user_activity_data(user_list):
     for user in user_list:
         _id = user.get("_id")
         _filter = {
-            "_id": _id,
-            "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "/^ZH/"}
+            "_id": _id
         }
         activity_data = get_data_from_db(conn_id="mongo_user_db",
                                          filter=_filter,
@@ -554,6 +552,13 @@ def refresh_cm_type_user_redis(cm_type="active"):
     :param cm_type:
     :return:
     """
+    cm_doc_code_map = {
+        "active": "^ZH",
+        "normal": "^ZH",
+        "sales": "^ZH",
+        "az": "^AZ"
+    }
+    doc_code = cm_doc_code_map.get(cm_type)
     date_format = "%a, %d %b %Y %H:%M:%S %Z"
     cm_list = get_cm_list_by_type(cm_type=cm_type)
     cm_list = [i.get("cmId") for i in cm_list]
@@ -564,7 +569,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {
             "assignedCmType": cm_type,
             "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "/^ZH/"}
+            "docCode": {"$regex": doc_code}
         }
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
@@ -578,7 +583,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
             redis_conn.rpush(redis_key, sanitized_data)
 
 
-def get_care_managers():
+def get_care_managers(cm_type="normal"):
     per_cm_slot_threshold = Variable().get(key="per_cm_slot_threshold",
                                            deserialize_json=True)
     _filter = {
@@ -595,22 +600,26 @@ def get_care_managers():
                     }
                 }
             ],
-        "cmType": "normal",
-        "deleted": {
-            "$ne": True
+        "cmType": cm_type,
+        "deleted":
+            {
+                "$ne": True
             }
-        }
+    }
     cm_data = get_data_from_db(conn_id="mongo_cm_db",
                                collection="careManager", filter=_filter)
     return cm_data
 
 
-def create_cm(tries=3):
+def create_cm(cm_type="normal", tries=3):
     log.info("Creating new cm on the basis")
     cm_payload = {}
+    endpoint = ""
+    if cm_type != "normal":
+        endpoint = cm_type
     try:
         make_http_request(conn_id="http_create_cm_url", method="POST",
-                          payload=cm_payload)
+                          payload=cm_payload, endpoint=endpoint)
     except Exception as e:
         log.error(e)
         if tries:
@@ -666,9 +675,12 @@ def compute_cm_priority(cm_list):
     return cm_priority_list
 
 
-def add_care_manager():
+def add_care_manager(check_cm_type="normal"):
+    redis_key = "cm:inactive_pool"
+    if check_cm_type != "normal":
+        redis_key = "cm:" + check_cm_type + "_pool"
     log.debug("Fetching care manager data from db. ")
-    cm_data = get_care_managers()
+    cm_data = get_care_managers(cm_type=check_cm_type)
     log.debug("Care managers fetched from db")
     log.debug(cm_data)
     log.debug("Init twilio service object ")
@@ -679,6 +691,7 @@ def add_care_manager():
         identity = cm.get("chatInformation", {}).get("providerData", {}).get(
             "identity", None)
         cm_id = cm.get("cmId")
+        cm_type = cm.get("cmType")
         if not isinstance(identity, str):
             identity = str(identity)
         mongo_id = cm.get("_id")
@@ -737,7 +750,8 @@ def add_care_manager():
         cm_slot_list.append({
             "cmId": cm_id,
             "openSlots": cm_open_slots,
-            "cmIdentity": identity
+            "cmIdentity": identity,
+            'cmType': cm_type
         })
     log.debug("Care managers with slots opened for further processing")
     log.debug(cm_slot_list)
@@ -753,13 +767,13 @@ def add_care_manager():
         log.info("we have enough cm slots.Nothing to do further")
     except Exception as e:
         log.error(e)
-        create_cm()
+        create_cm(cm_type=check_cm_type)
     redis_hook = RedisHook(redis_conn_id="redis_cm_pool")
     redis_conn = redis_hook.get_conn()
-    redis_conn.delete("cm:inactive_pool")
+    redis_conn.delete(redis_key)
     for cm in cm_by_priority:
         cm_data = json.dumps(cm)
-        redis_conn.rpush("cm:inactive_pool", cm_data)
+        redis_conn.rpush(redis_key, cm_data)
 
 
 def deactivate_patients(**kwargs):
@@ -776,7 +790,7 @@ def deactivate_patients(**kwargs):
         "patientId": {"$in": deactivation_list},
         "userStatus": {"$ne": 3},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     projection = {
         "_id": 1
@@ -901,7 +915,7 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
         },
         "assignedCmType": cm_type,
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "/^ZH/"}
+        "docCode": {"$regex": "^ZH"}
     }
     users = get_data_from_db(
         conn_id="mongo_user_db",
@@ -932,12 +946,12 @@ def continue_statemachine():
                 "userId": {"$in": user_list},
                 "processedSales": {"$ne": True},
                 "countryCode": {"$in": [91]},
-                "docCode": {"$regex": "/^ZH/"}
+                "docCode": {"$regex": "^ZH"}
             }
             sales_processed_payload = {
                 "processedSales": True,
                 "countryCode": {"$in": [91]},
-                "docCode": {"$regex": "/^ZH/"}
+                "docCode": {"$regex": "^ZH"}
             }
             log.info("Fetching user with filter " + json.dumps(remove_filter))
             users = get_data_from_db(
@@ -946,8 +960,10 @@ def continue_statemachine():
                 filter=remove_filter
             )
             try:
-                created_days_users = get_created_users_by_cm_by_days( # noqa F841
-                    cm_type="sales")
+                created_days_users = \
+                    get_created_users_by_cm_by_days(
+                        cm_type="sales")
+                log.debug(created_days_users)
                 # if created_days_users:
                 #     users = list(users)
                 #     users.extend(created_days_users)

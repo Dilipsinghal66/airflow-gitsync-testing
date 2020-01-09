@@ -35,3 +35,13 @@ sales_to_redis_task = PythonOperator(
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
 )
+
+az_to_redis_task = PythonOperator(
+    task_id="az_to_redis_task",
+    task_concurrency=2,
+    python_callable=refresh_cm_type_user_redis,
+    dag=users_to_redis_dag,
+    op_kwargs={"cm_type": "az"},
+    pool="scheduled_jobs_pool",
+    retry_exponential_backoff=True
+)
