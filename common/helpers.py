@@ -552,6 +552,13 @@ def refresh_cm_type_user_redis(cm_type="active"):
     :param cm_type:
     :return:
     """
+    cm_doc_code_map = {
+        "active": "^ZH",
+        "normal": "^ZH",
+        "sales": "^ZH",
+        "az": "^AZ"
+    }
+    doc_code = cm_doc_code_map.get(cm_type)
     date_format = "%a, %d %b %Y %H:%M:%S %Z"
     cm_list = get_cm_list_by_type(cm_type=cm_type)
     cm_list = [i.get("cmId") for i in cm_list]
@@ -562,7 +569,7 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {
             "assignedCmType": cm_type,
             "countryCode": {"$in": [91]},
-            "docCode": {"$regex": "^ZH"}
+            "docCode": {"$regex": doc_code}
         }
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
