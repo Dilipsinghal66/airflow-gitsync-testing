@@ -996,7 +996,6 @@ def continue_statemachine():
                     method="PATCH")
                 if status == HTTPStatus.OK:
                     log.info("Marked as sales processed. ")
-                    user_list.remove(user_id)
         except Exception as e:
             log.error(e)
             log.error(user_list)
