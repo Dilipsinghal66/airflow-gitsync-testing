@@ -928,7 +928,6 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
     users = list(users)
     log.info("old users")
     log.info(len(users))
-    log.info(users)
     return users
 
 
@@ -950,9 +949,7 @@ def continue_statemachine():
                 "docCode": {"$regex": "^ZH"}
             }
             sales_processed_payload = {
-                "processedSales": True,
-                "countryCode": {"$in": [91]},
-                "docCode": {"$regex": "^ZH"}
+                "processedSales": True
             }
             log.info("Fetching user with filter " + json.dumps(remove_filter))
             users = get_data_from_db(
@@ -964,7 +961,6 @@ def continue_statemachine():
                 created_days_users = \
                     get_created_users_by_cm_by_days(
                         cm_type="sales")
-                log.debug(created_days_users)
                 # if created_days_users:
                 #     users = list(users)
                 #     users.extend(created_days_users)
