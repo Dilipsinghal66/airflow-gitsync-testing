@@ -165,7 +165,7 @@ def create_vitals_func(**kwargs):
                                                "(patientId, paramGroupId) " \
                                                "VALUES (" \
                                                + str(patientid) + ", " \
-                                               + str(defaultId) + "');"
+                                               + str(defaultId) + ");"
                             cursor.execute(paramInsertQuery)
                     else:
                         for row in cursor.fetchall():
