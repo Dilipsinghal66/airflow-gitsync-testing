@@ -9,7 +9,8 @@ PAGE_SIZE = 1000
 
 log = LoggingMixin().log
 
-DEF_VITAL_GROUPS = [1, 2, 5, 6]
+defVitalGroups = Variable.get("Default_Vital_Groups",
+                                     deserialize_json=True)
 
 
 def isRecommendedY(param, fortoday):
@@ -158,14 +159,14 @@ def create_vitals_func(**kwargs):
                     patientIdParamList = []
 
                     if(numberOfRows == 0):
-                        for defaultId in DEF_VITAL_GROUPS:
+                        for defaultId in defVitalGroups:
                             patientIdParamGroupList.append(defaultId)
                             paramInsertQuery = "INSERT INTO " \
                                                "zylaapi.testReadings " \
                                                "(patientId, paramGroupId) " \
                                                "VALUES (" \
                                                + str(patientid) + ", " \
-                                               + str(defaultId) + "')"
+                                               + str(defaultId) + "');"
                             cursor.execute(paramInsertQuery)
                     else:
                         for row in cursor.fetchall():
