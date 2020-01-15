@@ -9,6 +9,8 @@ PAGE_SIZE = 1000
 
 log = LoggingMixin().log
 
+DEF_VITAL_GROUPS = [1, 2, 5, 6]
+
 
 def isRecommendedY(param, fortoday):
     ret = 0
@@ -150,13 +152,25 @@ def create_vitals_func(**kwargs):
                 for patientid in patientIdList:
                     paramGroupSqlQuery = "select distinct(paramGroupId) from zylaapi.testReadings where patientid = " + str(  # noqa E303
                         patientid)
-                    cursor.execute(paramGroupSqlQuery)
+                    numberOfRows = cursor.execute(paramGroupSqlQuery)
+
                     patientIdParamGroupList = []
                     patientIdParamList = []
 
-                    for row in cursor.fetchall():
-                        for id in row:
-                            patientIdParamGroupList.append(id)
+                    if(numberOfRows == 0):
+                        for defaultId in DEF_VITAL_GROUPS:
+                            patientIdParamGroupList.append(defaultId)
+                            paramInsertQuery = "INSERT INTO " \
+                                               "zylaapi.testReadings " \
+                                               "(patientId, paramGroupId) " \
+                                               "VALUES (" \
+                                               + str(patientid) + ", " \
+                                               + str(defaultId) + "')"
+                            cursor.execute(paramInsertQuery)
+                    else:
+                        for row in cursor.fetchall():
+                            for id in row:
+                                patientIdParamGroupList.append(id)
 
                     # print(patientIdParamGroupList)
 
