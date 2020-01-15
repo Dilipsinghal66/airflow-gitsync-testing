@@ -569,7 +569,8 @@ def refresh_cm_type_user_redis(cm_type="active"):
         _filter = {
             "assignedCmType": cm_type,
             "countryCode": {"$in": [91]},
-            "docCode": {"$regex": doc_code}
+            "docCode": {"$regex": doc_code},
+            "assignedCm": cm
         }
         cacheable_users = get_data_from_db(conn_id="mongo_user_db",
                                            filter=_filter, collection="user")
@@ -927,7 +928,6 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
     users = list(users)
     log.info("old users")
     log.info(len(users))
-    log.info(users)
     return users
 
 
@@ -949,9 +949,7 @@ def continue_statemachine():
                 "docCode": {"$regex": "^ZH"}
             }
             sales_processed_payload = {
-                "processedSales": True,
-                "countryCode": {"$in": [91]},
-                "docCode": {"$regex": "^ZH"}
+                "processedSales": True
             }
             log.info("Fetching user with filter " + json.dumps(remove_filter))
             users = get_data_from_db(
@@ -963,10 +961,9 @@ def continue_statemachine():
                 created_days_users = \
                     get_created_users_by_cm_by_days(
                         cm_type="sales")
-                log.debug(created_days_users)
-                # if created_days_users:
-                #     users = list(users)
-                #     users.extend(created_days_users)
+                if created_days_users:
+                    users = list(users)
+                    users.extend(created_days_users)
             except Exception as e:
                 log.warning(e)
             for user in users:
@@ -999,7 +996,6 @@ def continue_statemachine():
                     method="PATCH")
                 if status == HTTPStatus.OK:
                     log.info("Marked as sales processed. ")
-                    user_list.remove(user_id)
         except Exception as e:
             log.error(e)
             log.error(user_list)
