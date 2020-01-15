@@ -9,7 +9,7 @@ PAGE_SIZE = 1000
 
 log = LoggingMixin().log
 
-defVitalGroups = Variable.get("Default_Vital_Groups", deserialize_json=True)
+defVitalGroups = Variable.get("default_vital_groups", deserialize_json=True)
 
 
 def isRecommendedY(param, fortoday):
