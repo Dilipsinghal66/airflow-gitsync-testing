@@ -12,7 +12,8 @@ def broadcast_active():
 
     sql_query = str(Variable.get("broadcast_active_sql_query",
                                  'select id from '
-                                 'patient_profile where status = 4'))
+                                 'zylaapi.patient_profile '
+                                 'where status = 4'))
 
     message = str(Variable.get("broadcast_active_msg", ''))
 
