@@ -2,9 +2,11 @@ from airflow.models import Variable
 
 from common.helpers import process_dynamic_task_sql
 
+
 def broadcast_active():
 
-    process_broadcast_active = int(Variable.get("process_broadcast_active", '0'))
+    process_broadcast_active = int(Variable.get("process_broadcast_active",
+                                                '0'))
     if process_broadcast_active == 1:
         return
 

@@ -88,7 +88,7 @@ def process_dynamic_task_sql(sql_query, message):
     mongo_filter_field = "patientId"
 
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                                    sql_query=sql_query, execute_query=True)
+                                sql_query=sql_query, execute_query=True)
     patient_id_list = []
     message_replace_data = {}
     if sql_data:
@@ -96,7 +96,6 @@ def process_dynamic_task_sql(sql_query, message):
             patient_id = patient[0]
             patient_id_list.append(patient_id)
             message_replace_data[patient_id] = patient
-
 
     log.info(patient_id_list)
     _filter = {
