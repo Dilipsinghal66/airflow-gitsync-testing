@@ -83,23 +83,12 @@ def task_success_callback(context):
                       payload=success_payload, endpoint=endpoint)
 
 
-def process_dynamic_task(**kwargs):
+def process_dynamic_task_sql(sql_query, message):
     action = "dynamic_message"
     mongo_filter_field = "patientId"
-    mongo_query = kwargs.get("query", {}).get("mongo", None)
-    sql_query = kwargs.get("query", {}).get("sql", None)
-    message: str = kwargs.get("message")
-    sql_data = None
-    if sql_query:
-        sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                                    sql_query=sql_query, execute_query=True)
-    mongo_data = None
-    if mongo_query:
-        mongo_query = json.loads(mongo_query)
-        collection = mongo_query.get("collection")
-        _filter = mongo_query_builder(query_data=mongo_query)
-        mongo_data = get_data_from_db(conn_id="mongo_user_db",
-                                      collection=collection, filter=_filter)
+
+    sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                                sql_query=sql_query, execute_query=True)
     patient_id_list = []
     message_replace_data = {}
     if sql_data:
@@ -108,12 +97,6 @@ def process_dynamic_task(**kwargs):
             patient_id_list.append(patient_id)
             message_replace_data[patient_id] = patient
 
-    if mongo_data:
-        for patient in mongo_data:
-            if "patientId" not in patient.keys():
-                mongo_filter_field = "_id"
-            patient_id = patient.get(mongo_filter_field)
-            patient_id_list.append(patient_id)
     log.info(patient_id_list)
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
