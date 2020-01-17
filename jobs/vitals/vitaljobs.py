@@ -203,6 +203,8 @@ def create_vitals_func(**kwargs):
                             paramInsertedToday.append(id)
 
                     for param in value:
+                        log.info("Current Date - patient ID : "
+                                 + str(key) + " param : " + str(param))
                         recommend = isRecommended(param, True)
                         if param not in paramInsertedToday:
                             insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
@@ -222,6 +224,8 @@ def create_vitals_func(**kwargs):
                             paramInsertedTom.append(id)
 
                     for param in value:
+                        log.info("Tomorrow - patient ID : "
+                                 + str(key) + " param : " + str(param))
                         recommend = isRecommended(param, False)
                         if param not in paramInsertedTom:
                             insertSqlQuery = "INSERT INTO zylaapi.patientTestReadings (patientId, paramId, forDate, isRecommended)  VALUES (" + str(  # noqa E303
