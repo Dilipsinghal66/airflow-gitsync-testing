@@ -20,7 +20,7 @@ active_patients_dag = DAG(
 )
 
 active_patients_task = PythonOperator(
-    task_id="send_dyn_func",
+    task_id="active_patients",
     task_concurrency=1,
     python_callable=active_patients,
     dag=active_patients_dag,
