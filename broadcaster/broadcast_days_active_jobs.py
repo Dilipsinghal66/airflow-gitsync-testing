@@ -2,7 +2,7 @@ from airflow.models import Variable
 import datetime
 
 from common.db_functions import get_data_from_db
-from common.helpers import send_chat_message
+from common.helpers import process_dynamic_message
 
 
 def broadcast_days_active():
@@ -37,14 +37,5 @@ def broadcast_days_active():
     projection = {
         "userId": 1, "_id": 0
     }
-    user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
-                                 filter=_filter, projection=projection)
-    payload = {
-        "action": "dynamic_message",
-        "message": "",
-        "is_notification": False
-    }
-    for user in user_data:
-        user_id = user.get("userId")
-        payload["message"] = message
-        send_chat_message(user_id=user_id, payload=payload)
+    message_replace_data = {}
+    process_dynamic_message(_filter, projection, message_replace_data, message)
