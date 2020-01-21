@@ -7,9 +7,9 @@ from common.helpers import process_dynamic_message
 
 def broadcast_days_active():
 
-    process_broadcast_days_active = int(Variable.get
-                                        ("process_broadcast_days_active", '0'))
-    if process_broadcast_days_active == 1:
+    process_broadcast_days_active_disable = int(Variable.get
+                                        ("process_broadcast_days_active_disable", '0'))
+    if process_broadcast_days_active_disable == 1:
         return
 
     message = str(Variable.get("broadcast_days_active_msg", ''))
