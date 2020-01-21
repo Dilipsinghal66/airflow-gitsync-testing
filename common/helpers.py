@@ -122,7 +122,7 @@ def process_dynamic_message(_filter, projection,
     for user in user_data:
         user_id = user.get("userId")
         patient_id = user.get("patientId")
-        if patient_id is not None:
+        if patient_id:
             patient_data = message_replace_data.get(patient_id)
             for i in range(0, len(patient_data)):
                 old = "#" + str(i) + "#"
