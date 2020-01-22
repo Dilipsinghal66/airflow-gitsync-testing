@@ -84,7 +84,7 @@ def task_success_callback(context):
 
 
 def process_dynamic_task_sql(sql_query, message):
-    action = "dynamic_message"
+
     mongo_filter_field = "patientId"
 
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
@@ -106,6 +106,12 @@ def process_dynamic_task_sql(sql_query, message):
     projection = {
         "userId": 1, "patientId": 1, "_id": 0
     }
+    process_dynamic_message(_filter, projection, message_replace_data, message)
+
+
+def process_dynamic_message(_filter, projection,
+                            message_replace_data, message):
+    action = "dynamic_message"
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter, projection=projection)
     payload = {
@@ -116,12 +122,16 @@ def process_dynamic_task_sql(sql_query, message):
     for user in user_data:
         user_id = user.get("userId")
         patient_id = user.get("patientId")
-        patient_data = message_replace_data.get(patient_id)
-        for i in range(0, len(patient_data)):
-            old = "#" + str(i) + "#"
-            new = str(patient_data[i])
-            patient_message = message.replace(old, new)
-        payload["message"] = patient_message
+        if patient_id:
+            patient_data = message_replace_data.get(patient_id)
+            for i in range(0, len(patient_data)):
+                old = "#" + str(i) + "#"
+                new = str(patient_data[i])
+                patient_message = message.replace(old, new)
+            payload["message"] = patient_message
+        else:
+            payload["message"] = message
+        log.info("Sending message for user ID " + str(user_id))
         send_chat_message(user_id=user_id, payload=payload)
 
 
