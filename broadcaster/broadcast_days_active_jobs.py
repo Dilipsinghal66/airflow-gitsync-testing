@@ -42,7 +42,8 @@ def broadcast_days_active():
     _filter = {
         mongo_filter_field: {"$in": userid_list},
         "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "^ZH"}
+        "docCode": {"$regex": "^ZH"},
+        "userFlags.active.activated": {"$eq": True}
     }
     projection = {
         "userId": 1, "_id": 0
