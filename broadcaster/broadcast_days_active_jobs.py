@@ -1,8 +1,11 @@
 from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
 import datetime
 
 from common.db_functions import get_data_from_db
 from common.helpers import process_dynamic_message
+
+log = LoggingMixin().log
 
 
 def broadcast_days_active():
@@ -24,11 +27,17 @@ def broadcast_days_active():
     projection = {
         "_id": 1
     }
-    userid_list = get_data_from_db(conn_id="mongo_user_db",
-                                   collection="user_activity",
-                                   filter=_filter,
-                                   projection=projection)
+    userid_cursor = get_data_from_db(conn_id="mongo_user_db",
+                                     collection="user_activity",
+                                     filter=_filter,
+                                     projection=projection)
     mongo_filter_field = "_id"
+
+    userid_list = []
+    for user in userid_cursor:
+        user_id = user.get("_id")
+        userid_list.append(user_id)
+        log.info("Object ID received " + str(user_id))
 
     _filter = {
         mongo_filter_field: {"$in": userid_list},
