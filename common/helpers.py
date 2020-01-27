@@ -84,7 +84,6 @@ def task_success_callback(context):
 
 
 def process_dynamic_task_sql(sql_query, message):
-
     mongo_filter_field = "patientId"
 
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
@@ -212,7 +211,7 @@ def get_deactivated_patients():
     :return: None
     """
     _filter = {
-        "userStatus": 3,
+        "userStatus": 5,
         "deleted": False,
         "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
@@ -392,7 +391,8 @@ def switch_active_cm(cm_type):
             log.info(e)
 
 
-def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
+def twilio_cleanup_channel(twilio_service=None, channel_sid=None,
+                           remove_cm=False):
     """
     This function fetches all members of the target channel defined in
     `channel_sid` and deletes the same from the channel.
@@ -406,7 +406,13 @@ def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
     members = channel.members.list()
     if members:
         for member in members:
-            member.delete()
+            if not remove_cm:
+                member.delete()
+            else:
+                attributes = member.attributes
+                is_cm = attributes.get("isCm", False)
+                if is_cm:
+                    member.delete()
         log.info(channel_sid + " cleaned of all members.")
     else:
         log.info(channel_sid + " has no members to delete.")
@@ -483,20 +489,21 @@ def twilio_cleanup():
                 patient_id) + ". Missing twilio user information")
         try:
             twilio_cleanup_channel(twilio_service=twilio_service,
-                                   channel_sid=channel_sid)
+                                   channel_sid=channel_sid,
+                                   remove_cm=True)
         except Exception as e:
             log.error(e)
-        try:
-            twilio_delete_user(twilio_service=twilio_service,
-                               user_sid=user_sid)
-        except TwilioRestException as e:
-            log.error(e.msg)
-        except Exception as e:
-            log.error(e)
-        try:
-            mark_user_deleted(_id=_id)
-        except Exception as e:
-            log.error(e)
+        # try:
+        #     twilio_delete_user(twilio_service=twilio_service,
+        #                        user_sid=user_sid)
+        # except TwilioRestException as e:
+        #     log.error(e.msg)
+        # except Exception as e:
+        #     log.error(e)
+        # try:
+        #     mark_user_deleted(_id=_id)
+        # except Exception as e:
+        #     log.error(e)
     log.info("Finished processing deactivated users for deletion. ")
 
 
