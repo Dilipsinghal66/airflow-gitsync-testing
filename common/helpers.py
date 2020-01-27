@@ -409,7 +409,7 @@ def twilio_cleanup_channel(twilio_service=None, channel_sid=None,
             if not remove_cm:
                 member.delete()
             else:
-                attributes = member.attributes
+                attributes = json.loads(member.attributes)
                 is_cm = attributes.get("isCm", False)
                 if is_cm:
                     member.delete()
