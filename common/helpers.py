@@ -99,7 +99,6 @@ def process_dynamic_task_sql(sql_query, message):
     log.info(patient_id_list)
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     projection = {
@@ -189,7 +188,6 @@ def get_patients_activated_today():
     _filter = {
         "userStatus": 4,
         "userFlags.active.activatedOn": {"$gt": today},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     projection = {"patientId": 1, "_id": 0}
@@ -213,7 +211,6 @@ def get_deactivated_patients():
     _filter = {
         "userStatus": 5,
         "deleted": False,
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
@@ -263,7 +260,6 @@ def remove_sales_cm(cm_type):
         "assignedCmType": cm_type,
         "processedSales": True,
         "userStatus": {"$ne": 4},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
@@ -344,7 +340,6 @@ def switch_active_cm(cm_type):
     _filter = {
         "userStatus": 4,
         "assignedCm": {"$nin": active_cm_list},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
 
     }
@@ -569,7 +564,6 @@ def refresh_cm_type_user_redis(cm_type="active"):
         redis_key = cm_type + "_users_" + str(cm)
         _filter = {
             "assignedCmType": cm_type,
-            "countryCode": {"$in": [91]},
             "docCode": {"$regex": doc_code},
             "assignedCm": cm
         }
@@ -791,7 +785,6 @@ def deactivate_patients(**kwargs):
     _filter = {
         "patientId": {"$in": deactivation_list},
         "userStatus": {"$ne": 3},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     projection = {
@@ -916,7 +909,6 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
             "$lt": cm_remove_date
         },
         "assignedCmType": cm_type,
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     users = get_data_from_db(
@@ -946,7 +938,6 @@ def continue_statemachine():
             remove_filter = {
                 "userId": {"$in": user_list},
                 "processedSales": {"$ne": True},
-                "countryCode": {"$in": [91]},
                 "docCode": {"$regex": "^ZH"}
             }
             sales_processed_payload = {
