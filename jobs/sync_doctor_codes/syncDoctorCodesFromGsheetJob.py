@@ -1,16 +1,18 @@
 from googleapiclient.discovery import build
 from airflow.contrib.hooks.gcp_api_base_hook import GoogleCloudBaseHook
+from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from typing import Dict, Optional
 import pandas as pd
 
 
-SPREADSHEET_ID = '1Stvnw3ezJAJYYjGBTl4ou5Tr1ZcJbmx7ChmYrDg2d1I'
+SPREADSHEET_ID = str(Variable.get('SPREADSHEET_ID', '0'))
 RANGE_NAME = 'Sheet1'
 STATUS = 4
 TYPE = 0
 DESCRIPTION = "AZ"
 INITIATED_BY = "SCHEDULED TASK"
+TABLE_NAME = ""  # Mention table name along with db name
 
 
 ######## GETTING DATA FROM GOOGLE SPREADSHEET ######
@@ -111,7 +113,7 @@ def check_for_null(input_string):
 # It helps in deciding if the query should be INSERT or UPDATE.
 def record_exist(spreadsheet_data, row, cursor):
 
-    select_query = "SELECT EXISTS(SELECT * FROM zylaapi.doc_profile  WHERE phoneno = '" + \
+    select_query = "SELECT EXISTS(SELECT * FROM " + TABLE_NAME + " WHERE phoneno = '" + \
                    str(spreadsheet_data['Phone Number (+91)'][row]) + "');"
 
     cursor.execute(select_query)
@@ -134,7 +136,7 @@ def dump_data_in_db(spreadsheet_data, cursor, connection):
 
             if record_exist(spreadsheet_data, row, cursor):
                 print("\n Update sql query")
-                update_sql_query = " UPDATE zylaapi.doc_profile SET " \
+                update_sql_query = " UPDATE " + TABLE_NAME + " SET " \
                                    "profile_image = '" + \
                                    str(check_for_null(spreadsheet_data['Photo (Keep name of photo as doctor code)'][row])) + "', " +\
                                    "name = '" + str(spreadsheet_data['Name of Dcotor'][row]) + "', " + \
@@ -155,7 +157,7 @@ def dump_data_in_db(spreadsheet_data, cursor, connection):
 
             else:
                 print("\n Insert sql query")
-                insert_sql_query = "INSERT INTO zylaapi.doc_profile (phoneno, profile_image, name, " \
+                insert_sql_query = "INSERT INTO " + TABLE_NAME + " (phoneno, profile_image, name, " \
                                "speciality, clinicHospital, location, licenseNumber, status, " \
                                "initiated_by, type, description, title, code, email) VALUES ('" + \
                                str(spreadsheet_data['Phone Number (+91)'][row]) + "', '" + \
@@ -184,11 +186,14 @@ def dump_data_in_db(spreadsheet_data, cursor, connection):
 # initializer() is the driver function for this script
 def initializer():
 
+    if SPREADSHEET_ID == '0':
+        return "Invalid Spreadsheet Id"
+
     g_sheet_hook = GoogleSheetsHook(SPREADSHEET_ID)
 
     g_sheet_hook.get_conn()
 
-    spreadsheet_data = g_sheet_hook.get_values(range_=RANGE_NAME, major_dimension="ROWS")
+    spreadsheet_data = g_sheet_hook.get_values(range=RANGE_NAME, major_dimension="ROWS")
 
     spreadsheet_data = pd.DataFrame(spreadsheet_data[1:], columns=spreadsheet_data[0])
 
