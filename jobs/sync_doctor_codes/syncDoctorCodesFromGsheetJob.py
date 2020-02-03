@@ -12,30 +12,31 @@ def schema_validation(spreadsheet_row):
     :return: bool
     """
 
-    schema = {'rows': {'type': 'list',
-                       'code': {'type': 'string', 'required': True},
-                       'name': {'type': 'string', 'required': True},
-                       'title': {'type': 'string', 'required': True},
-                       'phoneno': {'type': 'string', 'required': True},
-                       'email': {'type': 'string', 'default_setter': "None"},
-                       'speciality': {'type': 'string', 'default_setter': "None"
-                                      },
-                       'clinicHospital': {'type': 'string', 'default_setter':
-                                                            "None"},
-                       'location': {'type': 'string', 'default_setter': "None"},
-                       'profile_image': {'type': 'string', 'default_setter':
-                                                           "None"},
-                       'description': {'type': 'string', 'default_setter':
-                                                         "AZ"},
-                       'status': {'type': 'string', 'default_setter': '4'},
-                       'Type': {'type': 'integer', 'default_setter': '0'},
-                       'initiated_by': {'type': 'string',
-                                        'default_setter': "SCHEDULED TASK"},
-                       'licenseNumber': {'type': 'string', 'required': True},
-                       }}
-    document = {'rows': spreadsheet_row}
+    schema = {'row': {'type': 'list',
+                      'code': {'type': 'string', 'required': True},
+                      'name': {'type': 'string', 'required': True},
+                      'title': {'type': 'string', 'required': True},
+                      'phoneno': {'type': 'string', 'required': True},
+                      'email': {'type': 'string', 'default_setter': 'None'},
+                      'speciality': {'type': 'string',
+                                     'default_setter': 'None'},
+                      'clinicHospital': {'type': 'string',
+                                         'default_setter': 'None'},
+                      'location': {'type': 'string',
+                                   'default_setter': 'None'},
+                      'profile_image': {'type': 'string',
+                                        'default_setter': 'None'},
+                      'description': {'type': 'string',
+                                      'default_setter': 'AZ'},
+                      'status': {'type': 'integer', 'default_setter': '4'},
+                      'Type': {'type': 'integer', 'default_setter': '0'},
+                      'initiated_by': {'type': 'string',
+                                       'default_setter': 'SCHEDULED TASK'},
+                      'licenseNumber': {'type': 'string', 'required': True}
+                      }}
+    record = {'row': spreadsheet_row}
     v = Validator(schema)
-    return v.validate(document, schema)
+    return v.validate(record, schema)
 
 
 def dump_data_in_db(table_name, spreadsheet_data, engine):
@@ -47,10 +48,10 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
     :return: Nothing
     """
 
-    spreadsheet_data['description'] = "AZ"
+    spreadsheet_data['description'] = 'AZ'
     spreadsheet_data['status'] = 4
     spreadsheet_data['type'] = 0
-    spreadsheet_data['initiated_by'] = "SCHEDULED TASK"
+    spreadsheet_data['initiated_by'] = 'SCHEDULED TASK'
     spreadsheet_data['licenseNumber'] = spreadsheet_data['Doctor Code']
 
     row_list = [[]]
@@ -97,13 +98,17 @@ def initializer():
 
     sheet_conn = sheet_hook.get_conn()
 
+    if not sheet_conn:
+        return
+
     spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
                                                    major_dimension='ROWS').\
         get('values')
 
-    spreadsheet_data = pd.DataFrame(spreadsheet_data[1:],
+    spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
                                     columns=spreadsheet_data[0])
 
-    engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+    engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
 
-    dump_data_in_db(table_name, spreadsheet_data, engine)
+    dump_data_in_db(table_name=table_name, spreadsheet_data=spreadsheet_data,
+                    engine=engine)
