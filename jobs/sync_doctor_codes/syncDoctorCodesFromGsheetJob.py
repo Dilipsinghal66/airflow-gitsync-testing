@@ -6,7 +6,7 @@ from common.custom_hooks.google_sheets_hook import GSheetsHook
 
 def dump_data_in_db(table_name, spreadsheet_data, engine):
     """
-
+    Dumps data into the database
     :param table_name: Name of the table where data is to be written
     :param spreadsheet_data: Data from the GSheetsHook
     :param engine: MySqlHook object from common.db_functions
@@ -34,21 +34,22 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
                                      'type, initiated_by, licenseNumber',
                        commit_every=100, replace=True)
 
-#    print("Successfully Committed")
-
 
 def initializer():
-    # initializer() is the driver function for this script
+    """
+    Driver function for this script
+    :return: Nothing
+    """
 
-    spreadsheet_id_conn_id = str(Variable.get('spreadsheet_id_conn_id', '0'))
-    spreadsheet_id_conn_id.split('|')
-    spreadsheet_id = spreadsheet_id_conn_id[0]
-    gcp_conn_id = spreadsheet_id_conn_id[1]
+    config_var = str(Variable.get('spreadsheet_id_conn_id', '0'))
 
-    if spreadsheet_id == '0':
+    if config_var == '0':
         return
 
-    table_name = ""  # Mention table name along with db name
+    config_var.split('|')
+    spreadsheet_id = config_var[0]
+    gcp_conn_id = config_var[1]
+    table_name = config_var[2]
 
     range_names = ['Sheet1!A:D', 'Sheet1!F:J']
 
