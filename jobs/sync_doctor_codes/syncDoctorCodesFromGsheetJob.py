@@ -193,7 +193,7 @@ def initializer():
 
     g_sheet_hook.get_conn()
 
-    spreadsheet_data = g_sheet_hook.get_values(range=RANGE_NAME, major_dimension="ROWS")
+    spreadsheet_data = g_sheet_hook.get_values(range_=RANGE_NAME, major_dimension="ROWS")
 
     spreadsheet_data = pd.DataFrame(spreadsheet_data[1:], columns=spreadsheet_data[0])
 
