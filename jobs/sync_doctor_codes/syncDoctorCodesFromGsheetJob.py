@@ -6,6 +6,11 @@ from cerberus import Validator
 
 
 def schema_validation(spreadsheet_row):
+    """
+    Validation of record to be inserted in database
+    :param spreadsheet_row: A record from the spreadsheet
+    :return: bool
+    """
 
     schema = {'rows': {'type': 'list',
                        'code': {'type': 'string', 'required': True},
@@ -23,7 +28,7 @@ def schema_validation(spreadsheet_row):
                        'description': {'type': 'string', 'default_setter':
                                                          "AZ"},
                        'status': {'type': 'string', 'default_setter': '4'},
-                       'dType': {'type': 'integer', 'default_setter': '0'},
+                       'Type': {'type': 'integer', 'default_setter': '0'},
                        'initiated_by': {'type': 'string',
                                         'default_setter': "SCHEDULED TASK"},
                        'licenseNumber': {'type': 'string', 'required': True},
@@ -52,9 +57,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 
     for row in range(len(spreadsheet_data)):
 
-        if spreadsheet_data['Phone Number (+91)'][row] is not None:
-            if schema_validation(spreadsheet_data[row]):
-                row_list.append(spreadsheet_data[row])
+        if schema_validation(spreadsheet_data[row]):
+            row_list.append(spreadsheet_data[row])
 
     engine.insert_rows(table_name, row_list,
                        target_fields='code, name, title, phoneno, email, '
@@ -103,5 +107,3 @@ def initializer():
     engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
 
     dump_data_in_db(table_name, spreadsheet_data, engine)
-
-
