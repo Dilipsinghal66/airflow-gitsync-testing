@@ -84,7 +84,6 @@ def task_success_callback(context):
 
 
 def process_dynamic_task_sql(sql_query, message):
-
     mongo_filter_field = "patientId"
 
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
@@ -100,7 +99,6 @@ def process_dynamic_task_sql(sql_query, message):
     log.info(patient_id_list)
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     projection = {
@@ -190,7 +188,6 @@ def get_patients_activated_today():
     _filter = {
         "userStatus": 4,
         "userFlags.active.activatedOn": {"$gt": today},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     projection = {"patientId": 1, "_id": 0}
@@ -212,9 +209,8 @@ def get_deactivated_patients():
     :return: None
     """
     _filter = {
-        "userStatus": 3,
+        "userStatus": 5,
         "deleted": False,
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
@@ -264,7 +260,6 @@ def remove_sales_cm(cm_type):
         "assignedCmType": cm_type,
         "processedSales": True,
         "userStatus": {"$ne": 4},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
@@ -304,10 +299,11 @@ def add_sales_cm(cm_type):
                                       microsecond=0, tzinfo=local_tz)
     yesterday = today - timedelta(days=1)
     _filter = {
-        "assignedCmType": {"$ne": "sales"},
+        "assignedCmType": "normal",
         "processedSales": {"$ne": True},
         "userStatus": {"$ne": 4},
-        "_created": {"$gt": yesterday}
+        "_created": {"$gt": yesterday},
+        "docCode": {"$regex": "^ZH"}
     }
     eligible_users = get_data_from_db(conn_id="mongo_user_db",
                                       filter=_filter, collection="user")
@@ -344,7 +340,6 @@ def switch_active_cm(cm_type):
     _filter = {
         "userStatus": 4,
         "assignedCm": {"$nin": active_cm_list},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
 
     }
@@ -391,7 +386,8 @@ def switch_active_cm(cm_type):
             log.info(e)
 
 
-def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
+def twilio_cleanup_channel(twilio_service=None, channel_sid=None,
+                           remove_cm=False):
     """
     This function fetches all members of the target channel defined in
     `channel_sid` and deletes the same from the channel.
@@ -405,7 +401,13 @@ def twilio_cleanup_channel(twilio_service=None, channel_sid=None):
     members = channel.members.list()
     if members:
         for member in members:
-            member.delete()
+            if not remove_cm:
+                member.delete()
+            else:
+                attributes = json.loads(member.attributes)
+                is_cm = attributes.get("isCm", False)
+                if is_cm:
+                    member.delete()
         log.info(channel_sid + " cleaned of all members.")
     else:
         log.info(channel_sid + " has no members to delete.")
@@ -482,20 +484,21 @@ def twilio_cleanup():
                 patient_id) + ". Missing twilio user information")
         try:
             twilio_cleanup_channel(twilio_service=twilio_service,
-                                   channel_sid=channel_sid)
+                                   channel_sid=channel_sid,
+                                   remove_cm=True)
         except Exception as e:
             log.error(e)
-        try:
-            twilio_delete_user(twilio_service=twilio_service,
-                               user_sid=user_sid)
-        except TwilioRestException as e:
-            log.error(e.msg)
-        except Exception as e:
-            log.error(e)
-        try:
-            mark_user_deleted(_id=_id)
-        except Exception as e:
-            log.error(e)
+        # try:
+        #     twilio_delete_user(twilio_service=twilio_service,
+        #                        user_sid=user_sid)
+        # except TwilioRestException as e:
+        #     log.error(e.msg)
+        # except Exception as e:
+        #     log.error(e)
+        # try:
+        #     mark_user_deleted(_id=_id)
+        # except Exception as e:
+        #     log.error(e)
     log.info("Finished processing deactivated users for deletion. ")
 
 
@@ -561,7 +564,6 @@ def refresh_cm_type_user_redis(cm_type="active"):
         redis_key = cm_type + "_users_" + str(cm)
         _filter = {
             "assignedCmType": cm_type,
-            "countryCode": {"$in": [91]},
             "docCode": {"$regex": doc_code},
             "assignedCm": cm
         }
@@ -783,7 +785,6 @@ def deactivate_patients(**kwargs):
     _filter = {
         "patientId": {"$in": deactivation_list},
         "userStatus": {"$ne": 3},
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     projection = {
@@ -908,7 +909,6 @@ def get_created_users_by_cm_by_days(cm_type="sales"):
             "$lt": cm_remove_date
         },
         "assignedCmType": cm_type,
-        "countryCode": {"$in": [91]},
         "docCode": {"$regex": "^ZH"}
     }
     users = get_data_from_db(
@@ -938,7 +938,6 @@ def continue_statemachine():
             remove_filter = {
                 "userId": {"$in": user_list},
                 "processedSales": {"$ne": True},
-                "countryCode": {"$in": [91]},
                 "docCode": {"$regex": "^ZH"}
             }
             sales_processed_payload = {
@@ -992,3 +991,23 @@ def continue_statemachine():
         except Exception as e:
             log.error(e)
             log.error(user_list)
+
+
+def get_distinct_care_managers():
+    query_filter = "cmType"
+    query_type = "distinct"
+    _filter = {
+        "$or": [
+            {"$ne": "deleted"},
+            {"deleted": False}
+        ]
+    }
+    distinct_cm_list = get_data_from_db(
+        db_type="mongo",
+        collection="careManager",
+        query_filter=query_filter,
+        query_type=query_type,
+        filter=_filter
+    )
+    log.info(distinct_cm_list)
+    return distinct_cm_list

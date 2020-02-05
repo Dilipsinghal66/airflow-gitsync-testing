@@ -3,26 +3,25 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
-from common.helpers import deactivate_patients
+from common.helpers import get_distinct_care_managers
 from config import local_tz, default_args
 
-deactivate_patients_dag = DAG(
-    dag_id="DeactivatePatients",
+cleanup_care_managers_dag = DAG(
+    dag_id="cleanup_care_managers",
     default_args=default_args,
-    schedule_interval="@daily",
+    schedule_interval="@every_5_minutes",
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
     dagrun_timeout=timedelta(minutes=1),
 )
 
-deactivate_patients_task = PythonOperator(
-    task_id="deactivatePatients",
+get_distinct_cm = PythonOperator(
+    task_id="get_distinct_cm",
     task_concurrency=1,
-    python_callable=deactivate_patients,
-    dag=deactivate_patients_dag,
-    op_kwargs={"userStatus": 5, "assignedCmType": "normal", "assignedCm": 0},
+    python_callable=get_distinct_care_managers,
+    dag=cleanup_care_managers_dag,
+    op_kwargs={},
     pool="scheduled_jobs_pool",
-    execution_timeout=timedelta(minutes=1),
-    on_failure_callback=None
+    retry_exponential_backoff=True
 )
