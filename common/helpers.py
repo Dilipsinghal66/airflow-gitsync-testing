@@ -991,3 +991,23 @@ def continue_statemachine():
         except Exception as e:
             log.error(e)
             log.error(user_list)
+
+
+def get_distinct_care_managers():
+    query_filter = "cmType"
+    query_type = "distinct"
+    _filter = {
+        "$or": [
+            {"$ne": "deleted"},
+            {"deleted": False}
+        ]
+    }
+    distinct_cm_list = get_data_from_db(
+        db_type="mongo",
+        collection="careManager",
+        query_filter=query_filter,
+        query_type=query_type,
+        filter=_filter
+    )
+    log.info(distinct_cm_list)
+    return distinct_cm_list
