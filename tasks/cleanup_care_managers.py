@@ -16,8 +16,8 @@ cleanup_care_managers_dag = DAG(
     dagrun_timeout=timedelta(minutes=1),
 )
 
-add_normal_cm_task = PythonOperator(
-    task_id="populate_normal_cm",
+get_distinct_cm = PythonOperator(
+    task_id="get_distinct_cm",
     task_concurrency=1,
     python_callable=get_distinct_care_managers,
     dag=cleanup_care_managers_dag,
