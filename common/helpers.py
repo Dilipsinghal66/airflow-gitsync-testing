@@ -1004,6 +1004,7 @@ def get_distinct_care_managers():
     }
     distinct_cm_list = get_data_from_db(
         db_type="mongo",
+        conn_id="mongo_cm_db",
         collection="careManager",
         query_filter=query_filter,
         query_type=query_type,
