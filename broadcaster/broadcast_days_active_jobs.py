@@ -50,4 +50,5 @@ def broadcast_days_active():
     }
     message_replace_data = {}
     action = "dynamic_message"
-    process_dynamic_message(_filter, projection, message_replace_data, message, action)
+    process_dynamic_message(_filter, projection,
+                            message_replace_data, message, action)
