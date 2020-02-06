@@ -49,6 +49,7 @@ def send_vital_reminder_func():
                 patient_data_list.append(patient_id)
                 message_replace_data[patient_id] = patient_data_list
                 action = "vitals_reminder_6_am"
+                log.info("patient_data_list " + str(patient_data_list))
                 log.info("Message " + message)
                 patient_user_id_conv_msg(patient_data_list,
                                          message_replace_data, message, action)
