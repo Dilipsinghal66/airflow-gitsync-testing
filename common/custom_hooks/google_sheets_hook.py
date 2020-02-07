@@ -43,7 +43,8 @@ class GSheetsHook(GoogleCloudBaseHook):
         """
         if not self._conn:
             http_authorized = self._authorize()
-            self._conn = build('sheets', self.api_version, http=http_authorized, cache_discovery=False)
+            self._conn = build('sheets', self.api_version,
+                               http=http_authorized, cache_discovery=False)
 
         return self._conn
 
@@ -57,23 +58,28 @@ class GSheetsHook(GoogleCloudBaseHook):
     ) -> Dict:
         """
         Gets values from Google Sheet from a single range
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/get
+        https://developers.google.com/sheets/api/reference/rest/v4/
+        spreadsheets.values/get
         :param range_: The A1 notation of the values to retrieve.
         :type range_: str
-        :param major_dimension: Indicates which dimension an operation should apply to.
+        :param major_dimension: Indicates which dimension an operation should
+        apply to.
             DIMENSION_UNSPECIFIED, ROWS, or COLUMNS
         :type major_dimension: str
-        :param value_render_option: Determines how values should be rendered in the output.
+        :param value_render_option: Determines how values should be rendered
+        in the output.
             FORMATTED_VALUE, UNFORMATTED_VALUE, or FORMULA
         :type value_render_option: str
-        :param date_time_render_option: Determines how dates should be rendered in the output.
+        :param date_time_render_option: Determines how dates should be
+        rendered in the output.
             SERIAL_NUMBER or FORMATTED_STRING
         :type date_time_render_option: str
         :return: Google Sheets API response.
         :rtype: Dict
         """
         service = self.get_conn()
-        response = service.spreadsheets().values().get(  # pylint: disable=no-member
+        response = service.spreadsheets().values().get(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             range=range_,
             majorDimension=major_dimension,
@@ -93,23 +99,28 @@ class GSheetsHook(GoogleCloudBaseHook):
     ) -> Dict:
         """
         Gets values from Google Sheet from a list of ranges
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGet
+        https://developers.google.com/sheets/api/reference/rest/
+        v4/spreadsheets.values/batchGet
         :param ranges: The A1 notation of the values to retrieve.
         :type ranges: List
-        :param major_dimension: Indicates which dimension an operation should apply to.
+        :param major_dimension: Indicates which dimension an operation
+        should apply to.
             DIMENSION_UNSPECIFIED, ROWS, or COLUMNS
         :type major_dimension: str
-        :param value_render_option: Determines how values should be rendered in the output.
+        :param value_render_option: Determines how values should be rendered
+        in the output.
             FORMATTED_VALUE, UNFORMATTED_VALUE, or FORMULA
         :type value_render_option: str
-        :param date_time_render_option: Determines how dates should be rendered in the output.
+        :param date_time_render_option: Determines how dates should be
+        rendered in the output.
             SERIAL_NUMBER or FORMATTED_STRING
         :type date_time_render_option: str
         :return: Google Sheets API response.
         :rtype: Dict
         """
         service = self.get_conn()
-        response = service.spreadsheets().values().batchGet(  # pylint: disable=no-member
+        response = service.spreadsheets().values().batchGet(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             ranges=ranges,
             majorDimension=major_dimension,
@@ -132,24 +143,29 @@ class GSheetsHook(GoogleCloudBaseHook):
     ) -> Dict:
         """
         Updates values from Google Sheet from a single range
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/update
+        https://developers.google.com/sheets/api/reference/rest/v4/
+        spreadsheets.values/update
         :param range_: The A1 notation of the values to retrieve.
         :type range_: str
         :param values: Data within a range of the spreadsheet.
         :type values: List
-        :param major_dimension: Indicates which dimension an operation should apply to.
+        :param major_dimension: Indicates which dimension an operation should
+        apply to.
             DIMENSION_UNSPECIFIED, ROWS, or COLUMNS
         :type major_dimension: str
-        :param value_input_option: Determines how input data should be interpreted.
+        :param value_input_option: Determines how input data should be
+        interpreted.
             RAW or USER_ENTERED
         :type value_input_option: str
-        :param include_values_in_response: Determines if the update response should
-            include the values of the cells that were updated.
+        :param include_values_in_response: Determines if the update response
+        should include the values of the cells that were updated.
         :type include_values_in_response: bool
-        :param value_render_option: Determines how values should be rendered in the output.
+        :param value_render_option: Determines how values should be rendered
+        in the output.
             FORMATTED_VALUE, UNFORMATTED_VALUE, or FORMULA
         :type value_render_option: str
-        :param date_time_render_option: Determines how dates should be rendered in the output.
+        :param date_time_render_option: Determines how dates should be
+        rendered in the output.
             SERIAL_NUMBER or FORMATTED_STRING
         :type date_time_render_option: str
         :return: Google Sheets API response.
@@ -161,7 +177,8 @@ class GSheetsHook(GoogleCloudBaseHook):
             "majorDimension": major_dimension,
             "values": values
         }
-        response = service.spreadsheets().values().update(  # pylint: disable=no-member
+        response = service.spreadsheets().values().update(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             range=range_,
             valueInputOption=value_input_option,
@@ -186,24 +203,29 @@ class GSheetsHook(GoogleCloudBaseHook):
     ) -> Dict:
         """
         Updates values from Google Sheet for multiple ranges
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdate
+        https://developers.google.com/sheets/api/reference/rest/v4/
+        spreadsheets.values/batchUpdate
         :param ranges: The A1 notation of the values to retrieve.
         :type ranges: List
         :param values: Data within a range of the spreadsheet.
         :type values: List
-        :param major_dimension: Indicates which dimension an operation should apply to.
+        :param major_dimension: Indicates which dimension an operation should
+        apply to.
             DIMENSION_UNSPECIFIED, ROWS, or COLUMNS
         :type major_dimension: str
-        :param value_input_option: Determines how input data should be interpreted.
+        :param value_input_option: Determines how input data should be
+        interpreted.
             RAW or USER_ENTERED
         :type value_input_option: str
-        :param include_values_in_response: Determines if the update response should
-            include the values of the cells that were updated.
+        :param include_values_in_response: Determines if the update response
+        should include the values of the cells that were updated.
         :type include_values_in_response: bool
-        :param value_render_option: Determines how values should be rendered in the output.
+        :param value_render_option: Determines how values should be rendered
+        in the output.
             FORMATTED_VALUE, UNFORMATTED_VALUE, or FORMULA
         :type value_render_option: str
-        :param date_time_render_option: Determines how dates should be rendered in the output.
+        :param date_time_render_option: Determines how dates should be rendered
+        in the output.
             SERIAL_NUMBER or FORMATTED_STRING
         :type date_time_render_option: str
         :return: Google Sheets API response.
@@ -213,7 +235,8 @@ class GSheetsHook(GoogleCloudBaseHook):
             raise AirflowException(
                 "'Ranges' and and 'Lists' must be of equal length. \n \
                 'Ranges' is of length: {} and \n \
-                'Values' is of length: {}.".format(str(len(ranges)), str(len(values))))
+                'Values' is of length: {}.".format(str(len(ranges)),
+                                                   str(len(values))))
         service = self.get_conn()
         data = []
         for idx, range_ in enumerate(ranges):
@@ -230,7 +253,8 @@ class GSheetsHook(GoogleCloudBaseHook):
             "responseValueRenderOption": value_render_option,
             "responseDateTimeRenderOption": date_time_render_option
         }
-        response = service.spreadsheets().values().batchUpdate(  # pylint: disable=no-member
+        response = service.spreadsheets().values().batchUpdate(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             body=body
         ).execute(num_retries=self.num_retries)
@@ -251,27 +275,33 @@ class GSheetsHook(GoogleCloudBaseHook):
     ) -> Dict:
         """
         Append values from Google Sheet from a single range
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/append
+        https://developers.google.com/sheets/api/reference/rest/v4/
+        spreadsheets.values/append
         :param range_: The A1 notation of the values to retrieve.
         :type range_: str
         :param values: Data within a range of the spreadsheet.
         :type values: List
-        :param major_dimension: Indicates which dimension an operation should apply to.
+        :param major_dimension: Indicates which dimension an operation should
+        apply to.
             DIMENSION_UNSPECIFIED, ROWS, or COLUMNS
         :type major_dimension: str
-        :param value_input_option: Determines how input data should be interpreted.
+        :param value_input_option: Determines how input data should be
+        interpreted.
             RAW or USER_ENTERED
         :type value_input_option: str
-        :param insert_data_option: Determines how existing data is changed when new data is input.
+        :param insert_data_option: Determines how existing data is changed when
+        new data is input.
             OVERWRITE or INSERT_ROWS
         :type insert_data_option: str
-        :param include_values_in_response: Determines if the update response should
-            include the values of the cells that were updated.
+        :param include_values_in_response: Determines if the update response
+        should include the values of the cells that were updated.
         :type include_values_in_response: bool
-        :param value_render_option: Determines how values should be rendered in the output.
+        :param value_render_option: Determines how values should be rendered in
+        the output.
             FORMATTED_VALUE, UNFORMATTED_VALUE, or FORMULA
         :type value_render_option: str
-        :param date_time_render_option: Determines how dates should be rendered in the output.
+        :param date_time_render_option: Determines how dates should be rendered
+        in the output.
             SERIAL_NUMBER or FORMATTED_STRING
         :type date_time_render_option: str
         :return: Google Sheets API response.
@@ -283,7 +313,8 @@ class GSheetsHook(GoogleCloudBaseHook):
             "majorDimension": major_dimension,
             "values": values
         }
-        response = service.spreadsheets().values().append(  # pylint: disable=no-member
+        response = service.spreadsheets().values().append(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             range=range_,
             valueInputOption=value_input_option,
@@ -300,14 +331,16 @@ class GSheetsHook(GoogleCloudBaseHook):
     def clear(self, range_: str) -> Dict:
         """
         Clear values from Google Sheet from a single range
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/clear
+        https://developers.google.com/sheets/api/reference/rest/v4/
+        spreadsheets.values/clear
         :param range_: The A1 notation of the values to retrieve.
         :type range_: str
         :return: Google Sheets API response.
         :rtype: Dict
         """
         service = self.get_conn()
-        response = service.spreadsheets().values().clear(  # pylint: disable=no-member
+        response = service.spreadsheets().values().clear(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             range=range_
         ).execute(num_retries=self.num_retries)
@@ -318,7 +351,8 @@ class GSheetsHook(GoogleCloudBaseHook):
     def batch_clear(self, ranges: List) -> Dict:
         """
         Clear values from Google Sheet from a list of ranges
-        https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClear
+        https://developers.google.com/sheets/api/reference/rest/v4/
+        spreadsheets.values/batchClear
         :param ranges: The A1 notation of the values to retrieve.
         :type ranges: List
         :return: Google Sheets API response.
@@ -328,7 +362,8 @@ class GSheetsHook(GoogleCloudBaseHook):
         body = {
             "ranges": ranges
         }
-        response = service.spreadsheets().values().batchClear(  # pylint: disable=no-member
+        response = service.spreadsheets().values().batchClear(
+            # pylint: disable=no-member
             spreadsheetId=self.spreadsheet_id,
             body=body
         ).execute(num_retries=self.num_retries)
