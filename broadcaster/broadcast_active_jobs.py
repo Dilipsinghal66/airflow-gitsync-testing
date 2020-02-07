@@ -16,5 +16,5 @@ def broadcast_active():
                                  'where status = 4'))
 
     message = str(Variable.get("broadcast_active_msg", ''))
-
-    process_dynamic_task_sql(sql_query, message)
+    action = "dynamic_message"
+    process_dynamic_task_sql(sql_query, message, action)
