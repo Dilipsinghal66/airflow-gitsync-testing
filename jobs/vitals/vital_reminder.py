@@ -2,6 +2,9 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import patient_user_id_conv_msg
+from airflow.utils.log.logging_mixin import LoggingMixin
+
+log = LoggingMixin().log
 
 
 def send_vital_reminder_func():
@@ -45,7 +48,9 @@ def send_vital_reminder_func():
                 message_replace_data = {}
                 patient_data_list.append(patient_id)
                 message_replace_data[patient_id] = patient_data_list
-                action = "vitals_reminder_6_am"
+                action = "vitals_reminder"
+                log.info("patient_data_list " + str(patient_data_list))
+                log.info("Message " + message)
                 patient_user_id_conv_msg(patient_data_list,
                                          message_replace_data, message, action)
 
