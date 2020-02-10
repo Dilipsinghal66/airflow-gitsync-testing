@@ -104,7 +104,7 @@ def initializer():
     if not config_var:
         raise ValueError("Config variables not defined")
 
-    if len(config_var) < 3 or len(config_var) > 3:
+    if len(config_var) != 3:
         raise ValueError("Incomplete config variables")
 
     config_var.split('|')
