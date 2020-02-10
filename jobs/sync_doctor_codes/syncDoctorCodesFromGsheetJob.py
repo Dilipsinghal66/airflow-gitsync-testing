@@ -108,10 +108,10 @@ def initializer():
     if not config_var:
         raise ValueError("Config variables not defined")
 
+    config_var.split('|')
     if len(config_var) != 3:
         raise ValueError("Incomplete config variables")
 
-    config_var.split('|')
     spreadsheet_id = config_var[0]
     gcp_conn_id = config_var[1]
     table_name = config_var[2]
