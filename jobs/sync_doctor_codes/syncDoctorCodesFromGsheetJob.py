@@ -116,8 +116,6 @@ def initializer():
     gcp_conn_id = config_var[1]
     table_name = config_var[2]
 
-    range_names = ['Sheet1!A:D', 'Sheet1!F:J']
-
     sheet_hook = GSheetsHook(
         spreadsheet_id=spreadsheet_id,
         gcp_conn_id=gcp_conn_id,
@@ -134,9 +132,10 @@ def initializer():
         raise e
 
     try:
-        spreadsheet_data = sheet_hook.batch_get_values(ranges=range_names,
-                                                       major_dimension='ROWS')\
-            .get('values')
+
+        spreadsheet_data = sheet_hook.get_values(range_='Sheet1!A:J',
+                                                 major_dimension='ROWS'
+                                                 ).get('values')
 
     except Exception as e:
         warning_message = "Data retrieval from Google Sheet failed"
@@ -146,6 +145,7 @@ def initializer():
 
     spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
                                     columns=spreadsheet_data[0])
+    spreadsheet_data.drop(spreadsheet_data['Whatsapp No. (+91)'], inplace=True)
 
     try:
         dump_data_in_db(table_name=table_name,
