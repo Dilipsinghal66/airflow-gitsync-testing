@@ -75,7 +75,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
             row_list.append(spreadsheet_data[row])
 
         else:
-            log.error("Validation failed for record " + str(row))
+            log.info("Validation failed for record " + str(row))
 
     try:
         engine.insert_rows(table_name,
@@ -93,7 +93,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
     except Exception as e:
         warning_message = "Data insertion into mysql database failed"
         log.warning(warning_message)
-        log.err(e, exc_info=True)
+        log.error(e, exc_info=True)
         raise e
 
 
@@ -128,7 +128,7 @@ def initializer():
     except Exception as e:
         warning_message = "Connection to mysql database failed."
         log.warning(warning_message)
-        log.err(e, exc_info=True)
+        log.error(e, exc_info=True)
         raise e
 
     try:
@@ -140,7 +140,7 @@ def initializer():
     except Exception as e:
         warning_message = "Data retrieval from Google Sheet failed"
         log.warning(warning_message)
-        log.err(e, exc_info=True)
+        log.error(e, exc_info=True)
         raise e
 
     spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
@@ -155,5 +155,5 @@ def initializer():
     except Exception as e:
         warning_message = "Data dumping into database failed"
         log.warning(warning_message)
-        log.err(e, exc_info=True)
+        log.error(e, exc_info=True)
         raise e
