@@ -70,9 +70,11 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 
     for row in range(len(spreadsheet_data)):
 
-        if schema_validation(schema, spreadsheet_data[row]):
+        df_to_list = list(spreadsheet_data[row:row + 1])
+
+        if schema_validation(schema, df_to_list):
             log.info("Validation successful for record " + str(row))
-            row_list.append(spreadsheet_data[row])
+            row_list.append(df_to_list)
 
         else:
             log.info("Validation failed for record " + str(row))
