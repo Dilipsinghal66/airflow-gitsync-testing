@@ -125,15 +125,6 @@ def initializer():
     )
 
     try:
-        sheet_conn = sheet_hook.get_conn()
-
-    except Exception as e:
-        warning_message = "Google Sheets API failed"
-        log.warning(warning_message)
-        log.err(e, exc_info=True)
-        raise e
-
-    try:
         engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
 
     except Exception as e:
@@ -143,7 +134,7 @@ def initializer():
         raise e
 
     try:
-        spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
+        spreadsheet_data = sheet_hook.batch_get_values(ranges=range_names,
                                                        major_dimension='ROWS')\
             .get('values')
 
