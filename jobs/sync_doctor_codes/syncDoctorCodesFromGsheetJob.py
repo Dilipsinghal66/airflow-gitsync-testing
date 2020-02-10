@@ -78,13 +78,17 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
             log.error("Validation failed for record " + str(row))
 
     try:
-        engine.insert_rows(table_name, row_list,
-                           target_fields='code, name, title, phoneno, email, '
-                                         'speciality, clinicHospital, '
-                                         'location, profile_image, '
-                                         'description, status, type, '
-                                         'initiated_by, licenseNumber',
-                           commit_every=100, replace=True)
+        engine.insert_rows(table_name,
+                           row_list,
+                           target_fields=['code', 'name', 'title', 'phoneno',
+                                          'email', 'speciality',
+                                          'clinicHospital', 'location',
+                                          'profile_image', 'description',
+                                          'status', 'type', 'initiated_by',
+                                          'licenseNumber'],
+                           commit_every=100,
+                           replace=True
+                           )
 
     except Exception as e:
         warning_message = "Data insertion into mysql database failed"
