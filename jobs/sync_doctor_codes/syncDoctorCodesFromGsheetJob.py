@@ -79,9 +79,10 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
     try:
         engine.insert_rows(table_name, row_list,
                            target_fields='code, name, title, phoneno, email, '
-                                         'speciality, clinicHospital, location,'
-                                         ' profile_image, description, status, '
-                                         'type, initiated_by, licenseNumber',
+                                         'speciality, clinicHospital, '
+                                         'location, profile_image, '
+                                         'description, status, type, '
+                                         'initiated_by, licenseNumber',
                            commit_every=100, replace=True)
 
     except Exception as e:
@@ -128,8 +129,8 @@ def initializer():
     try:
 
         spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
-                                                       major_dimension='ROWS').\
-            get('values')
+                                                       major_dimension='ROWS')\
+            .get('values')
 
         spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
                                         columns=spreadsheet_data[0])
@@ -140,4 +141,3 @@ def initializer():
 
     except Exception as e:
         log.err(e, exc_info=True)
-
