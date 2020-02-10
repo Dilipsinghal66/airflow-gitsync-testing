@@ -3,35 +3,49 @@ import pandas as pd
 from airflow.models import Variable
 from common.custom_hooks.google_sheets_hook import GSheetsHook
 from cerberus import Validator
+from airflow.utils.log.logging_mixin import LoggingMixin
+
+log = LoggingMixin().log
 
 
-def schema_validation(spreadsheet_row):
+def schema_validation(schema, spreadsheet_row):
     """
     Validation of record to be inserted in database
+    :param schema: Validation Schema
     :param spreadsheet_row: A record from the spreadsheet
     :return: bool
     """
-
-    schema = {'row': {'type': 'list',
-                      'code': {'type': 'string', 'required': True},
-                      'name': {'type': 'string', 'required': True},
-                      'title': {'type': 'string', 'required': True},
-                      'phoneno': {'type': 'string', 'required': True},
-                      'email': {'type': 'string', 'default': 'None'},
-                      'speciality': {'type': 'string', 'default': 'None'},
-                      'clinicHospital': {'type': 'string', 'default': 'None'},
-                      'location': {'type': 'string', 'default': 'None'},
-                      'profile_image': {'type': 'string', 'default': 'None'},
-                      'description': {'type': 'string', 'default': 'AZ'},
-                      'status': {'type': 'integer', 'default': 4},
-                      'Type': {'type': 'integer', 'default': 0},
-                      'initiated_by': {'type': 'string',
-                                       'default': 'SCHEDULED TASK'},
-                      'licenseNumber': {'type': 'string', 'required': True}
-                      }}
     record = {'row': spreadsheet_row}
+
     v = Validator(schema)
     return v.validate(record, schema)
+
+
+def make_schema():
+    """
+    Making validation schema
+    :return: Validation schema
+    """
+    log.info("Making validation schema")
+
+    schema = {'row': {'type': 'list',
+              'items':
+                      [{'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'AZ'},
+                       {'type': 'integer', 'default': 4},
+                       {'type': 'integer', 'default': 0},
+                       {'type': 'string', 'default': 'SCHEDULED TASK'},
+                       {'type': 'string', 'required': True}]}}
+
+    return schema
 
 
 def dump_data_in_db(table_name, spreadsheet_data, engine):
@@ -51,17 +65,36 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 
     row_list = [[]]
 
+    schema = make_schema()
+    log.info("Validation schema received")
+
     for row in range(len(spreadsheet_data)):
 
-        if schema_validation(spreadsheet_data[row]):
+        if schema_validation(schema, spreadsheet_data[row]):
+            log.info("Validation successful for record " + str(row))
             row_list.append(spreadsheet_data[row])
 
-    engine.insert_rows(table_name, row_list,
-                       target_fields='code, name, title, phoneno, email, '
-                                     'speciality, clinicHospital, location, '
-                                     'profile_image, description, status, '
-                                     'type, initiated_by, licenseNumber',
-                       commit_every=100, replace=True)
+        else:
+            log.error("Validation failed for record " + str(row))
+
+    try:
+        engine.insert_rows(table_name,
+                           row_list,
+                           target_fields=['code', 'name', 'title', 'phoneno',
+                                          'email', 'speciality',
+                                          'clinicHospital', 'location',
+                                          'profile_image', 'description',
+                                          'status', 'type', 'initiated_by',
+                                          'licenseNumber'],
+                           commit_every=100,
+                           replace=True
+                           )
+
+    except Exception as e:
+        warning_message = "Data insertion into mysql database failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
 
 
 def initializer():
@@ -70,13 +103,13 @@ def initializer():
     :return: Nothing
     """
 
-    config_var = str(Variable.get('config_var', '0'))
+    config_var = Variable.get('doctor_sync_config', None)
 
-    if config_var == '0':
-        return
+    if not config_var:
+        raise ValueError("Config variables not defined")
 
-    if len(config_var) < 3 or len(config_var) > 3:
-        return
+    if len(config_var) != 3:
+        raise ValueError("Incomplete config variables")
 
     config_var.split('|')
     spreadsheet_id = config_var[0]
@@ -91,19 +124,45 @@ def initializer():
         api_version="v4"
     )
 
-    sheet_conn = sheet_hook.get_conn()
+    try:
+        sheet_conn = sheet_hook.get_conn()
 
-    if not sheet_conn:
-        return
+    except Exception as e:
+        warning_message = "Google Sheets API failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
 
-    spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
-                                                   major_dimension='ROWS').\
-        get('values')
+    try:
+        engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
+
+    except Exception as e:
+        warning_message = "Connection to mysql database failed."
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
+
+    try:
+        spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
+                                                       major_dimension='ROWS')\
+            .get('values')
+
+    except Exception as e:
+        warning_message = "Data retrieval from Google Sheet failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
 
     spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
                                     columns=spreadsheet_data[0])
 
-    engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
+    try:
+        dump_data_in_db(table_name=table_name,
+                        spreadsheet_data=spreadsheet_data,
+                        engine=engine)
 
-    dump_data_in_db(table_name=table_name, spreadsheet_data=spreadsheet_data,
-                    engine=engine)
+    except Exception as e:
+        warning_message = "Data dumping into database failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
