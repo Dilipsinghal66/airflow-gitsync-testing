@@ -8,17 +8,20 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 log = LoggingMixin().log
 
 
-def schema_validation(schema, spreadsheet_row):
+def schema_validation(validator_obj, spreadsheet_row):
     """
     Validation of record to be inserted in database
-    :param schema: Validation Schema
+    :param validator_obj: Validator object
     :param spreadsheet_row: A record from the spreadsheet
     :return: bool
     """
+    log.info("Record: " + str(spreadsheet_row))
     record = {'row': spreadsheet_row}
 
-    v = Validator(schema)
-    return v.validate(record, schema)
+    if not validator_obj.validate(record):
+        log.info(validator_obj.errors)
+
+    return validator_obj.validate(record)
 
 
 def make_schema():
@@ -54,7 +57,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
     :param table_name: Name of the table where data is to be written
     :param spreadsheet_data: Data from the GSheetsHook
     :param engine: MySqlHook object from common.db_functions
-    :return: Nothing
+    :return:
     """
 
     spreadsheet_data['description'] = 'AZ'
@@ -67,12 +70,13 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 
     schema = make_schema()
     log.info("Validation schema received")
+    validator_obj = Validator(schema)
 
     for row in range(len(spreadsheet_data)):
 
         df_to_list = list(spreadsheet_data[row:row + 1])
 
-        if schema_validation(schema, df_to_list):
+        if schema_validation(validator_obj, df_to_list):
             log.info("Validation successful for record " + str(row))
             row_list.append(df_to_list)
 
@@ -80,17 +84,21 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
             log.info("Validation failed for record " + str(row))
 
     try:
-        engine.insert_rows(table_name,
-                           row_list,
-                           target_fields=['code', 'name', 'title', 'phoneno',
-                                          'email', 'speciality',
-                                          'clinicHospital', 'location',
-                                          'profile_image', 'description',
-                                          'status', 'type', 'initiated_by',
-                                          'licenseNumber'],
-                           commit_every=100,
-                           replace=True
-                           )
+        if len(row_list) > 0:
+            engine.insert_rows(table_name,
+                               row_list,
+                               target_fields=['code', 'name', 'title',
+                                              'phoneno', 'email', 'speciality',
+                                              'clinicHospital', 'location',
+                                              'profile_image', 'description',
+                                              'status', 'type', 'initiated_by',
+                                              'licenseNumber'],
+                               commit_every=100,
+                               replace=True
+                               )
+
+        else:
+            log.info("No data updated in mysql database")
 
     except Exception as e:
         warning_message = "Data insertion into mysql database failed"
@@ -102,7 +110,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 def initializer():
     """
     Driver function for this script
-    :return: Nothing
+    :return:
     """
 
     config_var = Variable.get('doctor_sync_config', None)
