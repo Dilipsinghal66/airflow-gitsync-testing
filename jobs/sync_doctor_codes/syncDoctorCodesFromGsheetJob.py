@@ -145,7 +145,7 @@ def initializer():
 
     spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
                                     columns=spreadsheet_data[0])
-    spreadsheet_data.drop(spreadsheet_data['Whatsapp No. (+91)'], inplace=True)
+    spreadsheet_data.drop(columns=['Whatsapp No. (+91)'], axis=1, inplace=True)
 
     try:
         dump_data_in_db(table_name=table_name,
