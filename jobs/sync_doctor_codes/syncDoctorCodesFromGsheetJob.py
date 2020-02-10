@@ -71,14 +71,13 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
     schema = make_schema()
     log.info("Validation schema received")
     validator_obj = Validator(schema)
+    spreadsheet_list = spreadsheet_data.values.tolist()
 
-    for row in range(len(spreadsheet_data)):
+    for row in range(len(spreadsheet_list)):
 
-        df_to_list = list(spreadsheet_data[row:row + 1])
-
-        if schema_validation(validator_obj, df_to_list):
+        if schema_validation(validator_obj, spreadsheet_list[row]):
             log.info("Validation successful for record " + str(row))
-            row_list.append(df_to_list)
+            row_list.append(spreadsheet_list[row])
 
         else:
             log.info("Validation failed for record " + str(row))
