@@ -3,14 +3,29 @@ import pandas as pd
 from airflow.models import Variable
 from common.custom_hooks.google_sheets_hook import GSheetsHook
 from cerberus import Validator
+from airflow.utils.log.logging_mixin import LoggingMixin
+
+log = LoggingMixin().log
 
 
-def schema_validation(spreadsheet_row):
+def schema_validation(schema, spreadsheet_row):
     """
     Validation of record to be inserted in database
+    :param schema: Validation Schema
     :param spreadsheet_row: A record from the spreadsheet
     :return: bool
     """
+    record = {'row': spreadsheet_row}
+    v = Validator(schema)
+    return v.validate(record, schema)
+
+
+def make_schema():
+    """
+    Making validation schema
+    :return: Validation schema
+    """
+    log.info("Making validation schema")
 
     schema = {'row': {'type': 'list',
                       'code': {'type': 'string', 'required': True},
@@ -29,9 +44,7 @@ def schema_validation(spreadsheet_row):
                                        'default': 'SCHEDULED TASK'},
                       'licenseNumber': {'type': 'string', 'required': True}
                       }}
-    record = {'row': spreadsheet_row}
-    v = Validator(schema)
-    return v.validate(record, schema)
+    return schema
 
 
 def dump_data_in_db(table_name, spreadsheet_data, engine):
@@ -51,17 +64,28 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 
     row_list = [[]]
 
+    schema = make_schema()
+    log.info("Validation schema received")
+
     for row in range(len(spreadsheet_data)):
 
-        if schema_validation(spreadsheet_data[row]):
+        if schema_validation(schema, spreadsheet_data[row]):
+            log.info("Validation successful for record " + str(row))
             row_list.append(spreadsheet_data[row])
 
-    engine.insert_rows(table_name, row_list,
-                       target_fields='code, name, title, phoneno, email, '
-                                     'speciality, clinicHospital, location, '
-                                     'profile_image, description, status, '
-                                     'type, initiated_by, licenseNumber',
-                       commit_every=100, replace=True)
+        else:
+            log.error("Validation failed for record " + str(row))
+
+    try:
+        engine.insert_rows(table_name, row_list,
+                           target_fields='code, name, title, phoneno, email, '
+                                         'speciality, clinicHospital, location,'
+                                         ' profile_image, description, status, '
+                                         'type, initiated_by, licenseNumber',
+                           commit_every=100, replace=True)
+
+    except Exception as e:
+        log.error(e, exc_info=True)
 
 
 def initializer():
@@ -70,13 +94,13 @@ def initializer():
     :return: Nothing
     """
 
-    config_var = str(Variable.get('config_var', '0'))
+    config_var = str(Variable.get('doctor_sync_config', '0'))
 
     if config_var == '0':
-        return
+        raise ValueError("Config variables unreachable")
 
     if len(config_var) < 3 or len(config_var) > 3:
-        return
+        raise ValueError("Incomplete config variables")
 
     config_var.split('|')
     spreadsheet_id = config_var[0]
@@ -94,16 +118,26 @@ def initializer():
     sheet_conn = sheet_hook.get_conn()
 
     if not sheet_conn:
-        return
-
-    spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
-                                                   major_dimension='ROWS').\
-        get('values')
-
-    spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
-                                    columns=spreadsheet_data[0])
+        raise ValueError("Sheet connection is mandatory")
 
     engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
 
-    dump_data_in_db(table_name=table_name, spreadsheet_data=spreadsheet_data,
-                    engine=engine)
+    if not engine:
+        raise ValueError("Couldn't connect to database")
+
+    try:
+
+        spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
+                                                       major_dimension='ROWS').\
+            get('values')
+
+        spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
+                                        columns=spreadsheet_data[0])
+
+        dump_data_in_db(table_name=table_name,
+                        spreadsheet_data=spreadsheet_data,
+                        engine=engine)
+
+    except Exception as e:
+        log.err(e, exc_info=True)
+
