@@ -16,6 +16,7 @@ def schema_validation(schema, spreadsheet_row):
     :return: bool
     """
     record = {'row': spreadsheet_row}
+
     v = Validator(schema)
     return v.validate(record, schema)
 
@@ -28,22 +29,22 @@ def make_schema():
     log.info("Making validation schema")
 
     schema = {'row': {'type': 'list',
-                      'code': {'type': 'string', 'required': True},
-                      'name': {'type': 'string', 'required': True},
-                      'title': {'type': 'string', 'required': True},
-                      'phoneno': {'type': 'string', 'required': True},
-                      'email': {'type': 'string', 'default': 'None'},
-                      'speciality': {'type': 'string', 'default': 'None'},
-                      'clinicHospital': {'type': 'string', 'default': 'None'},
-                      'location': {'type': 'string', 'default': 'None'},
-                      'profile_image': {'type': 'string', 'default': 'None'},
-                      'description': {'type': 'string', 'default': 'AZ'},
-                      'status': {'type': 'integer', 'default': 4},
-                      'Type': {'type': 'integer', 'default': 0},
-                      'initiated_by': {'type': 'string',
-                                       'default': 'SCHEDULED TASK'},
-                      'licenseNumber': {'type': 'string', 'required': True}
-                      }}
+              'items':
+                      [{'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'None'},
+                       {'type': 'string', 'default': 'AZ'},
+                       {'type': 'integer', 'default': 4},
+                       {'type': 'integer', 'default': 0},
+                       {'type': 'string', 'default': 'SCHEDULED TASK'},
+                       {'type': 'string', 'required': True}]}}
+
     return schema
 
 
@@ -86,7 +87,10 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
                            commit_every=100, replace=True)
 
     except Exception as e:
-        log.error(e, exc_info=True)
+        warning_message = "Data insertion into mysql database failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
 
 
 def initializer():
@@ -95,10 +99,10 @@ def initializer():
     :return: Nothing
     """
 
-    config_var = str(Variable.get('doctor_sync_config', '0'))
+    config_var = Variable.get('doctor_sync_config', None)
 
-    if config_var == '0':
-        raise ValueError("Config variables unreachable")
+    if not config_var:
+        raise ValueError("Config variables not defined")
 
     if len(config_var) < 3 or len(config_var) > 3:
         raise ValueError("Incomplete config variables")
@@ -116,28 +120,45 @@ def initializer():
         api_version="v4"
     )
 
-    sheet_conn = sheet_hook.get_conn()
+    try:
+        sheet_conn = sheet_hook.get_conn()
 
-    if not sheet_conn:
-        raise ValueError("Sheet connection is mandatory")
-
-    engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
-
-    if not engine:
-        raise ValueError("Couldn't connect to database")
+    except Exception as e:
+        warning_message = "Google Sheets API failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
 
     try:
+        engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
 
+    except Exception as e:
+        warning_message = "Connection to mysql database failed."
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
+
+    try:
         spreadsheet_data = sheet_conn.batch_get_values(ranges=range_names,
                                                        major_dimension='ROWS')\
             .get('values')
 
-        spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
-                                        columns=spreadsheet_data[0])
+    except Exception as e:
+        warning_message = "Data retrieval from Google Sheet failed"
+        log.warning(warning_message)
+        log.err(e, exc_info=True)
+        raise e
 
+    spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
+                                    columns=spreadsheet_data[0])
+
+    try:
         dump_data_in_db(table_name=table_name,
                         spreadsheet_data=spreadsheet_data,
                         engine=engine)
 
     except Exception as e:
+        warning_message = "Data dumping into database failed"
+        log.warning(warning_message)
         log.err(e, exc_info=True)
+        raise e
