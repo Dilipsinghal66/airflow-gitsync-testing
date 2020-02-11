@@ -86,7 +86,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
         if len(row_list) > 0:
             engine.insert_rows(table_name,
                                row_list,
-                               target_fields=['code', 'name', 'title"',
+                               target_fields=['code', 'name', 'title',
                                               'phoneno', 'email', 'speciality',
                                               'clinicHospital', 'location',
                                               'profile_image', 'description',
