@@ -15,11 +15,11 @@ def schema_validation(validator_obj, spreadsheet_row):
     :param spreadsheet_row: A record from the spreadsheet
     :return: bool
     """
-    log.info("Record: " + str(spreadsheet_row))
+    log.debug("Record: " + str(spreadsheet_row))
     record = {'row': spreadsheet_row}
 
     if not validator_obj.validate(record):
-        log.info(validator_obj.errors)
+        log.debug(validator_obj.errors)
 
     return validator_obj.validate(record)
 
@@ -36,7 +36,8 @@ def make_schema():
                       [{'type': 'string', 'required': True},
                        {'type': 'string', 'required': True},
                        {'type': 'string', 'required': True},
-                       {'type': 'string', 'required': True},
+                       {'type': 'string', 'required': True,
+                        'minlength': 6, 'maxlength': 10},
                        {'type': 'string', 'default': 'None'},
                        {'type': 'string', 'default': 'None'},
                        {'type': 'string', 'default': 'None'},
@@ -66,11 +67,18 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
     spreadsheet_data['initiated_by'] = 'SCHEDULED TASK'
     spreadsheet_data['licenseNumber'] = spreadsheet_data['Doctor Code']
 
-    row_list = [[]]
+    row_list = []
 
     schema = make_schema()
-    log.info("Validation schema received")
+    log.info("Validation schema initialised")
+
     validator_obj = Validator(schema)
+
+    target_fields = ['code', 'name', 'title', 'phoneno', 'email', 'speciality',
+                     'clinicHospital', 'location', 'profile_image',
+                     'description', 'status', 'type', 'initiated_by',
+                     'licenseNumber']
+
     spreadsheet_list = spreadsheet_data.values.tolist()
 
     for row in range(len(spreadsheet_list)):
@@ -78,26 +86,22 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
         if schema_validation(validator_obj=validator_obj,
                              spreadsheet_row=spreadsheet_list[row]):
             log.info("Validation successful for record " + str(row))
-            row_list.append(spreadsheet_list[row])
+
+            if len(spreadsheet_list[row]) == len(target_fields):
+                row_list.append(spreadsheet_list[row])
 
         else:
-            log.info("Validation failed for record " + str(row))
-
-    target_fields = ['code', 'name', 'title', 'phoneno', 'email', 'speciality',
-                     'clinicHospital', 'location', 'profile_image',
-                     'description', 'status', 'type', 'initiated_by',
-                     'licenseNumber']
+            log.warning("Validation failed for record " + str(row))
 
     try:
-
-        log.info("target fields size: " + str(len(target_fields)))
+        log.info("Target fields being replaced")
+        log.info(target_fields)
+        log.info("Number of target fields: " + str(len(target_fields)))
         log.info("Number of values in a row: " + str(len(row_list[0])))
         log.info("Number of rows: " + str(len(row_list)))
 
-        log.info(target_fields)
-
         for i in range(len(row_list)):
-            log.info(row_list[i])
+            log.debug(row_list[i])
 
         if len(row_list) > 0:
             engine.insert_rows(table=table_name,
@@ -108,7 +112,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
                                )
 
         else:
-            log.info("No data updated in mysql database")
+            warning_message = "No data updated in mysql database"
+            log.warning(warning_message)
 
     except Exception as e:
         warning_message = "Data insertion into mysql database failed"
