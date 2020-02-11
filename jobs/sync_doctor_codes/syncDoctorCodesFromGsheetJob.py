@@ -89,6 +89,16 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
                      'licenseNumber']
 
     try:
+
+        log.info("target fields size: " + str(len(target_fields)))
+        log.info("Number of values in a row: " + str(len(row_list[0])))
+        log.info("Number of rows: " + str(len(row_list)))
+
+        log.info(target_fields)
+
+        for i in range(len(row_list)):
+            log.info(row_list[i])
+
         if len(row_list) > 0:
             engine.insert_rows(table=table_name,
                                rows=row_list,
@@ -96,14 +106,6 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
                                commit_every=100,
                                replace=True
                                )
-            log.info("target fields size: " + str(len(target_fields)))
-            log.info("Number of values in a row: " + str(len(row_list[0])))
-            log.info("Number of rows: " + str(len(row_list)))
-
-            log.info(target_fields)
-
-            for i in range(len(row_list)):
-                log.info(row_list[i])
 
         else:
             log.info("No data updated in mysql database")
