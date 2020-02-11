@@ -75,26 +75,35 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
 
     for row in range(len(spreadsheet_list)):
 
-        if schema_validation(validator_obj, spreadsheet_list[row]):
+        if schema_validation(validator_obj=validator_obj,
+                             spreadsheet_row=spreadsheet_list[row]):
             log.info("Validation successful for record " + str(row))
             row_list.append(spreadsheet_list[row])
 
         else:
             log.info("Validation failed for record " + str(row))
 
+    target_fields = ['code', 'name', 'title', 'phoneno', 'email', 'speciality',
+                     'clinicHospital', 'location', 'profile_image',
+                     'description', 'status', 'type', 'initiated_by',
+                     'licenseNumber']
+
     try:
         if len(row_list) > 0:
-            engine.insert_rows(table_name,
-                               row_list,
-                               target_fields=['code', 'name', 'title',
-                                              'phoneno', 'email', 'speciality',
-                                              'clinicHospital', 'location',
-                                              'profile_image', 'description',
-                                              'status', 'type', 'initiated_by',
-                                              'licenseNumber'],
+            engine.insert_rows(table=table_name,
+                               rows=row_list,
+                               target_fields=target_fields,
                                commit_every=100,
                                replace=True
                                )
+            log.info("target fields size: " + str(len(target_fields)))
+            log.info("Number of values in a row: " + str(len(row_list[0])))
+            log.info("Number of rows: " + str(len(row_list)))
+
+            log.info(target_fields)
+
+            for i in range(len(row_list)):
+                log.info(row_list[i])
 
         else:
             log.info("No data updated in mysql database")
