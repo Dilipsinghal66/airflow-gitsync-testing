@@ -415,6 +415,7 @@ class CustomMySqlHook(MySqlHook):
                         table,
                         target_fields,
                         ",".join(placeholders))
+                    self.log.debug(sql)
                     sql += " ON DUPLICATE KEY UPDATE "
 
                     update_str = []
@@ -422,7 +423,7 @@ class CustomMySqlHook(MySqlHook):
                         update_str.append("'{0}' = '{1}'".format(fields[ii],
                                                                  row[ii]))
                     sql += ", ".join(update_str)
-
+                    self.log.debug(sql)
                     cur.execute(sql, values)
                     if commit_every and i % commit_every == 0:
                         conn.commit()
