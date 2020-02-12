@@ -51,7 +51,6 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
 
     schema = schema.to_dict()
     validator_obj = Validator(schema)
-    target_fields = target_fields.to_dict()
 
     spreadsheet_list = spreadsheet_data.values.tolist()
 
@@ -122,6 +121,7 @@ def initializer():
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
+
 
     try:
         sheet_hook = GSheetsHook(
