@@ -49,7 +49,9 @@ def schema_validation(validator_obj, spreadsheet_row):
     record = {'row': spreadsheet_row}
 
     validation_result = validator_obj.validate(record)
-    log.debug(validator_obj.errors)
+
+    if not validation_result:
+        log.debug(validator_obj.errors)
 
     return validation_result
 
