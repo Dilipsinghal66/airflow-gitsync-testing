@@ -81,7 +81,6 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                                target_fields=target_fields,
                                commit_every=1,
                                )
-
             log.info("Data successfully updated in mysql database")
 
         else:

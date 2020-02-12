@@ -388,6 +388,7 @@ class CustomMySqlHook(MySqlHook):
         :param commit_every: No. upserts per commit
         :return:
         """
+        fields = target_fields
 
         if target_fields:
             target_fields = ", ".join(target_fields)
@@ -417,10 +418,9 @@ class CustomMySqlHook(MySqlHook):
                     sql += " ON DUPLICATE KEY UPDATE "
 
                     update_str = []
-                    for ii in range(len(target_fields)):
-                        update_str.append("{0} = {1}".format(target_fields[ii],
+                    for ii in range(len(fields)):
+                        update_str.append("{0} = {1}".format(fields[ii],
                                                              row[ii]))
-
                     sql += ", ".join(update_str)
 
                     cur.execute(sql, values)
