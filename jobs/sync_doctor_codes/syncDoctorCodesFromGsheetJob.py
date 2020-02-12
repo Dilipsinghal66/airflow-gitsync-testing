@@ -1,41 +1,13 @@
 from common.db_functions import get_data_from_db
+import json
 import pandas as pd
 from airflow.models import Variable
 from common.custom_hooks.google_sheets_hook import GSheetsHook
 from cerberus import Validator
 from airflow.utils.log.logging_mixin import LoggingMixin
-
+from common.pyjson import PyJSON
 
 log = LoggingMixin().log
-
-
-def make_schema():
-    """
-    Making validation schema
-    :return: Validation schema
-    """
-    log.info("Making validation schema")
-
-    schema = {'row':
-              {'type': 'list',
-               'items':
-               [{'type': 'string', 'required': True},
-                {'type': 'string', 'required': True},
-                {'type': 'string', 'required': True},
-                {'type': 'string', 'required': True,
-                    'minlength': 6, 'maxlength': 10},
-                {'type': 'string', 'default': 'None'},
-                {'type': 'string', 'default': 'None'},
-                {'type': 'string', 'default': 'None'},
-                {'type': 'string', 'default': 'None'},
-                {'type': 'string', 'default': 'None'},
-                {'type': 'string', 'default': 'AZ'},
-                {'type': 'integer', 'default': 4},
-                {'type': 'integer', 'default': 0},
-                {'type': 'string', 'default': 'SCHEDULED TASK'},
-                {'type': 'string', 'required': True}]}}
-
-    return schema
 
 
 def schema_validation(validator_obj, spreadsheet_row):
@@ -51,36 +23,33 @@ def schema_validation(validator_obj, spreadsheet_row):
     validation_result = validator_obj.validate(record)
 
     if not validation_result:
-        log.debug(validator_obj.errors)
+        log.warning(validator_obj.errors)
 
     return validation_result
 
 
-def dump_data_in_db(table_name, spreadsheet_data, engine):
+def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
+                    target_fields, defaults):
     """
     Dumps data into the database
+    :param defaults: Default values
+    :param target_fields: Fields to be updated in database
+    :param schema: Validation schema
     :param table_name: Name of the table where data is to be written
     :param spreadsheet_data: Data from the GSheetsHook
     :param engine: MySqlHook object from common.db_functions
     :return:
     """
-    spreadsheet_data['description'] = 'AZ'
-    spreadsheet_data['status'] = 4
-    spreadsheet_data['type'] = 0
-    spreadsheet_data['initiated_by'] = 'SCHEDULED TASK'
-    spreadsheet_data['licenseNumber'] = spreadsheet_data['Doctor Code']
+    spreadsheet_data['description'] = defaults.description
+    spreadsheet_data['status'] = defaults.status
+    spreadsheet_data['type'] = defaults.type
+    spreadsheet_data['initiated_by'] = defaults.initiated_by
+    spreadsheet_data['licenseNumber'] = spreadsheet_data[
+                                        defaults.license_number]
 
     row_list = []
 
-    schema = make_schema()
-    log.info("Validation schema initialised")
-
     validator_obj = Validator(schema)
-
-    target_fields = ['code', 'name', 'title', 'phoneno', 'email', 'speciality',
-                     'clinicHospital', 'location', 'profile_image',
-                     'description', 'status', 'type', 'initiated_by',
-                     'licenseNumber']
 
     spreadsheet_list = spreadsheet_data.values.tolist()
 
@@ -95,19 +64,17 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
                 row_list.append(spreadsheet_list[row])
 
         else:
-            log.debug("Validation failed for record " + str(row))
+            warning_message = "Validation failed for record " + str(row)
+            log.warning(warning_message)
 
     try:
-        log.info("Fields being replaced are as follows: ")
-        log.info(target_fields)
-        log.info("Number of fields: " + str(len(target_fields)))
-        log.info("Number of fields in a record: " + str(len(row_list[0])))
-        log.info("Number of records: " + str(len(row_list)))
+        log.debug("Fields being replaced are as follows: ")
+        log.debug(target_fields)
+        log.debug("Number of fields: " + str(len(target_fields)))
+        log.debug("Number of fields in a record: " + str(len(row_list[0])))
+        log.debug("Number of records: " + str(len(row_list)))
 
-        for i in range(len(row_list)):
-            log.debug(row_list[i])
-
-        if len(row_list) > 0:
+        if len(row_list):
             engine.insert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
@@ -118,7 +85,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine):
             log.info("Data successfully updated in mysql database")
 
         else:
-            log.info("No data updated in mysql database")
+            warning_message = "No data updated in mysql database"
+            log.warning(warning_message)
 
     except Exception as e:
         warning_message = "Failed to update data in mysql database"
@@ -134,25 +102,24 @@ def initializer():
     """
     config_var = Variable.get('doctor_sync_config', None)
 
-    if not config_var:
+    if config_var:
+        config_var = json.loads(config_var)
+        config_obj = PyJSON(d=config_var)
+    else:
         raise ValueError("Config variables not defined")
 
-    config_var = config_var.split('|')
-
-    if len(config_var) is not 3:
-        raise ValueError("Incomplete config variables")
-
-    spreadsheet_id = config_var[0]
-    gcp_conn_id = config_var[1]
-    table_name = config_var[2]
+    gcp = config_obj.gcp
+    sheet = config_obj.sheet
+    db = config_obj.db
+    validation_schema = config_obj.validation
+    defaults = config_obj.defaults
 
     try:
         sheet_hook = GSheetsHook(
-            spreadsheet_id=spreadsheet_id,
-            gcp_conn_id=gcp_conn_id,
+            spreadsheet_id=sheet.id,
+            gcp_conn_id=gcp.conn_id,
             api_version="v4"
         )
-
     except Exception as e:
         warning_message = "Google Sheet Hook object could not be instantiated"
         log.warning(warning_message)
@@ -160,7 +127,7 @@ def initializer():
         raise e
 
     try:
-        engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
+        engine = get_data_from_db(db_type=db.type, conn_id=db.conn_id)
 
     except Exception as e:
         warning_message = "Connection to mysql database failed."
@@ -170,8 +137,9 @@ def initializer():
 
     try:
 
-        spreadsheet_data = sheet_hook.get_values(range_='Sheet1!A:J',
-                                                 major_dimension='ROWS'
+        spreadsheet_data = sheet_hook.get_values(range_=sheet.column_range,
+                                                 major_dimension=
+                                                 sheet.major_dimensions
                                                  ).get('values')
 
     except Exception as e:
@@ -181,16 +149,26 @@ def initializer():
         raise e
 
     if spreadsheet_data is not None:
-        spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
-                                        columns=spreadsheet_data[0])
-        spreadsheet_data.drop(columns=['Whatsapp No. (+91)'],
-                              axis=1,
-                              inplace=True)
 
         try:
-            dump_data_in_db(table_name=table_name,
+            spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
+                                            columns=spreadsheet_data[0])
+            spreadsheet_data.drop(columns=sheet.drop_columns,
+                                  axis=1,
+                                  inplace=True)
+        except Exception as e:
+            warning_message = "Pre-processing of spreadsheet data failed"
+            log.warning(warning_message)
+            log.error(e, exc_info=True)
+            raise e
+
+        try:
+            dump_data_in_db(table_name=db.table_name,
                             spreadsheet_data=spreadsheet_data,
-                            engine=engine)
+                            engine=engine,
+                            schema=validation_schema.schema,
+                            target_fields=db.fields,
+                            defaults=defaults)
 
             log.info("Script executed successfully")
 
