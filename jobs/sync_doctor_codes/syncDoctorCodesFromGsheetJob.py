@@ -72,10 +72,10 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         log.debug("Fields being replaced are as follows: ")
         log.debug(target_fields)
         log.debug("Number of fields: " + str(len(target_fields)))
-        log.debug("Number of fields in a record: " + str(len(row_list[0])))
         log.debug("Number of records: " + str(len(row_list)))
 
-        if len(row_list):
+        if row_list:
+            log.debug("Number of fields in a record: " + str(len(row_list[0])))
             engine.insert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
@@ -121,7 +121,6 @@ def initializer():
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
-
 
     try:
         sheet_hook = GSheetsHook(
