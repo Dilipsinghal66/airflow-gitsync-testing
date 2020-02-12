@@ -416,7 +416,6 @@ class CustomMySqlHook(MySqlHook):
                         table,
                         target_fields,
                         ",".join(placeholders))
-                    self.log.debug(sql)
                     sql += " ON DUPLICATE KEY UPDATE "
 
                     update_str = []
