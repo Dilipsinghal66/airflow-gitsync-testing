@@ -1,5 +1,5 @@
 from airflow.contrib.hooks.mongo_hook import MongoHook
-from airflow.hooks.mysql_hook import MySqlHook
+from .custom_hooks.google_sheets_hook import CustomMySqlHook
 
 
 def get_data_from_db(db_type="mongo", conn_id=None, collection=None, **kwargs):
@@ -9,7 +9,7 @@ def get_data_from_db(db_type="mongo", conn_id=None, collection=None, **kwargs):
             collection)
         data = coll.find(**kwargs)
     if db_type == "mysql":
-        data = MySqlHook(mysql_conn_id=conn_id)
+        data = CustomMySqlHook(mysql_conn_id=conn_id)
         execute_query = kwargs.get("execute_query", False)
         if execute_query:
             sql = kwargs.get("sql_query")
