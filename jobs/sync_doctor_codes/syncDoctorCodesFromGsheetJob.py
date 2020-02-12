@@ -49,6 +49,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
 
     row_list = []
 
+    schema = schema.to_dict()
     validator_obj = Validator(schema)
 
     spreadsheet_list = spreadsheet_data.values.tolist()
@@ -108,11 +109,19 @@ def initializer():
     else:
         raise ValueError("Config variables not defined")
 
-    gcp = config_obj.gcp
-    sheet = config_obj.sheet
-    db = config_obj.db
-    validation_schema = config_obj.validation
-    defaults = config_obj.defaults
+    try:
+        gcp = config_obj.gcp
+        sheet = config_obj.sheet
+        db = config_obj.db
+        validation_schema = config_obj.validation
+        defaults = config_obj.defaults
+
+    except Exception as e:
+        warning_message = "Couldn't get config variables"
+        log.warning(warning_message)
+        log.error(e, exc_info=True)
+        raise e
+
 
     try:
         sheet_hook = GSheetsHook(
