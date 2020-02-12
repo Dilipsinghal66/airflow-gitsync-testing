@@ -416,8 +416,12 @@ class CustomMySqlHook(MySqlHook):
                         ",".join(placeholders))
                     sql += " ON DUPLICATE KEY UPDATE "
 
+                    update_str = []
                     for ii in range(len(target_fields)):
-                        sql += "{0} = {1}".format(target_fields[ii], row[ii])
+                        update_str.append("{0} = {1}".format(target_fields[ii],
+                                                             row[ii]))
+
+                    sql += ", ".join(update_str)
 
                     cur.execute(sql, values)
                     if commit_every and i % commit_every == 0:
