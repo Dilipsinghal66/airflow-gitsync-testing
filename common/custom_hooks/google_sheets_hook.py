@@ -419,8 +419,8 @@ class CustomMySqlHook(MySqlHook):
 
                     update_str = []
                     for ii in range(len(fields)):
-                        update_str.append("{0} = {1}".format(fields[ii],
-                                                             row[ii]))
+                        update_str.append("'{0}' = '{1}'".format(fields[ii],
+                                                                 row[ii]))
                     sql += ", ".join(update_str)
 
                     cur.execute(sql, values)
