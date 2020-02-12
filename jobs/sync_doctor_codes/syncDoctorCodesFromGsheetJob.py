@@ -79,7 +79,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
             engine.insert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
-                               commit_every=100,
+                               commit_every=1,
                                replace=True
                                )
 
