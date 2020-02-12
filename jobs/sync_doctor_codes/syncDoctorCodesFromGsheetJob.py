@@ -7,6 +7,7 @@ from cerberus import Validator
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.pyjson import PyJSON
 
+
 log = LoggingMixin().log
 
 
@@ -96,7 +97,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         raise e
 
 
-def initializer():
+def initializer(**context):
     """
     Driver function for this script
     :return:
@@ -144,11 +145,10 @@ def initializer():
         raise e
 
     try:
-
         spreadsheet_data = sheet_hook.get_values(range_=sheet.column_range,
-                                                 major_dimension=
-                                                 sheet.major_dimensions
-                                                 ).get('values')
+                                                 major_dimension=sheet.
+                                                 major_dimensions).\
+                                                 get('values')
 
     except Exception as e:
         warning_message = "Data retrieval from Google Sheet failed"
