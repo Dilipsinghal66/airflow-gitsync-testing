@@ -76,11 +76,10 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
 
         if row_list:
             log.debug("Number of fields in a record: " + str(len(row_list[0])))
-            engine.insert_rows(table=table_name,
+            engine.upsert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
                                commit_every=1,
-                               replace=True
                                )
 
             log.info("Data successfully updated in mysql database")
