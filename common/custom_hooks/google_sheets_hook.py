@@ -407,6 +407,7 @@ class CustomMySqlHook(MySqlHook):
                     lst = []
                     for cell in row:
                         lst.append(self._serialize_cell(cell, conn))
+
                     values = tuple(lst)
                     placeholders = ["%s", ] * len(values)
 
@@ -420,8 +421,8 @@ class CustomMySqlHook(MySqlHook):
 
                     update_str = []
                     for ii in range(len(fields)):
-                        update_str.append("'{0}' = '{1}'".format(fields[ii],
-                                                                 row[ii]))
+                        update_str.append("{0} = '{1}'".format(fields[ii],
+                                                               row[ii]))
                     sql += ", ".join(update_str)
                     self.log.debug(sql)
                     cur.execute(sql, values)
