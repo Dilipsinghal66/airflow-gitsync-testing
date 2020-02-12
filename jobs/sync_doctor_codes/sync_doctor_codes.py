@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from .syncDoctorCodesFromGsheetJob import initializer
+from jobs.sync_doctor_codes.syncDoctorCodesFromGsheetJob import initializer
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from config import default_args, local_tz
