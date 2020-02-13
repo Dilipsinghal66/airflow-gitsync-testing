@@ -68,17 +68,27 @@ def broadcast_queries():
     #        "FROM zylaapi.meditationLogs)",
     #        ]
     #
-    data1 = engine.get_records(sql=sql_query_male, parameters='id')
-    log.debug(sql_query_male)
-    log.debug(data1)
+    try:
 
-    data2 = engine.get_records(sql=sql_query_female, parameters='id')
-    log.debug(sql_query_male)
-    log.debug(data2)
+        data1 = engine.get_records(sql=sql_query_male, parameters='id')
+        log.debug(sql_query_male)
+        log.debug(data1)
 
-    data3 = engine.get_records(sql=sql_query_meditation, parameters='id')
-    log.debug(sql_query_male)
-    log.debug(data3)
+        data2 = engine.get_records(sql=sql_query_female, parameters='id')
+        log.debug(sql_query_male)
+        log.debug(data2)
+
+        data3 = engine.get_records(sql=sql_query_meditation, parameters='id')
+        log.debug(sql_query_male)
+        log.debug(data3)
+
+    except Exception as e:
+        warning_message = "Query unsuccessful"
+        log.warning(warning_message)
+        log.error(e, exc_info=True)
+        raise e
+
+
 
     # projection = {
     #     "_id": 1
