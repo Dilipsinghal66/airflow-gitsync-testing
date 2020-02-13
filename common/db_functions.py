@@ -1,7 +1,7 @@
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
-from .custom_hooks.google_sheets_hook import CustomMySqlHook
+from .custom_hooks.custom_sql_hook import CustomMySqlHook
 
 
 def get_data_from_db(db_type="mongo", conn_id=None, collection=None,
