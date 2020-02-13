@@ -8,9 +8,11 @@ class CustomMySqlHook(MySqlHook):
         super(CustomMySqlHook, self).__init__(*args, **kwargs)
         self.schema = kwargs.pop("schema", None)
 
-    def upsert_rows(self, table, rows, target_fields=None, commit_every=1000):
+    def upsert_rows(self, table, rows, target_fields=None, commit_every=1000,
+                    unique_fields=[]):
         """
 
+        :param unique_keys: Unique keys cannot be updated
         :param table: Table name in the mysql database
         :param rows: List of rows to be upserted
         :param target_fields: Fields to be upserted
@@ -48,9 +50,11 @@ class CustomMySqlHook(MySqlHook):
                     sql += " ON DUPLICATE KEY UPDATE "
 
                     update_str = []
+
                     for ii in range(len(fields)):
-                        update_str.append("{0} = '{1}'".format(fields[ii],
-                                                               row[ii]))
+                        if fields[ii] not in unique_fields:
+                            update_str.append("{0} = '{1}'".format(fields[ii],
+                                                                   row[ii]))
                     sql += ", ".join(update_str)
                     self.log.debug(sql)
                     cur.execute(sql, values)
