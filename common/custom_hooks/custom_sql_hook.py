@@ -12,7 +12,7 @@ class CustomMySqlHook(MySqlHook):
                     unique_fields=[]):
         """
 
-        :param unique_keys: Unique keys cannot be updated
+        :param unique_fields: Unique keys(cannot be updated)
         :param table: Table name in the mysql database
         :param rows: List of rows to be upserted
         :param target_fields: Fields to be upserted
