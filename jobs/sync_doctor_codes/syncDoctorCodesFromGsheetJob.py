@@ -29,9 +29,10 @@ def schema_validation(validator_obj, spreadsheet_row):
 
 
 def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
-                    target_fields, defaults):
+                    target_fields, defaults, unique_fields):
     """
     Dumps data into the database
+    :param unique_fields: Unique keys
     :param defaults: Default values
     :param target_fields: Fields to be updated in database
     :param schema: Validation schema
@@ -76,13 +77,12 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
 
         if row_list:
             log.debug("Number of fields in a record: " + str(len(row_list[0])))
-            engine.insert_rows(table=table_name,
+            engine.upsert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
                                commit_every=1,
-                               replace=True
+                               unique_fields=unique_fields
                                )
-
             log.info("Data successfully updated in mysql database")
 
         else:
@@ -176,7 +176,8 @@ def initializer():
                             engine=engine,
                             schema=validation_schema.schema,
                             target_fields=db.fields,
-                            defaults=defaults)
+                            defaults=defaults,
+                            unique_fields=db.unique_fields)
 
             log.info("Script executed successfully")
 
