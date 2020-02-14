@@ -64,10 +64,8 @@ def broadcast_queries():
         log.debug(sql_query_female)
         log.debug(sql_query_meditation)
 
-        data = engine.get_records(sql=[sql_query_male,
-                                       sql_query_female,
-                                       sql_query_meditation],
-                                  parameters='id')
+        data = engine.get_records(sql=sql_query_male,
+                                  parameters=None)
         log.debug(data)
 
         # data2 = engine.get_records(sql=sql_query_female, parameters='id')
