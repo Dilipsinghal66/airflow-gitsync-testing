@@ -23,27 +23,27 @@ def broadcast_queries():
     :return:
     """
 
-    config_var = Variable.get('broadcast_query_config', None)
-
-    if config_var:
-        config_var = json.loads(config_var)
-        config_obj = PyJSON(d=config_var)
-    else:
-        raise ValueError("Config variables not defined")
-
-
-    try:
-        table1 = config_obj.gcp
-        sheet = config_obj.sheet
-        db = config_obj.db
-        validation_schema = config_obj.validation
-        defaults = config_obj.defaults
-
-    except Exception as e:
-        warning_message = "Couldn't get config variables"
-        log.warning(warning_message)
-        log.error(e, exc_info=True)
-        raise e
+    # config_var = Variable.get('broadcast_query_config', None)
+    #
+    # if config_var:
+    #     config_var = json.loads(config_var)
+    #     config_obj = PyJSON(d=config_var)
+    # else:
+    #     raise ValueError("Config variables not defined")
+    #
+    #
+    # try:
+    #     table1 = config_obj.gcp
+    #     sheet = config_obj.sheet
+    #     db = config_obj.db
+    #     validation_schema = config_obj.validation
+    #     defaults = config_obj.defaults
+    #
+    # except Exception as e:
+    #     warning_message = "Couldn't get config variables"
+    #     log.warning(warning_message)
+    #     log.error(e, exc_info=True)
+    #     raise e
 
     sql_query_male = str(Variable.get("paid_male_patients",
                                       'SELECT %s FROM '
