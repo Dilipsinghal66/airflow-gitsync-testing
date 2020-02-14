@@ -18,3 +18,10 @@ def broadcast_active():
     message = str(Variable.get("broadcast_active_msg", ''))
     action = "dynamic_message"
     process_dynamic_task_sql(sql_query, message, action)
+     # query = {
+     #     "a": {
+     #     "$and" :[
+     #         {"a": {"$gte": "askd"}},
+     #         {"c": "d"}
+     #     ]
+     # }
