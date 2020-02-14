@@ -15,8 +15,8 @@ broadcast_queries_dag = DAG(
     catchup=False
 )
 
-sync_doctor_code_task = PythonOperator(
-    task_id="sync_doctor_codes",
+broadcast_queries_task = PythonOperator(
+    task_id="broadcast_query_task",
     task_concurrency=1,
     python_callable=broadcast_queries,
     dag=broadcast_queries_dag,
