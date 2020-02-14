@@ -64,15 +64,14 @@ def broadcast_queries():
         log.debug(sql_query_female)
         log.debug(sql_query_meditation)
 
-        data = engine.get_records(sql=[sql_query_male,
-                                       sql_query_female,
-                                       sql_query_meditation],
-                                  parameters='id')
-        log.debug(data)
+        data1 = engine.get_records(sql=sql_query_male,
+                                   parameters=None)
+        log.debug(data1)
 
         # data2 = engine.get_records(sql=sql_query_female, parameters='id')
 
-        # data3 = engine.get_records(sql=sql_query_meditation, parameters='id')
+        data3 = engine.get_records(sql=sql_query_meditation, parameters=['id'])
+        log.debug(data3)
 
     except Exception as e:
         warning_message = "Query on mysql database unsuccessful"
