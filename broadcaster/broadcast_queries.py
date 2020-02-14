@@ -2,8 +2,10 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 # from common.pyjson import PyJSON
-# import datetime
+import datetime
 from common.db_functions import get_data_from_db
+
+
 log = LoggingMixin().log
 
 """
@@ -24,12 +26,12 @@ def broadcast_queries():
     sql_query_male = str(Variable.get("paid_male_patients",
                                       'SELECT id FROM '
                                       'zylaapi.patient_profile '
-                                      'WHERE status = 4 AND gender = 1'))
+                                      'WHERE status = 4 AND gender = 2'))
 
     sql_query_female = str(Variable.get("paid_female_patients",
                                         'SELECT id FROM '
                                         'zylaapi.patient_profile '
-                                        'WHERE status = 4 AND gender = 2'))
+                                        'WHERE status = 4 AND gender = 1'))
 
     sql_query_meditation = str(Variable.get("no_meditation",
                                             'SELECT id FROM '
@@ -39,25 +41,14 @@ def broadcast_queries():
                                             'patientId FROM '
                                             'zylaapi.meditationLogs)'))
 
-    # config_var = Variable.get('broadcast_query_config', None)
-    #
-    # if config_var:
-    #     config_var = json.loads(config_var)
-    #     config_obj = PyJSON(d=config_var)
-    # else:
-    #     raise ValueError("Config variables not defined")
-    #
-    # try:
-    #     db = config_obj.db
-    #
-    # except Exception as e:
-    #     warning_message = "Couldn't get config variables"
-    #     log.warning(warning_message)
-    #     log.error(e, exc_info=True)
-    #     raise e
+    try:
+        engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
 
-    engine = get_data_from_db(db_type='mysql', conn_id='mysql_monolith')
-    # timeSlot = datetime.datetime.now()
+    except Exception as e:
+        warning_message = "Connection with mysql database unsuccessful"
+        log.warning(warning_message)
+        log.error(e, exc_info=True)
+        raise e
 
     # sql = ["SELECT id FROM zylaapi.patient_profile "
     #        "WHERE status = 4 AND gender = 1",
@@ -67,37 +58,46 @@ def broadcast_queries():
     #        "WHERE id NOT IN (SELECT DISTINCT patientId "
     #        "FROM zylaapi.meditationLogs)",
     #        ]
-    #
+
     try:
-
-        data1 = engine.get_records(sql=sql_query_male, parameters='id')
         log.debug(sql_query_male)
-        log.debug(data1)
+        log.debug(sql_query_female)
+        log.debug(sql_query_meditation)
 
-        data2 = engine.get_records(sql=sql_query_female, parameters='id')
-        log.debug(sql_query_male)
-        log.debug(data2)
+        data = engine.get_records(sql=[sql_query_male,
+                                       sql_query_female,
+                                       sql_query_meditation],
+                                  parameters='id')
+        log.debug(data)
 
-        data3 = engine.get_records(sql=sql_query_meditation, parameters='id')
-        log.debug(sql_query_male)
-        log.debug(data3)
+        # data2 = engine.get_records(sql=sql_query_female, parameters='id')
+
+        # data3 = engine.get_records(sql=sql_query_meditation, parameters='id')
 
     except Exception as e:
-        warning_message = "Query unsuccessful"
+        warning_message = "Query on mysql database unsuccessful"
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
 
-
-
     # projection = {
     #     "_id": 1
     # }
+    # datetime.datetime.time()
     # _filter = {
-    #     "lastReported": {"$gte": ""}, {}
+    #     "lastReported": {"$gte": ""} and {"$lte": ""}
     # }
     #
-    # mongo_data = get_data_from_db(db_type='mongo', conn_id="mongo_user_db",
-    #                               collection="user_activity",
-    #                               filter=_filter,
-    #                               projection=projection)
+    # try:
+    #
+    #     mongo_data = get_data_from_db(db_type='mongo',
+    #                                   conn_id="mongo_user_db",
+    #                                   collection="user_activity",
+    #                                   filter=_filter,
+    #                                   projection=projection)
+    #
+    # except Exception as e:
+    #     warning_message = "Query on mongodb unsuccessful"
+    #     log.warning(warning_message)
+    #     log.error(e, exc_info=True)
+    #     raise e
