@@ -15,6 +15,12 @@ def broadcast_active_male():
     :return:
     """
 
+    process_broadcast_active_males = int(Variable.get(
+        'process_broadcast_active_males_disable', '0'))
+
+    if process_broadcast_active_males == 1:
+        return
+
     sql_query_male = str(Variable.get("paid_male_patients",
                                       'SELECT id FROM '
                                       'zylaapi.patient_profile '
