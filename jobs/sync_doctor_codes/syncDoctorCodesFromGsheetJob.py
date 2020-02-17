@@ -7,6 +7,7 @@ from cerberus import Validator
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.pyjson import PyJSON
 
+
 log = LoggingMixin().log
 
 
@@ -49,6 +50,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                                         defaults.license_number]
 
     row_list = []
+    failed_row_list = []
 
     schema = schema.to_dict()
     validator_obj = Validator(schema)
@@ -68,6 +70,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         else:
             warning_message = "Validation failed for record " + str(row)
             log.warning(warning_message)
+            failed_row_list.append(spreadsheet_list[row])
 
     try:
         log.debug("Fields being replaced are as follows: ")
@@ -85,6 +88,9 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                                )
             log.info("Data successfully updated in mysql database")
 
+            if failed_row_list:
+                raise ValueError("Failed row list created")
+
         else:
             warning_message = "No data updated in mysql database"
             log.warning(warning_message)
@@ -96,11 +102,12 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         raise e
 
 
-def initializer():
+def initializer(**kwargs):
     """
     Driver function for this script
     :return:
     """
+
     config_var = Variable.get('doctor_sync_config', None)
 
     if config_var:
@@ -171,7 +178,8 @@ def initializer():
             raise e
 
         try:
-            dump_data_in_db(table_name=db.table_name,
+            failed_row_list = dump_data_in_db(
+                            table_name=db.table_name,
                             spreadsheet_data=spreadsheet_data,
                             engine=engine,
                             schema=validation_schema.schema,
@@ -186,6 +194,9 @@ def initializer():
             log.warning(warning_message)
             log.error(e, exc_info=True)
             raise e
+
+        if failed_row_list:
+            raise ValueError("Failed record list created")
 
     else:
         warning_message = "No data received from Google Sheets API"
