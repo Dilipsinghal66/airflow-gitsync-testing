@@ -30,7 +30,7 @@ def broadcast_active_male():
         log.debug(sql_query_male)
 
         action = "dynamic_message"
-        message = str(Variable.get("broadcast_active_male_msg", ''))
+        message = str(Variable.get("broadcast_active_male_dag_msg", ''))
 
         process_dynamic_task_sql(sql_query_male, message, action)
 
