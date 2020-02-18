@@ -1,23 +1,40 @@
-from datetime import datetime
-from broadcaster.broadcast_active_female import broadcast_active_fm
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from config import default_args, local_tz
+from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
+from common.helpers import process_dynamic_task_sql
 
-broadcast_active_female_dag = DAG(
-    dag_id="broadcast_active_female_dag",
-    default_args=default_args,
-    start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
-                        microsecond=0, tzinfo=local_tz),
-    schedule_interval='@once',
-    catchup=False
-)
+log = LoggingMixin().log
 
-broadcast_active_female_task = PythonOperator(
-    task_id="broadcast_active_female_task",
-    task_concurrency=1,
-    python_callable=broadcast_active_fm,
-    dag=broadcast_active_female_dag,
-    op_kwargs={},
-    pool="scheduled_jobs_pool",
-)
+"""
+All paid female patients on bridge (status = 4)
+"""
+
+
+def broadcast_active_fm():
+    """
+
+    :return:
+    """
+    process_broadcast_active_females = int(Variable.get(
+        'process_broadcast_active_females_disable', '0'))
+
+    if process_broadcast_active_females == 1:
+        return
+
+    sql_query_female = str(Variable.get("paid_female_patients",
+                                        'SELECT id FROM '
+                                        'zylaapi.patient_profile '
+                                        'WHERE status = 4 AND gender = 1'))
+
+    try:
+        log.debug(sql_query_female)
+
+        action = "dynamic_message"
+        message = str(Variable.get("broadcast_active_female_msg", ''))
+
+        process_dynamic_task_sql(sql_query_female, message, action)
+
+    except Exception as e:
+        warning_message = "Query on mysql database unsuccessful"
+        log.warning(warning_message)
+        log.error(e, exc_info=True)
+        raise e
