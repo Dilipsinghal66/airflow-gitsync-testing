@@ -14,6 +14,12 @@ def broadcast_active_no_med():
 
     :return:
     """
+    process_broadcast_active_no_meditation = int(Variable.get(
+        'process_broadcast_active_no_meditation_disable', '0'))
+
+    if process_broadcast_active_no_meditation == 1:
+        return
+
     sql_query_meditation = str(Variable.get("no_meditation",
                                             'SELECT id FROM '
                                             'zylaapi.patient_profile '
