@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from broadcaster.broadcast_active_no_meditation_job import \
      broadcast_active_no_med
 from airflow import DAG
@@ -14,7 +14,7 @@ broadcast_active_no_meditation_dag = DAG(
     default_args=default_args,
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    schedule_interval=broadcast_active_no_meditation_cron ,
+    schedule_interval=broadcast_active_no_meditation_cron,
     catchup=False
 )
 
