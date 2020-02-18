@@ -1,19 +1,16 @@
-from datetime import datetime
-from broadcaster.broadcast_active_female_job import broadcast_active_fm
+from datetime import datetime, timedelta
+from broadcaster.broadcast_active_female import broadcast_active_fm
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from config import default_args, local_tz
-from airflow.models import Variable
-
-broadcast_active_female_cron = str(Variable.get("broadcast_active_female_cron",
-                                                '@yearly'))
 
 broadcast_active_female_dag = DAG(
     dag_id="broadcast_active_female_dag",
     default_args=default_args,
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    schedule_interval=broadcast_active_female_cron,
+    schedule_interval=timedelta(days=0, seconds=0, microseconds=0,
+                                milliseconds=0, minutes=0, hours=12, weeks=0),
     catchup=False
 )
 
@@ -25,4 +22,3 @@ broadcast_active_female_task = PythonOperator(
     op_kwargs={},
     pool="scheduled_jobs_pool",
 )
-
