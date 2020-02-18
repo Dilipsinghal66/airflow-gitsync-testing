@@ -65,9 +65,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     for row in range(len(spreadsheet_list)):
 
         validation_result, spreadsheet_list[row] = schema_validation(
-                                                    validator_obj=validator_obj,
-                                                    spreadsheet_row=
-                                                    spreadsheet_list[row])
+            validator_obj=validator_obj,
+            spreadsheet_row=spreadsheet_list[row])
 
         if validation_result:
 
