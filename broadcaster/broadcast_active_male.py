@@ -9,7 +9,7 @@ broadcast_active_male_cron = str(Variable.get("broadcast_active_male_cron",
                                               '@yearly'))
 
 broadcast_active_male_dag = DAG(
-    dag_id="broadcast_active_male_dag",
+    dag_id="broadcast_active_male",
     default_args=default_args,
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
