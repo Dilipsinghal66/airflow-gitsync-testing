@@ -1,37 +1,28 @@
+from datetime import datetime
+from broadcaster.broadcast_active_no_meditation_job import \
+     broadcast_active_no_med
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+from config import default_args, local_tz
 from airflow.models import Variable
-from airflow.utils.log.logging_mixin import LoggingMixin
-from common.helpers import process_dynamic_task_sql
 
-log = LoggingMixin().log
+broadcast_active_no_meditation_cron = str(Variable.get(
+    "broadcast_active_no_meditation_cron", '@yearly'))
 
-"""
-All paid patients on bridge who have never listened to meditations until today
-"""
+broadcast_active_no_meditation_dag = DAG(
+    dag_id="broadcast_active_no_meditation_dag",
+    default_args=default_args,
+    start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
+                        microsecond=0, tzinfo=local_tz),
+    schedule_interval=broadcast_active_no_meditation_cron,
+    catchup=False
+)
 
-
-def broadcast_active_no_med():
-    """
-
-    :return:
-    """
-    sql_query_meditation = str(Variable.get("no_meditation",
-                                            'SELECT id FROM '
-                                            'zylaapi.patient_profile '
-                                            'WHERE id NOT IN '
-                                            '(SELECT DISTINCT '
-                                            'patientId FROM '
-                                            'zylaapi.meditationLogs)'))
-
-    try:
-        log.debug(sql_query_meditation)
-
-        action = "dynamic_message"
-        message = str(Variable.get("broadcast_active_no_meditation_msg", ''))
-
-        process_dynamic_task_sql(sql_query_meditation, message, action)
-
-    except Exception as e:
-        warning_message = "Query on mysql database unsuccessful"
-        log.warning(warning_message)
-        log.error(e, exc_info=True)
-        raise e
+broadcast_active_no_meditation_task = PythonOperator(
+    task_id="broadcast_active_no_meditation_task",
+    task_concurrency=1,
+    python_callable=broadcast_active_no_med,
+    dag=broadcast_active_no_meditation_dag,
+    op_kwargs={},
+    pool="scheduled_jobs_pool",
+)
