@@ -6,6 +6,10 @@ from common.helpers import process_dynamic_message
 
 log = LoggingMixin().log
 
+"""
+Broadcast active patients which shared report between specified time duration
+"""
+
 
 def broadcast_active_reporting_patients():
 
