@@ -10,10 +10,7 @@ All paid female patients on bridge (status = 4)
 
 
 def broadcast_active_fm():
-    """
 
-    :return:
-    """
     process_broadcast_active_females = int(Variable.get(
         'process_broadcast_active_females_disable', '0'))
 

@@ -10,10 +10,6 @@ All paid Male patients on bridge (status = 4)
 
 
 def broadcast_active_male():
-    """
-
-    :return:
-    """
 
     process_broadcast_active_males = int(Variable.get(
         'process_broadcast_active_males_disable', '0'))

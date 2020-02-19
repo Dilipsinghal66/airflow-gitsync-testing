@@ -10,10 +10,7 @@ All paid patients on bridge who have never listened to meditations until today
 
 
 def broadcast_active_no_med():
-    """
 
-    :return:
-    """
     process_broadcast_active_no_meditation = int(Variable.get(
         'process_broadcast_active_no_meditation_disable', '0'))
 
