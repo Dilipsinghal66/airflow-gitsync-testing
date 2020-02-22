@@ -72,6 +72,7 @@ def task_failure_email_alert(context):
     except Exception as e:
         warning_message = "Could't pull failed records list"
         log.warning(warning_message)
+        log.error(e, exc_info=True)
 
     try:
 
