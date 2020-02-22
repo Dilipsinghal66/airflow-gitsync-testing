@@ -43,40 +43,43 @@ def task_failure_email_alert(context):
         raise e
 
     email_msg = """
-                Task: {task} <br>
-                Dag: {dag} <br>
-                Execution Time: {exec_date} <br>
-                Log Url: {log_url} <br>
-                Here is the list of Doctor Codes from AZ doctor spreadsheet
-                which have failed schema validation. <br>
+                <h3> Task Failed </h3>
+                <b> Task: </b> {task} <br>
+                <b> Dag: </b> {dag} <br>
+                <b> Execution Time: </b> {exec_date} <br>
+                <b> Logs: </b> {log_url} <br>
                 """.format(task=ti.task_id,
                            dag=ti.dag_id,
                            exec_date=context.get('execution_date'),
                            log_url=ti.log_url
                            )
 
-    subject_msg = "List of Doctors failing validation in AZ sync"
+    subject_msg = "[ALERT] Task Failed! Task Id: " + ti.task_id
+    files = []
 
     try:
 
-        failed_records = ti.xcom_pull(key='failed_doctor_codes_list')
+        failed_records_report = ti.xcom_pull(key=context.get('key'))
 
-        failed_records.to_csv(path_or_buf='failed_records.csv', index=False)
+        if failed_records_report is not None:
+
+            report_name = 'failure_report_taskid_' + ti.task_id + '.csv'
+
+            failed_records_report.to_csv(path_or_buf=report_name, index=False)
+
+            files.append(report_name)
 
     except Exception as e:
         warning_message = "Could't pull failed records list"
         log.warning(warning_message)
-        log.error(e, exc_info=True)
-        raise e
 
     try:
 
-        email_obj = EmailOperator(to='mrigesh@zyla.in',
-                                  cc='rajat@zyla.in',
+        email_obj = EmailOperator(to='rajat@zyla.in',
                                   subject=subject_msg,
                                   html_content=email_msg,
                                   task_id=ti.task_id,
-                                  files=['failed_records.csv']
+                                  files=files
                                   )
     except Exception as e:
         warning_message = "Email operator could not be instantiated"
