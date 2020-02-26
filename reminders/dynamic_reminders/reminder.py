@@ -1,14 +1,14 @@
 import calendar
 import random
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from time import sleep
 
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
-
 from common.db_functions import get_data_from_db
-from common.helpers import send_chat_message, get_patient_on_trial_days, \
-    get_patient_days, get_meditation_for_today, refresh_daily_message
+from common.helpers import (get_meditation_for_today, get_patient_days,
+                            get_patient_on_trial_days, refresh_daily_message,
+                            send_chat_message)
 from common.http_functions import make_http_request
 
 calendar.setfirstweekday(6)
@@ -44,9 +44,7 @@ def send_notifications(time=None, reminder_type=None, index_by_days=False):
         days=notification_filter_by_days)
     user_filter = {
         "userStatus": {"$in": [11, 12]},
-        "_created": {"$gt": filter_date},
-        "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "^ZH"}
+        "_created": {"$gt": filter_date}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
@@ -112,9 +110,7 @@ def send_dynamic(time=None, reminder_type=None, index_by_days=False):
         "is_notification": False
     }
     user_filter = {
-        "userStatus": {"$in": [4]},
-        "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "^ZH"}
+        "userStatus": {"$in": [4]}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
@@ -164,9 +160,7 @@ def send_meditation(**kwargs):
     }
     print(payload)
     user_filter = {
-        "userStatus": {"$in": [4]},
-        "countryCode": {"$in": [91]},
-        "docCode": {"$regex": "^ZH"}
+        "userStatus": {"$in": [4]}
     }
     if test_user_id:
         user_filter["userId"] = test_user_id
