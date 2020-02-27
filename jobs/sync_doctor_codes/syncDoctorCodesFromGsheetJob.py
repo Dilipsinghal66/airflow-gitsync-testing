@@ -47,12 +47,15 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     :param engine: MySqlHook object from common.db_functions
     :return:
     """
-    spreadsheet_data['description'] = defaults.description
+    spreadsheet_data['description'] = spreadsheet_data[defaults.description]
     spreadsheet_data['status'] = defaults.status
     spreadsheet_data['type'] = defaults.type
     spreadsheet_data['initiated_by'] = defaults.initiated_by
     spreadsheet_data['licenseNumber'] = spreadsheet_data[
                                         defaults.license_number]
+    spreadsheet_data.Title = spreadsheet_data[defaults.Title]
+    spreadsheet_data['Name of Dcotor'] = spreadsheet_data['Name of Dcotor'].\
+        apply(lambda x: "{}{}".format('Dr. ', x))
 
     row_list = []
     failed_doctor_codes_list = []
