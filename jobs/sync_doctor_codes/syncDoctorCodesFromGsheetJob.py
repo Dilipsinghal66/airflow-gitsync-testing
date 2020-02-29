@@ -93,8 +93,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
 
             if defaults.print_valid_rows:
                 for i in range(len(row_list)):
-                    row_data_str = ",".join(row_list[i])
-                    log.info(row_data_str)
+                    row_data_str = row_list[i]
+                    log.info(str(i) + " " + str(row_data_str))
 
             log.debug("Number of fields in a record: " + str(len(row_list[0])))
             engine.upsert_rows(table=table_name,
