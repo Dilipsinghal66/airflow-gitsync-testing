@@ -1,6 +1,9 @@
 from airflow.contrib.hooks.slack_webhook_hook import SlackWebhookHook
 from airflow.operators.email_operator import EmailOperator
 from airflow.utils.log.logging_mixin import LoggingMixin
+from common.pyjson import PyJSON
+from airflow.models import Variable
+import json
 
 log = LoggingMixin().log
 
@@ -31,6 +34,16 @@ def task_success_slack_alert(context):
 
 
 def task_failure_email_alert(context):
+
+    config_var = Variable.get('doctor_sync_config', None)
+
+    if config_var:
+        config_var = json.loads(config_var)
+        config_obj = PyJSON(d=config_var)
+        alerts = config_obj.alerts
+        alerts_email = alerts.email
+    else:
+        raise ValueError("Config variables not defined")
 
     try:
 
@@ -76,7 +89,7 @@ def task_failure_email_alert(context):
 
     try:
 
-        email_obj = EmailOperator(to='rajat@zyla.in',
+        email_obj = EmailOperator(to=alerts_email,
                                   subject=subject_msg,
                                   html_content=email_msg,
                                   task_id=ti.task_id,
