@@ -20,7 +20,7 @@ class CustomMySqlHook(MySqlHook):
         :return:
         """
         fields = target_fields
-
+        failed_queries = 0
         if target_fields:
             target_fields = ", ".join(target_fields)
             target_fields = "({})".format(target_fields)
@@ -57,12 +57,22 @@ class CustomMySqlHook(MySqlHook):
                                                                    row[ii]))
                     sql += ", ".join(update_str)
                     self.log.debug(sql)
-                    cur.execute(sql, values)
-                    if commit_every and i % commit_every == 0:
-                        conn.commit()
-                        self.log.info(
-                            "Loaded %s into %s rows so far", i, table
-                        )
+
+                    try:
+                        cur.execute(sql, values)
+                        if commit_every and i % commit_every == 0:
+                            conn.commit()
+                            self.log.info(
+                                "Loaded %s into %s rows so far", i, table
+                            )
+                    except Exception as e:
+                        failed_queries = failed_queries + 1
+                        warning_message = "Could not load " + str(i) + " row"
+                        self.log.warning(warning_message)
+                        self.log.warning(str(i) + " " + sql)
+                        self.log.error(e, exc_info=True)
 
             conn.commit()
-        self.log.info("Done loading. Loaded a total of %s rows", i)
+            queries_executed = i - failed_queries
+        self.log.info("Done loading. Loaded a total of %s rows",
+                      queries_executed)
