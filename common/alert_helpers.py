@@ -93,7 +93,8 @@ def task_failure_email_alert(context):
                                   subject=subject_msg,
                                   html_content=email_msg,
                                   task_id=ti.task_id,
-                                  files=files
+                                  files=files,
+                                  mime_charset='utf-8'
                                   )
     except Exception as e:
         warning_message = "Email operator could not be instantiated"
