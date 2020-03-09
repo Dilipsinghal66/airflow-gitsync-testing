@@ -55,7 +55,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                                         defaults.license_number]
     spreadsheet_data.Title = spreadsheet_data[defaults.Title]
     spreadsheet_data['Name of Dcotor'] = spreadsheet_data['Name of Dcotor'].\
-        apply(lambda x: "{}{}".format('Dr. ', x))
+        apply(lambda x: "{}{}".format('Dr. ', x) if type(x) != 'NoneType'
+              else x)
 
     row_list = []
     failed_doctor_codes_list = []
@@ -97,6 +98,17 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                     log.info(str(i) + " " + str(row_data_str))
 
             log.debug("Number of fields in a record: " + str(len(row_list[0])))
+
+            for i in range(len(row_list)):
+                for j in row_list:
+                    if type(j) == 'str':
+                        row_list[i][j] = row_list[i][j].encode('latin-1')
+
+            if defaults.print_valid_rows:
+                for i in range(len(row_list)):
+                    row_data_str = row_list[i]
+                    log.debug(str(i) + " " + str(row_data_str))
+
             engine.upsert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
