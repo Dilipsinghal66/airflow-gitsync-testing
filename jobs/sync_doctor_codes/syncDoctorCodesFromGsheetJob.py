@@ -100,8 +100,8 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
             log.debug("Number of fields in a record: " + str(len(row_list[0])))
 
             for i in range(len(row_list)):
-                for j in row_list:
-                    if type(j) == 'str':
+                for j in range(len(row_list[i])):
+                    if type(row_list[i][j]) == 'str':
                         row_list[i][j] = row_list[i][j].encode('latin-1')
 
             if defaults.print_valid_rows:
