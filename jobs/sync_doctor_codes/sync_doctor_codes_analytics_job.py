@@ -48,7 +48,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     try:
         for ind, row in spreadsheet_data.iterrows():
             if row["TBM Name"] is None:
-                row["TBM Name"] = row["SPOC Name"]
+                row["TBM Name"] = row[defaults.tbmName]
 
     except Exception as e:
         warning_message = "Failed to define defaults"
