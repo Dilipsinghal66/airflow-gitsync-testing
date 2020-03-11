@@ -55,8 +55,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                                         defaults.license_number]
     spreadsheet_data.Title = spreadsheet_data[defaults.Title]
     spreadsheet_data['Name of Dcotor'] = spreadsheet_data['Name of Dcotor'].\
-        apply(lambda x: "{}{}".format('Dr. ', x) if type(x) != 'NoneType'
-              else x)
+        apply(lambda x: "{}{}".format('Dr. ', x))
 
     row_list = []
     failed_doctor_codes_list = []
