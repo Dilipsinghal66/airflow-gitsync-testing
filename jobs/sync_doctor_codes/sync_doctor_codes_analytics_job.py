@@ -42,7 +42,6 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     :param table_name: Name of the table where data is to be written
     :param spreadsheet_data: Data from the GSheetsHook
     :param engine: MySqlHook object from common.db_functions
-    :return:
     """
 
     try:
@@ -124,7 +123,6 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
 def initializer(**kwargs):
     """
     Driver function for this script
-    :return:
     """
 
     config_var = Variable.get('doctor_sync_analytics_config', None)
@@ -206,7 +204,7 @@ def initializer(**kwargs):
                             schema=validation_schema.schema,
                             target_fields=db.fields,
                             defaults=defaults,
-                            unique_fields=db.unique_fields,
+                            unique_fields=db.unique_fields
                             )
 
             log.info("Script executed successfully")
