@@ -7,6 +7,7 @@ from cerberus import Validator
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.pyjson import PyJSON
 
+
 log = LoggingMixin().log
 
 
@@ -24,8 +25,13 @@ def schema_validation(validator_obj, spreadsheet_row):
 
     if not validation_result:
         log.warning(validator_obj.errors)
+        list_of_errors = validator_obj.errors.get('row')[0]
+        list_of_keys = list_of_errors.keys()
 
-    return validation_result
+        for param in list_of_keys:
+            spreadsheet_row[param] = list_of_errors.get(param)[0]
+
+    return validation_result, spreadsheet_row
 
 
 def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
@@ -41,24 +47,33 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     :param engine: MySqlHook object from common.db_functions
     :return:
     """
-    spreadsheet_data['description'] = defaults.description
+    spreadsheet_data['description'] = spreadsheet_data[defaults.description]
     spreadsheet_data['status'] = defaults.status
     spreadsheet_data['type'] = defaults.type
     spreadsheet_data['initiated_by'] = defaults.initiated_by
     spreadsheet_data['licenseNumber'] = spreadsheet_data[
                                         defaults.license_number]
+    spreadsheet_data.Title = spreadsheet_data[defaults.Title]
+    spreadsheet_data['Name of Dcotor'] = spreadsheet_data['Name of Dcotor'].\
+        apply(lambda x: "{}{}".format('Dr. ', x))
+    spreadsheet_data[' Zyla Onboarding Completed'] = \
+        spreadsheet_data[' Zyla Onboarding Completed'].apply(lambda x: 1 if(
+                type(x) == str and x.lower() == "yes") else 0)
 
     row_list = []
+    failed_doctor_codes_list = []
 
     schema = schema.to_dict()
     validator_obj = Validator(schema)
-
     spreadsheet_list = spreadsheet_data.values.tolist()
 
     for row in range(len(spreadsheet_list)):
 
-        if schema_validation(validator_obj=validator_obj,
-                             spreadsheet_row=spreadsheet_list[row]):
+        validation_result, spreadsheet_list[row] = schema_validation(
+            validator_obj=validator_obj,
+            spreadsheet_row=spreadsheet_list[row])
+
+        if validation_result:
 
             log.debug("Validation successful for record " + str(row))
 
@@ -68,6 +83,7 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         else:
             warning_message = "Validation failed for record " + str(row)
             log.warning(warning_message)
+            failed_doctor_codes_list.append(spreadsheet_list[row])
 
     try:
         log.debug("Fields being replaced are as follows: ")
@@ -76,7 +92,24 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         log.debug("Number of records: " + str(len(row_list)))
 
         if row_list:
+
+            if defaults.print_valid_rows:
+                for i in range(len(row_list)):
+                    row_data_str = row_list[i]
+                    log.info(str(i) + " " + str(row_data_str))
+
             log.debug("Number of fields in a record: " + str(len(row_list[0])))
+
+            for i in range(len(row_list)):
+                for j in range(len(row_list[i])):
+                    if type(row_list[i][j]) == 'str':
+                        row_list[i][j] = row_list[i][j].encode('latin-1')
+
+            if defaults.print_valid_rows:
+                for i in range(len(row_list)):
+                    row_data_str = row_list[i]
+                    log.debug(str(i) + " " + str(row_data_str))
+
             engine.upsert_rows(table=table_name,
                                rows=row_list,
                                target_fields=target_fields,
@@ -84,6 +117,13 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
                                unique_fields=unique_fields
                                )
             log.info("Data successfully updated in mysql database")
+
+            if failed_doctor_codes_list:
+                failed_doctor_codes_list = pd.DataFrame(
+                                            data=failed_doctor_codes_list,
+                                            columns=spreadsheet_data.columns)
+
+                return failed_doctor_codes_list
 
         else:
             warning_message = "No data updated in mysql database"
@@ -96,11 +136,12 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
         raise e
 
 
-def initializer():
+def initializer(**kwargs):
     """
     Driver function for this script
     :return:
     """
+
     config_var = Variable.get('doctor_sync_config', None)
 
     if config_var:
@@ -164,6 +205,7 @@ def initializer():
             spreadsheet_data.drop(columns=sheet.drop_columns,
                                   axis=1,
                                   inplace=True)
+
         except Exception as e:
             warning_message = "Pre-processing of spreadsheet data failed"
             log.warning(warning_message)
@@ -171,13 +213,15 @@ def initializer():
             raise e
 
         try:
-            dump_data_in_db(table_name=db.table_name,
+            failed_doctor_codes_list = dump_data_in_db(
+                            table_name=db.table_name,
                             spreadsheet_data=spreadsheet_data,
                             engine=engine,
                             schema=validation_schema.schema,
                             target_fields=db.fields,
                             defaults=defaults,
-                            unique_fields=db.unique_fields)
+                            unique_fields=db.unique_fields
+                            )
 
             log.info("Script executed successfully")
 
@@ -186,6 +230,19 @@ def initializer():
             log.warning(warning_message)
             log.error(e, exc_info=True)
             raise e
+
+        if not failed_doctor_codes_list.empty:
+
+            failed_doctor_codes_list.drop(columns=['description', 'status',
+                                                   'type', 'initiated_by',
+                                                   'licenseNumber'],
+                                          axis=1,
+                                          inplace=True)
+
+            kwargs['ti'].xcom_push(key='failed_doctor_codes_list',
+                                   value=failed_doctor_codes_list)
+
+            raise ValueError("Failed record list created")
 
     else:
         warning_message = "No data received from Google Sheets API"
