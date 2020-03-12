@@ -220,7 +220,7 @@ def initializer(**kwargs):
                             schema=validation_schema.schema,
                             target_fields=db.fields,
                             defaults=defaults,
-                            unique_fields=db.unique_fields,
+                            unique_fields=db.unique_fields
                             )
 
             log.info("Script executed successfully")
