@@ -44,6 +44,9 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     :param engine: MySqlHook object from common.db_functions
     """
 
+    spreadsheet_data = spreadsheet_data.applymap(lambda x: x.strip()
+                                                 if (type(x) == str) else x)
+
     try:
         for ind, row in spreadsheet_data.iterrows():
             if row["TBM Name"] is None:
