@@ -54,11 +54,16 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     spreadsheet_data['licenseNumber'] = spreadsheet_data[
                                         defaults.license_number]
     spreadsheet_data.Title = spreadsheet_data[defaults.Title]
+
+    spreadsheet_data = spreadsheet_data.applymap(lambda x: x.strip()
+                                                 if (type(x) == str) else x)
+
     spreadsheet_data['Name of Dcotor'] = spreadsheet_data['Name of Dcotor'].\
         apply(lambda x: "{}{}".format('Dr. ', x))
+
     spreadsheet_data[' Zyla Onboarding Completed'] = \
         spreadsheet_data[' Zyla Onboarding Completed'].apply(lambda x: 1 if(
-                type(x) == str and x.lower() == "yes") else 0)
+                type(x) == str and x.lower().__contains__("yes")) else 0)
 
     row_list = []
     failed_doctor_codes_list = []
