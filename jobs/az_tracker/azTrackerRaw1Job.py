@@ -4,6 +4,7 @@ from airflow.models import Variable
 from common.custom_hooks.google_sheets_hook import GSheetsHook
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.pyjson import PyJSON
+import numpy as np
 
 
 log = LoggingMixin().log
@@ -20,14 +21,15 @@ def get_data(table_name, engine, target_fields, query_string):
         sql = sql + query_string
 
     # sql = "SELECT code, p_tag, patients  from (select * from " \
-    #       "zylaapi.doc_profile where code like '%AZ%') x left join (select " \
-    #       "x.doc_id, case when y.patient_id is null then 'non-premium' else " \
-    #       "'premium' end as p_tag, count(distinct x.patient_id) as patients " \
+    #       "zylaapi.doc_profile where code like '%AZ%') x left join " \
+    #       "(select x.doc_id, case when y.patient_id is null " \
+    #       "then 'non-premium' else 'premium' end as p_tag, " \
+    #       "count(distinct x.patient_id) as patients " \
     #       "from (select referred_by as doc_id, id as patient_id from " \
     #       "zylaapi.patient_profile group by 1,2) x left join (select " \
-    #       "patient_id from zylaapi.prescription_verification where status =1 " \
-    #       "group by 1) y on x.patient_id = y.patient_id group by 1,2) y on " \
-    #       "x.id = y.doc_id;"
+    #       "patient_id from zylaapi.prescription_verification " \
+    #       "where status =1 group by 1) y on " \
+    #       "x.patient_id = y.patient_id group by 1,2) y on x.id = y.doc_id;"
 
     log.debug(sql)
 
@@ -45,9 +47,22 @@ def get_data(table_name, engine, target_fields, query_string):
     return data_df
 
 
-def update_spreadsheet(sheet_hook, data):
+def update_spreadsheet(sheet_hook, data, sheet):
 
-    sheet_hook.batch_update_values()
+    data.replace(np.nan, '', inplace=True)
+
+    # values = list(data.columns)
+    values = data.values.tolist()
+
+    response = sheet_hook.append_values(range_=sheet.column_range,
+                                        values=values,
+                                        major_dimension=sheet.major_dimensions,
+                                        insert_data_option=
+                                        sheet.insert_data_option,
+                                        include_values_in_response=True,
+                                        )
+
+    return response
 
 
 def initializer(**kwargs):
@@ -97,11 +112,11 @@ def initializer(**kwargs):
         raise e
 
     try:
-        data = get_data(table_name=db.table_name,
-                        engine=engine,
-                        target_fields=query.fields,
-                        query_string=query.query_string
-                        )
+        data_df = get_data(table_name=db.table_name,
+                           engine=engine,
+                           target_fields=query.fields,
+                           query_string=query.query_string
+                           )
 
     except Exception as e:
         warning_message = "Data retrieval from DB unsuccessful"
@@ -111,4 +126,8 @@ def initializer(**kwargs):
 
     log.debug("Data successfully retrieved from database")
 
-#    update_spreadsheet(sheet_hook=sheet_hook, data=data)
+    response = update_spreadsheet(sheet_hook=sheet_hook,
+                                  data=data_df,
+                                  sheet=sheet)
+
+    log.info(response)
