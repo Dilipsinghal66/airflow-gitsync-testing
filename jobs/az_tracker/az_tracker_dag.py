@@ -1,5 +1,5 @@
 from datetime import datetime
-from jobs.az_tracker.azTrackerRaw1Job import initializer
+from jobs.az_tracker.autoAZTrackerJob import initializer
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from config import default_args, local_tz
@@ -8,7 +8,7 @@ from common.pyjson import PyJSON
 from airflow.models import Variable
 import json
 
-config_var = Variable.get('az_tracker_raw1_config', None)
+config_var = Variable.get('az_tracker_config', None)
 
 if config_var:
     config_var = json.loads(config_var)
@@ -17,7 +17,7 @@ if config_var:
 else:
     raise ValueError("Config variables not defined")
 
-az_tracker_raw1_dag = DAG(
+az_tracker_dag = DAG(
     dag_id="az_tracker_dag",
     default_args=default_args,
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
@@ -27,10 +27,10 @@ az_tracker_raw1_dag = DAG(
 )
 
 az_tracker_raw1_task = PythonOperator(
-    task_id="az_tracker_raw1_task",
+    task_id="az_tracker_task",
     task_concurrency=1,
     python_callable=initializer,
-    dag=az_tracker_raw1_dag,
+    dag=az_tracker_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True,
