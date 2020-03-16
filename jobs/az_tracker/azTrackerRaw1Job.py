@@ -31,7 +31,7 @@ def get_data_multiple_queries(table_name, engine, sheet):
                            query_string=sheet.query.query_string[i])
 
         log.debug(data_df.head())
-        data_df0 = data_df0.merge(data_df, on=['spoc_name', 'tbm_name'])
+        data_df0 = data_df0.merge(data_df, on=sheet.merge_key)
         log.debug("After merge")
         log.debug(data_df0)
 
