@@ -18,11 +18,12 @@ def get_data_multiple_queries(table_name, engine, sheet):
     :return: pandas dataframe
     """
 
-    data_df0 = get_data(table_name=table_name, engine=engine,
-                        target_fields=sheet.query.fields[0],
-                        query_string=sheet.query.query_string[0])
+    data_df_query1 = get_data(table_name=table_name, engine=engine,
+                              target_fields=sheet.query.fields[0],
+                              query_string=sheet.query.query_string[0])
 
-    log.debug(data_df0.head())
+    log.info("Query 1 successful")
+    log.debug(data_df_query1.head())
 
     for i in range(1, len(sheet.query.query_string)):
 
@@ -31,16 +32,20 @@ def get_data_multiple_queries(table_name, engine, sheet):
                            query_string=sheet.query.query_string[i])
 
         log.debug(data_df.head())
-        data_df0 = data_df0.merge(data_df, on=sheet.merge_key)
-        log.debug("After merge")
-        log.debug(data_df0)
+        log.info("Query " + str(i + 1) + " successful")
 
-    data_df0 = data_df0[sheet.query.column_order]
+        data_df_query1 = data_df_query1.merge(data_df, on=sheet.merge_key,
+                                              how='outer')
+        log.debug(data_df_query1.head())
 
-    data_df0.rename(columns=sheet.query.column_names.to_dict(),
-                    inplace=True)
+    log.info("Merge Successful")
 
-    return data_df0
+    data_df = data_df_query1[sheet.query.column_order]
+
+    data_df.rename(columns=sheet.query.column_names.to_dict(),
+                   inplace=True)
+
+    return data_df
 
 
 def get_data(table_name, engine, target_fields, query_string):
@@ -66,10 +71,11 @@ def get_data(table_name, engine, target_fields, query_string):
     try:
 
         data_df = engine.get_pandas_df(sql=sql)
+        log.info("Query executed successfully")
         log.debug(data_df.head())
 
     except Exception as e:
-        warning_message = "Could not get data from Database"
+        warning_message = "Query Unsuccessful"
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
@@ -89,26 +95,37 @@ def update_spreadsheet(sheet_hook, data, sheet):
     data.replace(np.nan, '', inplace=True)
 
     if not data.empty:
+
+        log.info("Clearing the spreadsheet")
+
         sheet_hook.clear(range_=sheet.column_range)
 
-        # values.append(data.values.tolist())
         values = data.values.tolist()
         values.insert(0, data.columns.values.tolist())
 
         for i in range(len(values)):
             log.debug(values[i])
 
-        response = sheet_hook.update_values(
-            range_=sheet.column_range,
-            values=values,
-            major_dimension=sheet.major_dimensions,
-            include_values_in_response=True
-            )
+        try:
 
-        log.debug(response)
+            log.info("Overwriting the spreadsheet data")
+            response = sheet_hook.update_values(
+                range_=sheet.column_range,
+                values=values,
+                major_dimension=sheet.major_dimensions,
+                include_values_in_response=True
+                )
+            log.info(response)
+            log.info("Data overwritten successfully")
+
+        except Exception as e:
+            warning_message = "Data overwriting unsuccessful"
+            log.warning(warning_message)
+            log.error(e, exc_info=True)
+            raise e
 
     else:
-        log.warning("No data received from in query")
+        log.warning("No data received from the query")
 
 
 def initializer(**kwargs):
@@ -161,16 +178,18 @@ def initializer(**kwargs):
     try:
         data_df = get_data(table_name=db.table_name,
                            engine=engine,
-                           target_fields=raw1.query.fields,
-                           query_string=raw1.query.query_string
+                           target_fields=raw2.query.fields,
+                           query_string=raw2.query.query_string
                            )
 
         update_spreadsheet(sheet_hook=sheet_hook,
                            data=data_df,
-                           sheet=raw1)
+                           sheet=raw2)
+
+        log.info("Task on Raw 2 spreadsheet successful")
 
     except Exception as e:
-        warning_message = "Task unsuccessfully terminated"
+        warning_message = "Task on Raw 2 spreadsheet unsuccessful"
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
@@ -178,15 +197,17 @@ def initializer(**kwargs):
     try:
         data_df_merged = get_data_multiple_queries(table_name=db.table_name,
                                                    engine=engine,
-                                                   sheet=raw2
+                                                   sheet=raw1
                                                    )
 
         update_spreadsheet(sheet_hook=sheet_hook,
                            data=data_df_merged,
-                           sheet=raw2)
+                           sheet=raw1)
+
+        log.info("Task on Raw 1 spreadsheet successful")
 
     except Exception as e:
-        warning_message = "Task unsuccessfully terminated"
+        warning_message = "Task on Raw 1 spreadsheet unsuccessful"
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
