@@ -12,7 +12,6 @@ log = LoggingMixin().log
 def get_data_multiple_queries(table_name, engine, sheet):
 
     """
-
     :param table_name: The table which will be queried
     :param engine: SQL connection object
     :param sheet: A set of config for sheet
@@ -25,24 +24,16 @@ def get_data_multiple_queries(table_name, engine, sheet):
 
     log.debug(data_df0.head())
 
-    data_df1 = get_data(table_name=table_name, engine=engine,
-                        target_fields=sheet.query.fields[1],
-                        query_string=sheet.query.query_string[1])
+    for i in range(1, len(sheet.query.query_string)):
 
-    log.debug(data_df1.head())
+        data_df = get_data(table_name=table_name, engine=engine,
+                           target_fields=sheet.query.fields[i],
+                           query_string=sheet.query.query_string[i])
 
-    data_df2 = get_data(table_name=table_name, engine=engine,
-                        target_fields=sheet.query.fields[2],
-                        query_string=sheet.query.query_string[2])
-
-    log.debug(data_df2.head())
-
-    data_df0 = data_df0.merge(data_df1, on=['spoc_name', 'tbm_name'])
-    log.debug("After merge 1")
-    log.debug(data_df0)
-    data_df0 = data_df0.merge(data_df2, on=['spoc_name', 'tbm_name'])
-    log.debug("After merge 2")
-    log.debug(data_df0)
+        log.debug(data_df.head())
+        data_df0 = data_df0.merge(data_df, on=['spoc_name', 'tbm_name'])
+        log.debug("After merge")
+        log.debug(data_df0)
 
     data_df0 = data_df0[sheet.query.column_order]
 
@@ -55,12 +46,11 @@ def get_data_multiple_queries(table_name, engine, sheet):
 def get_data(table_name, engine, target_fields, query_string):
 
     """
-
-    :param table_name:
-    :param engine:
-    :param target_fields:
-    :param query_string:
-    :return:
+    :param table_name: table in which query should be executed
+    :param engine: sql connection object
+    :param target_fields: fields required in output
+    :param query_string: query
+    :return: Dataframe
     """
 
     sql = "SELECT " + ", ".join(target_fields) + " "
@@ -108,14 +98,17 @@ def update_spreadsheet(sheet_hook, data, sheet):
         for i in range(len(values)):
             log.debug(values[i])
 
-        response = sheet_hook.update_values(range_=sheet.column_range,
-                                            values=values,
-                                            major_dimension=
-                                            sheet.major_dimensions,
-                                            include_values_in_response=True
-                                            )
+        response = sheet_hook.update_values(
+            range_=sheet.column_range,
+            values=values,
+            major_dimension=sheet.major_dimensions,
+            include_values_in_response=True
+            )
 
-        return response
+        log.debug(response)
+
+    else:
+        log.warning("No data received from in query")
 
 
 def initializer(**kwargs):
@@ -172,11 +165,9 @@ def initializer(**kwargs):
                            query_string=raw1.query.query_string
                            )
 
-        response = update_spreadsheet(sheet_hook=sheet_hook,
-                                      data=data_df,
-                                      sheet=raw1)
-
-        log.debug(response)
+        update_spreadsheet(sheet_hook=sheet_hook,
+                           data=data_df,
+                           sheet=raw1)
 
     except Exception as e:
         warning_message = "Task unsuccessfully terminated"
@@ -190,11 +181,9 @@ def initializer(**kwargs):
                                                    sheet=raw2
                                                    )
 
-        response = update_spreadsheet(sheet_hook=sheet_hook,
-                                      data=data_df_merged,
-                                      sheet=raw2)
-
-        log.debug(response)
+        update_spreadsheet(sheet_hook=sheet_hook,
+                           data=data_df_merged,
+                           sheet=raw2)
 
     except Exception as e:
         warning_message = "Task unsuccessfully terminated"
