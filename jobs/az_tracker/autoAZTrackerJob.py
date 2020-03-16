@@ -116,7 +116,7 @@ def initializer(**kwargs):
     Driver function for this script
     """
 
-    config_var = Variable.get('az_tracker_raw1_config', None)
+    config_var = Variable.get('az_tracker_config', None)
 
     if config_var:
         config_var = json.loads(config_var)
