@@ -6,11 +6,62 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from common.pyjson import PyJSON
 import numpy as np
 
-
 log = LoggingMixin().log
 
 
+def get_data_multiple_queries(table_name, engine, sheet):
+
+    """
+
+    :param table_name: The table which will be queried
+    :param engine: SQL connection object
+    :param sheet: A set of config for sheet
+    :return: pandas dataframe
+    """
+
+    data_df0 = get_data(table_name=table_name, engine=engine,
+                        target_fields=sheet.query.fields[0],
+                        query_string=sheet.query.query_string[0])
+
+    log.debug(data_df0.head())
+
+    data_df1 = get_data(table_name=table_name, engine=engine,
+                        target_fields=sheet.query.fields[1],
+                        query_string=sheet.query.query_string[1])
+
+    log.debug(data_df1.head())
+
+    data_df2 = get_data(table_name=table_name, engine=engine,
+                        target_fields=sheet.query.fields[2],
+                        query_string=sheet.query.query_string[2])
+
+    log.debug(data_df2.head())
+
+    data_df0 = data_df0.merge(data_df1, on=['spoc_name', 'tbm_name'])
+    log.debug("After merge 1")
+    log.debug(data_df0)
+    data_df0 = data_df0.merge(data_df2, on=['spoc_name', 'tbm_name'])
+    log.debug("After merge 2")
+    log.debug(data_df0)
+
+    data_df0 = data_df0[sheet.query.column_order]
+
+    data_df0.rename(columns=sheet.query.column_names.to_dict(),
+                    inplace=True)
+
+    return data_df0
+
+
 def get_data(table_name, engine, target_fields, query_string):
+
+    """
+
+    :param table_name:
+    :param engine:
+    :param target_fields:
+    :param query_string:
+    :return:
+    """
 
     sql = "SELECT " + ", ".join(target_fields) + " "
 
@@ -19,17 +70,6 @@ def get_data(table_name, engine, target_fields, query_string):
 
     if query_string:
         sql = sql + query_string
-
-    # sql = "SELECT code, p_tag, patients  from (select * from " \
-    #       "zylaapi.doc_profile where code like '%AZ%') x left join " \
-    #       "(select x.doc_id, case when y.patient_id is null " \
-    #       "then 'non-premium' else 'premium' end as p_tag, " \
-    #       "count(distinct x.patient_id) as patients " \
-    #       "from (select referred_by as doc_id, id as patient_id from " \
-    #       "zylaapi.patient_profile group by 1,2) x left join (select " \
-    #       "patient_id from zylaapi.prescription_verification " \
-    #       "where status =1 group by 1) y on " \
-    #       "x.patient_id = y.patient_id group by 1,2) y on x.id = y.doc_id;"
 
     log.debug(sql)
 
@@ -49,22 +89,33 @@ def get_data(table_name, engine, target_fields, query_string):
 
 def update_spreadsheet(sheet_hook, data, sheet):
 
+    """
+    :param sheet_hook: Google sheet hook
+    :param data: Dataframe
+    :param sheet: Config var for sheet configurations
+    :return: dict
+    """
+
     data.replace(np.nan, '', inplace=True)
 
-    # values.append(data.values.tolist())
-    values = data.values.tolist()
-    values.insert(0, data.columns.values.tolist())
+    if not data.empty:
+        sheet_hook.clear(range_=sheet.column_range)
 
-    for i in range(len(values)):
-        log.debug(values[i])
+        # values.append(data.values.tolist())
+        values = data.values.tolist()
+        values.insert(0, data.columns.values.tolist())
 
-    response = sheet_hook.update_values(range_=sheet.column_range,
-                                        values=values,
-                                        major_dimension=sheet.major_dimensions,
-                                        include_values_in_response=True,
-                                        )
+        for i in range(len(values)):
+            log.debug(values[i])
 
-    return response
+        response = sheet_hook.update_values(range_=sheet.column_range,
+                                            values=values,
+                                            major_dimension=
+                                            sheet.major_dimensions,
+                                            include_values_in_response=True
+                                            )
+
+        return response
 
 
 def initializer(**kwargs):
@@ -83,8 +134,9 @@ def initializer(**kwargs):
     try:
         gcp = config_obj.gcp
         sheet = config_obj.sheet
+        raw1 = sheet.raw1
+        raw2 = sheet.raw2
         db = config_obj.db
-        query = config_obj.query
 
     except Exception as e:
         warning_message = "Couldn't get config variables"
@@ -116,20 +168,36 @@ def initializer(**kwargs):
     try:
         data_df = get_data(table_name=db.table_name,
                            engine=engine,
-                           target_fields=query.fields,
-                           query_string=query.query_string
+                           target_fields=raw1.query.fields,
+                           query_string=raw1.query.query_string
                            )
 
+        response = update_spreadsheet(sheet_hook=sheet_hook,
+                                      data=data_df,
+                                      sheet=raw1)
+
+        log.debug(response)
+
     except Exception as e:
-        warning_message = "Data retrieval from DB unsuccessful"
+        warning_message = "Task unsuccessfully terminated"
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
 
-    log.debug("Data successfully retrieved from database")
+    try:
+        data_df_merged = get_data_multiple_queries(table_name=db.table_name,
+                                                   engine=engine,
+                                                   sheet=raw2
+                                                   )
 
-    response = update_spreadsheet(sheet_hook=sheet_hook,
-                                  data=data_df,
-                                  sheet=sheet)
+        response = update_spreadsheet(sheet_hook=sheet_hook,
+                                      data=data_df_merged,
+                                      sheet=raw2)
 
-    log.info(response)
+        log.debug(response)
+
+    except Exception as e:
+        warning_message = "Task unsuccessfully terminated"
+        log.warning(warning_message)
+        log.error(e, exc_info=True)
+        raise e
