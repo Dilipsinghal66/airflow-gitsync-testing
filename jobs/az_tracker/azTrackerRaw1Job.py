@@ -51,14 +51,16 @@ def update_spreadsheet(sheet_hook, data, sheet):
 
     data.replace(np.nan, '', inplace=True)
 
-    # values = list(data.columns)
+    # values.append(data.values.tolist())
     values = data.values.tolist()
+    values.insert(0, data.columns.values.tolist())
 
-    response = sheet_hook.append_values(range_=sheet.column_range,
+    for i in range(len(values)):
+        log.debug(values[i])
+
+    response = sheet_hook.update_values(range_=sheet.column_range,
                                         values=values,
                                         major_dimension=sheet.major_dimensions,
-                                        insert_data_option=
-                                        sheet.insert_data_option,
                                         include_values_in_response=True,
                                         )
 
