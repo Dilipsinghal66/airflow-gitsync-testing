@@ -9,6 +9,19 @@ import numpy as np
 log = LoggingMixin().log
 
 
+def fixing_names(df):
+
+    df['spoc_name'] = df['spoc_name'].apply(lambda x: " ".join(map(lambda y:
+                                            y[:1].upper() + y[1:].lower(),
+                                                                   x.split())))
+
+    df['tbm_name'] = df['tbm_name'].apply(lambda x: " ".join(map(lambda y:
+                                          y[:1].upper() + y[1:].lower(),
+                                                                 x.split())))
+
+    return df
+
+
 def get_data_multiple_queries(table_name, engine, sheet):
 
     """
@@ -22,6 +35,8 @@ def get_data_multiple_queries(table_name, engine, sheet):
                               target_fields=sheet.query.fields[0],
                               query_string=sheet.query.query_string[0])
 
+    data_df_query1 = fixing_names(data_df_query1)
+
     log.info("Query 1 successful")
     log.debug(data_df_query1.head())
 
@@ -31,6 +46,7 @@ def get_data_multiple_queries(table_name, engine, sheet):
                            target_fields=sheet.query.fields[i],
                            query_string=sheet.query.query_string[i])
 
+        data_df = fixing_names(data_df)
         log.debug(data_df.head())
         log.info("Query " + str(i + 1) + " successful")
 
