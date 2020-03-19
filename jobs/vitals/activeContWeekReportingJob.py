@@ -6,7 +6,7 @@ from common.db_functions import get_data_from_db
 log = LoggingMixin().log
 
 
-def active_week_reporting():
+def active_week_reporting(**kwargs):
 
     process_cont_week_active_reporting = int(Variable.get("process_cont_week_"
                                                           "active_reporting_"
@@ -22,18 +22,25 @@ def active_week_reporting():
     }
 
     user_projection = {
-        "_id": 1
+        "_id": 0,
+        "userId": 1
     }
 
     try:
 
-        active_userid_list = get_data_from_db(conn_id='mongo',
-                                              collection="user",
-                                              filter=user_filter,
-                                              projection=user_projection)
+        active_userid_cursor = get_data_from_db(conn_id='mongo_user_db',
+                                                collection="user",
+                                                filter=user_filter,
+                                                projection=user_projection)
 
-        for user in active_userid_list:
-            log.debug(str(user))
+        active_userid = []
+
+        for user in active_userid_cursor:
+            user_id = user.get("userId")
+            active_userid.append(user_id)
+            log.info("User ID received " + str(user_id))
+
+        log.debug(active_userid)
 
     except Exception as e:
         warning_message = "First Query on MongoDB unsuccessful"
@@ -42,8 +49,8 @@ def active_week_reporting():
         raise e
 
     _filter = {
-        {"patientId": {"$in": active_userid_list}},
-        {"date": {"$gt": start_date}}
+        "patientId": {"$in": active_userid},
+        "report_": {"$gt": start_date.isoformat()}
     }
 
     projection = {
@@ -52,12 +59,17 @@ def active_week_reporting():
     log.info("--- Second DB call ---")
 
     try:
-        cont_active_userid_list = get_data_from_db(conn_id='mongo',
-                                                   collection='report_date',
-                                                   filter=_filter,
-                                                   projection=projection)
-        for userid in cont_active_userid_list:
-            log.debug(str(userid))
+        cont_active_userid_cursor = get_data_from_db(conn_id='mongo_user_db',
+                                                     collection='report_date',
+                                                     filter=_filter,
+                                                     projection=projection)
+
+        cont_active_userid_list = []
+
+        for userid in cont_active_userid_cursor:
+            user_id = userid.get("userId")
+            cont_active_userid_list.append(user_id)
+            log.debug("User ID received " + str(user_id))
 
     except Exception as e:
         warning_message = "Second Query on MongoDB unsuccessful"
