@@ -44,13 +44,12 @@ def broadcast_pa_trial_patients():
 
     query_filter = {
         "userStatus": {"$in": status},
-        "lastSeen": {"$gte": start_date_time}
+        "chatInformation.providerData.lastSeen": {"$gte": start_date_time}
     }
 
     projection = {
         "_id": 1,
         "userId": 1,
-        "patientId": 0
     }
 
     try:
@@ -69,7 +68,7 @@ def broadcast_pa_trial_patients():
             _id_list.append(_id)
             user_id = user.get("userId")
             user_id_list.append(user_id)
-            log.info("_id: " + _id + ", User ID: " + str(user_id))
+            log.info("_id: " + str(_id) + ", User ID: " + str(user_id))
 
     except Exception as e:
         warning_message = "Query on MongoDB unsuccessful"
