@@ -31,11 +31,11 @@ def broadcast_pa_trial_patients():
         config_var = json.loads(config_var)
         config_obj = PyJSON(d=config_var)
         db = config_obj.db
-        db_type = db.type
         collection = db.collection
         conn_id = db.conn_id
-        interval = config_obj.interval
-        status = config_obj.status
+        defaults = config_obj.defaults
+        interval = defaults.interval
+        status = defaults.status
     else:
         raise ValueError("Config variables not defined")
 
@@ -55,7 +55,7 @@ def broadcast_pa_trial_patients():
 
     try:
 
-        mongo_cursor = get_data_from_db(db_type=db_type,
+        mongo_cursor = get_data_from_db(
                                         conn_id=conn_id,
                                         collection=collection,
                                         filter=query_filter,
