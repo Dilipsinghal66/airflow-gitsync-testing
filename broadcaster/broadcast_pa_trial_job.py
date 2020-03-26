@@ -23,7 +23,7 @@ def broadcast_pa_trial_patients():
     if process_broadcast_pa_trial_patients == 1:
         return
 
-    message = str(Variable.get("broadcast_pa_trial_msg", ''))
+    message = str(Variable.get("broadcast_pa_trial", ''))
 
     config_var = Variable.get('broadcast_pa_trial_config', None)
 
