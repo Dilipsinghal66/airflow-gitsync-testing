@@ -9,8 +9,8 @@ from common.pyjson import PyJSON
 log = LoggingMixin().log
 
 """
-Broadcast to patients with lastSeen <= 3 days and having status as ON_TRIAL 
-or PA_Completed
+Broadcast to patients with lastSeen <= 3 days and having status as ON_TRIAL or
+PA_Completed
 """
 
 
@@ -41,7 +41,7 @@ def broadcast_pa_trial_patients():
 
     start_date = datetime.now() - timedelta(days=interval)
 
-    _filter = {
+    query_filter = {
         "userStatus": {"$in": status},
         "lastSeen": {"$gte": start_date}
     }
@@ -49,18 +49,18 @@ def broadcast_pa_trial_patients():
     projection = {
         "_id": 1,
         "userId": 1,
-        "patientId": 1
+        "patientId": 0
     }
 
     try:
+
         mongo_cursor = get_data_from_db(db_type=db_type,
                                         conn_id=conn_id,
                                         collection=collection,
-                                        filter=_filter,
+                                        filter=query_filter,
                                         projection=projection
                                         )
         user_id_list = []
-        patient_id_list = []
         _id_list = []
 
         for user in mongo_cursor:
@@ -68,10 +68,7 @@ def broadcast_pa_trial_patients():
             _id_list.append(_id)
             user_id = user.get("userId")
             user_id_list.append(user_id)
-            patient_id = user.get("patientId")
-            patient_id_list.append(patient_id)
-            log.info("_id: " + _id + ", Patient ID: " + str(patient_id) +
-                     ", User ID: " + str(user_id) + " received")
+            log.info("_id: " + _id + ", User ID: " + str(user_id))
 
     except Exception as e:
         warning_message = "Query on MongoDB unsuccessful"
@@ -81,6 +78,9 @@ def broadcast_pa_trial_patients():
 
     message_replace_data = {}
     action = "dynamic_message"
+    _filter = {
+        "_id": {"$in": _id_list}
+    }
 
     try:
 
@@ -95,16 +95,3 @@ def broadcast_pa_trial_patients():
         log.warning(warning_message)
         log.error(e, exc_info=True)
         raise e
-
-
-
-
-
-
-
-
-
-
-
-
-
