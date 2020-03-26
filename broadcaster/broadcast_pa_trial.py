@@ -1,6 +1,6 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
-from datetime import datetime, timedelta
+from datetime import datetime, date, time, timedelta
 from common.db_functions import get_data_from_db
 from common.helpers import process_dynamic_message
 import json
@@ -39,11 +39,12 @@ def broadcast_pa_trial_patients():
     else:
         raise ValueError("Config variables not defined")
 
-    start_date = datetime.now() - timedelta(days=interval)
+    start_date = date.today() - timedelta(days=interval)
+    start_date_time = datetime.combine(start_date, time.min)
 
     query_filter = {
         "userStatus": {"$in": status},
-        "lastSeen": {"$gte": start_date}
+        "lastSeen": {"$gte": start_date_time}
     }
 
     projection = {
