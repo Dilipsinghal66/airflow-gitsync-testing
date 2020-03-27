@@ -49,7 +49,7 @@ def broadcast_pa_trial_patients():
 
     projection = {
         "_id": 1,
-        "userId": 1,
+        "userId": 1
     }
 
     try:
@@ -68,7 +68,7 @@ def broadcast_pa_trial_patients():
             _id_list.append(_id)
             user_id = user.get("userId")
             user_id_list.append(user_id)
-            log.info("_id: " + str(_id) + ", User ID: " + str(user_id))
+            log.debug("_id: " + str(_id) + ", User ID: " + str(user_id))
 
     except Exception as e:
         warning_message = "Query on MongoDB unsuccessful"
@@ -82,10 +82,14 @@ def broadcast_pa_trial_patients():
         "_id": {"$in": _id_list}
     }
 
+    _projection = {
+        "userId": 1, "_id": 0
+    }
+
     try:
 
         process_dynamic_message(_filter=_filter,
-                                projection=projection,
+                                projection=_projection,
                                 message_replace_data=message_replace_data,
                                 message=message,
                                 action=action)
