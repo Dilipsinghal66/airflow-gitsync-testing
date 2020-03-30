@@ -103,8 +103,7 @@ def patient_user_id_conv_msg(patient_id_list,
                              message_replace_data, message, action):
     mongo_filter_field = "patientId"
     _filter = {
-        mongo_filter_field: {"$in": patient_id_list},
-        "docCode": {"$regex": "^ZH"}
+        mongo_filter_field: {"$in": patient_id_list}
     }
     projection = {
         "userId": 1, "patientId": 1, "_id": 0
