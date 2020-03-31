@@ -4,17 +4,8 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from config import default_args, local_tz
 from airflow.models import Variable
-import json
-from common.pyjson import PyJSON
 
-config_var = Variable.get('broadcast_pa_trial_config', None)
-
-if config_var:
-    config_var = json.loads(config_var)
-    config_obj = PyJSON(d=config_var)
-    cron_time = config_obj.defaults.cron_time
-else:
-    raise ValueError("Config variables not defined")
+cron_time = Variable.get('broadcast_pa_trial_cron', '@yearly')
 
 broadcast_pa_trial_dag = DAG(
     dag_id="broadcast_pa_trial",
