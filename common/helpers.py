@@ -474,6 +474,10 @@ def twilio_cleanup():
     for user in users_deactivated:
         patient_id = user.get("patientId")
         _id = str(user.get("_id"))
+        user_endpoint = _id
+        payload = {
+            "assignedCm": 0
+        }
         log.info("Processing deletion for deactivated patient " + str(
             patient_id) + " with id " + _id)
         chat_information = user.get("chatInformation", {})
@@ -490,6 +494,8 @@ def twilio_cleanup():
             twilio_cleanup_channel(twilio_service=twilio_service,
                                    channel_sid=channel_sid,
                                    remove_cm=True)
+            make_http_request(conn_id="http_user_url", method="PATCH",
+                              endpoint=user_endpoint, payload=payload)
         except Exception as e:
             log.error(e)
         # try:
