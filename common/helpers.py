@@ -476,7 +476,8 @@ def twilio_cleanup():
         _id = str(user.get("_id"))
         user_endpoint = _id
         payload = {
-            "assignedCm": 0
+            "assignedCm": 0,
+            "assignedCmType": "normal"
         }
         log.info("Processing deletion for deactivated patient " + str(
             patient_id) + " with id " + _id)
