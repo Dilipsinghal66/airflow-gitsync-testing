@@ -77,6 +77,7 @@ def isRecommendedB(param, fortoday):
         if param in [10, 18, 68, 69, 71]:
             ret = 1
     elif day == 6:
+        if param in [10, 18, 27]:
             ret = 1
 
     return ret
