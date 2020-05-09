@@ -62,8 +62,8 @@ def isRecommendedB(param, fortoday):
     #    if param == 5:
     #       ret = 1
     if day == 1:
-            if param == 5:
-                ret = 1
+        if param == 5:
+            ret = 1
     # elif day == 2:
     #    if param == 5:
     #        ret = 1
