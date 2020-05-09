@@ -21,7 +21,7 @@ def isRecommendedA(param, fortoday):
     day = todaydate.weekday()
 
     if not fortoday:
-        day = 0 if day == 6 else day + 1]
+        day = 0 if day == 6 else day + 1
 
     # elif day == 0:
     #    if param == 5:
