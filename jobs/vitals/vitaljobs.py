@@ -42,7 +42,7 @@ def isRecommendedA(param, fortoday):
         if param in [1, 2, 10, 18, 61, 68, 69, 71]:
             ret = 1
     elif day == 6:
-        if param == 5:
+        if param == 58:
             ret = 1
 
     return ret
@@ -77,7 +77,7 @@ def isRecommendedB(param, fortoday):
         if param in [10, 18, 68, 69, 71]:
             ret = 1
     elif day == 6:
-        if param == 58:
+        if param in [10, 18, 27]:
             ret = 1
 
     return ret
@@ -112,7 +112,7 @@ def isRecommendedC(param, fortoday):
         if param in [1, 2, 10, 18, 61, 68, 69, 71]:
             ret = 1
     elif day == 6:
-        if param in [10, 18, 27]:
+        if param == 25:
             ret = 1
 
     return ret
@@ -147,7 +147,7 @@ def isRecommendedD(param, fortoday):
         if param in [10, 18, 68, 69, 71]:
             ret = 1
     elif day == 6:
-        if param == 25:
+        if param == 5:
             ret = 1
 
     return ret
