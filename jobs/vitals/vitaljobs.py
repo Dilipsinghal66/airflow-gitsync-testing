@@ -194,13 +194,10 @@ def create_vitals_func(**kwargs):
 
             if switch == 'A':
                 isRecommended = isRecommendedA
-                log.info("Is Recommended A Called")
             elif switch == 'B':
                 isRecommended = isRecommendedB
-                log.info("Is Recommended B Called")
             elif switch == 'C':
                 isRecommended = isRecommendedC
-                log.info("Is Recommended C Called")
             elif switch == 'D':
                 isRecommended = isRecommendedD
             else:
