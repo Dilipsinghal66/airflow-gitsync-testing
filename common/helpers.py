@@ -83,6 +83,36 @@ def task_success_callback(context):
                       payload=success_payload, endpoint=endpoint)
 
 
+
+def process_dynamic_task_sql_no_az(sql_query, message, action):
+    sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                                sql_query=sql_query, execute_query=True)
+    patient_id_list = []
+    message_replace_data = {}
+    if sql_data:
+        for patient in sql_data:
+            patient_id = patient[0]
+            patient_id_list.append(patient_id)
+            message_replace_data[patient_id] = patient
+
+    log.info(patient_id_list)
+    patient_user_id_conv_msg_no_az\
+        (patient_id_list, message_replace_data, message, action)
+
+def patient_user_id_conv_msg_no_az\
+                (patient_id_list, message_replace_data, message, action):
+    mongo_filter_field = "patientId"
+    _filter = {
+        mongo_filter_field: {"$in": patient_id_list},
+        "docCode": {"$regex": "^ZH"}
+    }
+    projection = {
+        "userId": 1, "patientId": 1, "_id": 0
+    }
+    process_dynamic_message(_filter, projection,
+                            message_replace_data, message, action)
+
+
 def process_dynamic_task_sql(sql_query, message, action):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
