@@ -26,8 +26,7 @@ def send_vital_reminder_func():
                 patient_id_list.append(_id)
 
         for patient_id in patient_id_list:
-            message = str(Variable.get("vital_reminder_message",
-                                       "Recommended vitals to test today: \n"))
+            message = str(Variable.get("vital_reminder_message", ""))
 
             param_query = "select distinct(paramId) " \
                           "from zylaapi.patientTestReadings " \
