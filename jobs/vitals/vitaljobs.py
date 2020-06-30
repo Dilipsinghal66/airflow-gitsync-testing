@@ -215,13 +215,13 @@ def create_vitals_func(**kwargs):
             # print("got the cursor")
 
             cursor.execute(
-                "select count(*) from zylaapi.patient_profile where status in (10,4,11,5,18)")  # noqa E303
+                "select count(*) from zylaapi.patient_profile")  # noqa E303
             totalcount = cursor.fetchone()[0]
             # print(totalcount)
             numberofPage = int(totalcount / PAGE_SIZE) + 1
             print(numberofPage)
             for i in range(numberofPage):
-                patientIdSqlQuerry = "select id from zylaapi.patient_profile where status in (10,4,11,5,18) LIMIT " + str(
+                patientIdSqlQuerry = "select id from zylaapi.patient_profile LIMIT " + str(
                     # noqa E303
                     i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
                 cursor.execute(patientIdSqlQuerry)
