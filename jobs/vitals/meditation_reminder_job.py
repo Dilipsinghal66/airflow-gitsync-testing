@@ -45,7 +45,7 @@ def meditation_reminder_func():
                     patient_id_list.append(_id)
 
             for patient_id in patient_id_list:
-                message = meditation_arr[meditation_id]
+                message = str(meditation_arr[meditation_id])
 
                 action = "meditation_reminders"
                 log.info("patient_id " + str(patient_id))
