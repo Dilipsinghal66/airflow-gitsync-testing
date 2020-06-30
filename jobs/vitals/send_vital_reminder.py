@@ -8,7 +8,7 @@ from config import local_tz, default_args
 from jobs.vitals.vital_reminder import send_vital_reminder_func
 
 vital_reminder_interval = str(
-    Variable.get("vital_reminder_interval", '0 00 06 * * ?'))
+    Variable.get("vital_reminder_interval", '0 07 * * *'))
 
 send_vital_reminder_dag = DAG(
     dag_id="send_vital_reminder_func",

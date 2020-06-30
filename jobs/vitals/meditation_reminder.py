@@ -8,7 +8,7 @@ from config import local_tz, default_args
 from jobs.vitals.meditation_reminder_job import meditation_reminder_func
 
 meditation_reminder_interval = str(
-    Variable.get("meditation_reminder_interval", '0 45 21 * * ?'))
+    Variable.get("meditation_reminder_interval", '45 21 * * *'))
 
 meditation_reminder_dag = DAG(
     dag_id="meditation_reminder",
