@@ -1,7 +1,7 @@
 # from sqlalchemy.engine import create_engine
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
-from common.helpers import patient_user_id_conv_msg
+from common.helpers import patient_id_message_send
 from airflow.utils.log.logging_mixin import LoggingMixin
 
 log = LoggingMixin().log
@@ -19,7 +19,7 @@ def send_vital_reminder_func():
         connection = engine.get_conn()
         cursor = connection.cursor()
         cursor.execute("select id from "
-                       "zylaapi.patient_profile where status = 4;")
+                       "zylaapi.patient_profile")
         patient_id_list = []
         for row in cursor.fetchall():
             for _id in row:
@@ -43,15 +43,11 @@ def send_vital_reminder_func():
                         for row1 in cursor.fetchall():
                             for name in row1:
                                 message = message + name + "\n"
-                patient_data_list = []
-                message_replace_data = {}
-                patient_data_list.append(patient_id)
-                message_replace_data[patient_id] = patient_data_list
+
                 action = "vitals_reminder"
-                log.info("patient_data_list " + str(patient_data_list))
+                log.info("patient_id " + str(patient_id))
                 log.info("Message " + message)
-                patient_user_id_conv_msg(patient_data_list,
-                                         message_replace_data, message, action)
+                patient_id_message_send(patient_id, message, action)
 
     except Exception as e:
         print("Error Exception raised")

@@ -36,6 +36,19 @@ def send_chat_message(user_id=None, payload=None):
     except Exception as e:
         raise ValueError(str(e))
 
+def send_chat_message_patient_id(patient_id=None, payload=None):
+    try:
+        endpoint = "users/patients/" + str(
+            round(patient_id)) + "/message"
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_chat_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
 
 def mongo_query_builder(query_data):
     query = query_data.get("query")
@@ -192,6 +205,16 @@ def process_health_plan_not_created(patient_list):
     else:
         log.info("Health plan created for all patients. Nothing to do. ")
     return patient_list
+
+
+def patient_id_message_send(patient_id, message, action):
+    payload = {
+        "action": action,
+        "message": message,
+        "is_notification": False
+    }
+
+    send_chat_message_patient_id(patient_id=patient_id, payload=payload)
 
 
 def find_patients_not_level_jumped(patient_list):
