@@ -44,7 +44,7 @@ def send_vital_reminder_func():
                             for name in row1:
                                 message = message + name + "\n"
 
-                action = "vitals_reminder"
+                action = "vitals_reminder_6_am"
                 log.info("patient_id " + str(patient_id))
                 log.info("Message " + message)
                 try:
