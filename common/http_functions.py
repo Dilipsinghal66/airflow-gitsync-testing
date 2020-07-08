@@ -6,7 +6,7 @@ from config import payload_required_methods, extra_http_options, \
     disable_response_check_methods
 
 chat_headers = {
-    "client": "Service",
+    "client": "service",
     "auth_token": "0A44F17766A76D240552A6B3A12CAA38F37889B72E868AAE729A07C557B4B9CB",
     "Content-Type": "application/json"
 }
