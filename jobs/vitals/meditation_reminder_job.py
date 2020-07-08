@@ -50,7 +50,11 @@ def meditation_reminder_func():
                 action = "meditation_reminders"
                 log.info("patient_id " + str(patient_id))
                 log.info("Message " + message)
-                patient_id_message_send(patient_id, message, action)
+                try:
+                    patient_id_message_send(patient_id, message, action)
+                except Exception as e:
+                    print("Error Exception raised")
+                    print(e)
 
         else:
             log.info("Skipping as it is not wed or sun")

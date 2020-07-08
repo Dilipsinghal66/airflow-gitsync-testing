@@ -47,7 +47,11 @@ def send_vital_reminder_func():
                 action = "vitals_reminder"
                 log.info("patient_id " + str(patient_id))
                 log.info("Message " + message)
-                patient_id_message_send(patient_id, message, action)
+                try:
+                    patient_id_message_send(patient_id, message, action)
+                except Exception as e:
+                    print("Error Exception raised")
+                    print(e)
 
     except Exception as e:
         print("Error Exception raised")
