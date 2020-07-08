@@ -7,7 +7,8 @@ from config import payload_required_methods, extra_http_options, \
 
 chat_headers = {
     "client": "Service",
-    "auth_token": "0A44F17766A76D240552A6B3A12CAA38F37889B72E868AAE729A07C557B4B9CB"
+    "auth_token": "0A44F17766A76D240552A6B3A12CAA38F37889B72E868AAE729A07C557B4B9CB",
+    "Content-Type": "application/json"
 }
 
 def make_http_request(conn_id=None, method=None, payload=None, endpoint=""):
