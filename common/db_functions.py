@@ -1,15 +1,26 @@
 from airflow.contrib.hooks.mongo_hook import MongoHook
-from airflow.hooks.mysql_hook import MySqlHook
+from pymongo.collection import Collection
+from pymongo.cursor import Cursor
+from common.custom_hooks.custom_sql_hook import CustomMySqlHook
 
 
-def get_data_from_db(db_type="mongo", conn_id=None, collection=None, **kwargs):
+def get_data_from_db(db_type="mongo", conn_id=None, collection=None,
+                     query_type="select", **kwargs):
     if db_type == "mongo":
-        coll = MongoHook(
+        coll: Collection = MongoHook(
             conn_id=conn_id).get_conn().get_default_database().get_collection(
             collection)
-        data = coll.find(**kwargs)
+        data: Cursor = coll.find(**kwargs)
+        if query_type == "distinct":
+            distinct_key = kwargs.get("query_filter", None)
+            if not distinct_key:
+                raise ValueError("query_filter is required when query_type "
+                                 "is distinct")
+            data = data.distinct(key=distinct_key)
     if db_type == "mysql":
-        #sql = kwargs.get("sql_query")
-        data = MySqlHook(mysql_conn_id=conn_id)
-        #data = db.get_records(sql=sql)
+        data: CustomMySqlHook = CustomMySqlHook(mysql_conn_id=conn_id)
+        execute_query = kwargs.get("execute_query", False)
+        if execute_query:
+            sql = kwargs.get("sql_query")
+            data = data.get_records(sql=sql)
     return data

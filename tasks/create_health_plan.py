@@ -7,14 +7,16 @@
 # from config import local_tz, default_args
 # from airflow.models import Variable
 #
-# activate_patient_duration = int(Variable.get("activated_patient_duration", '0'))
+# activate_patient_duration =
+#          int(Variable.get("activated_patient_duration", '0'))
 #
 # level_jump_dag = DAG(
 #     dag_id="create_health_plan",
 #     default_args=default_args,
 #     schedule_interval=None,
 #     catchup=False,
-#     start_date=datetime(year=2019, month=4, day=23, hour=0, minute=0, second=0, microsecond=0, tzinfo=local_tz)
+#     start_date=datetime(year=2019, month=4, day=23, hour=0, minute=0,
+#                         second=0, microsecond=0, tzinfo=local_tz)
 # )
 #
 # activated_patients_task = PythonOperator(
