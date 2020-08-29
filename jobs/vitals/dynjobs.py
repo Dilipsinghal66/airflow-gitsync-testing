@@ -1,9 +1,12 @@
 from time import sleep
 
 from airflow.models import Variable
-
+from airflow.utils.log.logging_mixin import LoggingMixin
 from common.db_functions import get_data_from_db
-from common.http_functions import make_http_request
+from common.helpers import patient_id_message_send
+
+log = LoggingMixin().log
+
 
 PAGE_SIZE = 1000
 
@@ -15,14 +18,6 @@ def send_dyn_func():
         if process_dyn_flag == 1:
             return
 
-        payload = {
-            "action": "information_card",
-            "message": "String.valueOf(informationCard.getId()",
-            "is_notification": True,
-            "unlock_reporting": True,
-            "unlock_vitals": True
-        }
-
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         # print("got db connection from environment")
         connection = engine.get_conn()
@@ -30,7 +25,7 @@ def send_dyn_func():
         # print("created connection from engine")
 
         cursor.execute("select count(*) from zylaapi.patient_profile "
-                       "where status = 4")
+                       "where status = 4 and new_chat = 1")
         totalcount = cursor.fetchone()[0]
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
@@ -38,7 +33,7 @@ def send_dyn_func():
         for i in range(numberofPage):
             patientIdSqlQuerry = "select id, countDidYouKnow from " \
                                  "zylaapi.patient_profile where " \
-                                 "status = 4 LIMIT " + str(i * PAGE_SIZE) + \
+                                 "status = 4  and new_chat = 1 LIMIT " + str(i * PAGE_SIZE) + \
                                  ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
             patientIdList = []
@@ -59,30 +54,20 @@ def send_dyn_func():
                 # print(number_of_rows)
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
-                    # print(informationIdtobeSent)
-                    no_of_rows = cursor.execute("select distinct(id) from "
-                                                "zylaapi.auth where "
-                                                "phoneno in (select phoneno from zylaapi.patient_profile where id = " + str(  # noqa E303
-                        key) + " )")
-                    if no_of_rows > 0:
-                        user_id = cursor.fetchone()[0]
 
-                        # print(user_id)
-                        payload["message"] = str(informationIdtobeSent)
-                        endpoint = "user/" + str(round(user_id)) + "/message"
-                        # print(endpoint)
-                        # print(payload)
-                        status, body = make_http_request(
-                            conn_id="http_chat_service_url",
-                            endpoint=endpoint, method="POST", payload=payload)
-                        # print(status, body)
+                    log.info("patient_id " + str(key))
+                    log.info("Message " + str(informationIdtobeSent))
+                    try:
+                        patient_id_message_send(key, str(informationIdtobeSent), "information_card")
+                    except Exception as e:
+                        print("Error Exception raised")
+                        print(e)
 
                         updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(  # noqa E303
                             informationIdtobeSent) + " where id = " + str(key)
                         # print(updateSqlQuery)
                         cursor.execute(updateSqlQuery)
 
-                        sleep(.300)
                 else:
                     print(
                         "All DYN Ids are sent We need to reset this patient Id " + str(  # noqa E303
