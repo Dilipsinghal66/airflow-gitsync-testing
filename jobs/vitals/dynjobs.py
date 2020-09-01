@@ -60,11 +60,11 @@ def send_dyn_func():
                     try:
                         payload = {
                             "action": "information_card",
-                            "message": 20,
+                            "message": informationIdtobeSent,
                             "is_notification": False
                         }
                         log.info("Before Message ")
-                        send_chat_message_patient_id(patient_id=key, payload=payload)
+                        send_chat_message_patient_id(patient_id=int(key), payload=payload)
                     except Exception as e:
                         print("Error Exception raised")
                         print(e)
