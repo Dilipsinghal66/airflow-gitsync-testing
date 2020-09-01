@@ -3,7 +3,7 @@ from time import sleep
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.db_functions import get_data_from_db
-from common.helpers import patient_id_message_send
+from common.helpers import send_chat_message_patient_id
 
 log = LoggingMixin().log
 
@@ -58,7 +58,12 @@ def send_dyn_func():
                     log.info("patient_id " + str(key))
                     log.info("Message " + str(informationIdtobeSent))
                     try:
-                        patient_id_message_send(key, int(informationIdtobeSent), "information_card")
+                        payload = {
+                            "action": "information_card",
+                            "message": informationIdtobeSent,
+                            "is_notification": False
+                        }
+                        send_chat_message_patient_id(patient_id=key, payload=payload)
                     except Exception as e:
                         print("Error Exception raised")
                         print(e)
