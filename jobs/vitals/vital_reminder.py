@@ -21,7 +21,7 @@ def send_vital_reminder_func():
         sql_query = str(Variable.get("vital_reminder_sql_query",
                                      'select id from '
                                      'zylaapi.patient_profile '
-                                     'where status = 4 and new_chat = 1'))
+                                     'where status = 4 and new_chat = 1 and id = 5397'))
         cursor.execute(sql_query)
         patient_id_list = []
         for row in cursor.fetchall():
