@@ -58,7 +58,7 @@ def send_dyn_func():
                     log.info("patient_id " + str(key))
                     log.info("Message " + str(informationIdtobeSent))
                     try:
-                        patient_id_message_send(key, str(informationIdtobeSent), "information_card")
+                        patient_id_message_send(key, int(informationIdtobeSent), "information_card")
                     except Exception as e:
                         print("Error Exception raised")
                         print(e)
