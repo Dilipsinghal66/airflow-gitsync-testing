@@ -54,15 +54,16 @@ def send_dyn_func():
                 # print(number_of_rows)
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
-
+                    cardId = int(informationIdtobeSent)
                     log.info("patient_id " + str(key))
                     log.info("Message " + str(informationIdtobeSent))
                     try:
                         payload = {
                             "action": "information_card",
-                            "message": str(informationIdtobeSent),
+                            "message": cardId,
                             "is_notification": False
                         }
+                        log.info("Before Message ")
                         send_chat_message_patient_id(patient_id=key, payload=payload)
                     except Exception as e:
                         print("Error Exception raised")
