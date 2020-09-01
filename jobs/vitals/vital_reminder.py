@@ -18,8 +18,11 @@ def send_vital_reminder_func():
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
-        cursor.execute("select id from "
-                       "zylaapi.patient_profile status = 4 and new_chat = 1")
+        sql_query = str(Variable.get("vital_reminder_sql_query",
+                                     'select id from '
+                                     'zylaapi.patient_profile '
+                                     'where status = 4 and new_chat = 1'))
+        cursor.execute(sql_query)
         patient_id_list = []
         for row in cursor.fetchall():
             for _id in row:
