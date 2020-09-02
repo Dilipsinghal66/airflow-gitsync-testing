@@ -60,7 +60,7 @@ def send_dyn_func():
                     try:
                         payload = {
                             "action": "information_card",
-                            "message": informationIdtobeSent,
+                            "message": str(informationIdtobeSent),
                             "is_notification": False
                         }
                         log.info("Before Message ")
