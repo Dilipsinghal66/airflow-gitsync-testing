@@ -55,12 +55,13 @@ def send_dyn_func():
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
                     cardId = int(informationIdtobeSent)
+                    cardId = cardId + 1
                     log.info("patient_id " + str(key))
-                    log.info("Message " + str(informationIdtobeSent))
+                    log.info("Message " + str(cardId))
                     try:
                         payload = {
                             "action": "information_card",
-                            "message": str(informationIdtobeSent),
+                            "message": str(cardId),
                             "is_notification": False
                         }
                         log.info("Before Message ")
@@ -70,7 +71,7 @@ def send_dyn_func():
                         print(e)
 
                         updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(  # noqa E303
-                            informationIdtobeSent) + " where id = " + str(key)
+                            cardId) + " where id = " + str(key)
                         # print(updateSqlQuery)
                         cursor.execute(updateSqlQuery)
 
