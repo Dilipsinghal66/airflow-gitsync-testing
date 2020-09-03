@@ -68,10 +68,9 @@ def send_dyn_func():
                         print("Error Exception raised")
                         print(e)
 
-                        updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(  # noqa E303
+                    updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(  # noqa E303
                             informationIdtobeSent) + " where id = " + str(key)
-                        # print(updateSqlQuery)
-                        cursor.execute(updateSqlQuery)
+                    cursor.execute(updateSqlQuery)
 
                 else:
                     print(
