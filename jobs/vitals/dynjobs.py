@@ -63,7 +63,7 @@ def send_dyn_func():
                             "is_notification": False
                         }
                         log.info("Before Message ")
-                        #send_chat_message_patient_id(patient_id=int(key), payload=payload)
+                        send_chat_message_patient_id(patient_id=int(key), payload=payload)
                     except Exception as e:
                         print("Error Exception raised")
                         print(e)
