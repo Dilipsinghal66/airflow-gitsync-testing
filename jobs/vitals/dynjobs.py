@@ -25,7 +25,7 @@ def send_dyn_func():
         # print("created connection from engine")
 
         cursor.execute("select count(*) from zylaapi.patient_profile "
-                       "where status = 4 and new_chat = 1")
+                       "where status = 4 and new_chat = 1 and id = 5397")
         totalcount = cursor.fetchone()[0]
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
@@ -33,7 +33,7 @@ def send_dyn_func():
         for i in range(numberofPage):
             patientIdSqlQuerry = "select id, countDidYouKnow from " \
                                  "zylaapi.patient_profile where " \
-                                 "status = 4  and new_chat = 1 LIMIT " + str(i * PAGE_SIZE) + \
+                                 "status = 4  and new_chat = 1 and id = 5397 LIMIT " + str(i * PAGE_SIZE) + \
                                  ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
             patientIdList = []
@@ -54,14 +54,12 @@ def send_dyn_func():
                 # print(number_of_rows)
                 if number_of_rows != 0:
                     informationIdtobeSent = cursor.fetchone()[0]
-                    cardId = int(informationIdtobeSent)
-                    cardId = cardId + 1
                     log.info("patient_id " + str(key))
-                    log.info("Message " + str(cardId))
+                    log.info("Message " + str(informationIdtobeSent))
                     try:
                         payload = {
                             "action": "information_card",
-                            "message": str(cardId),
+                            "message": str(informationIdtobeSent),
                             "is_notification": False
                         }
                         log.info("Before Message ")
@@ -71,7 +69,7 @@ def send_dyn_func():
                         print(e)
 
                         updateSqlQuery = "UPDATE zylaapi.patient_profile SET countDidYouKnow = " + str(  # noqa E303
-                            cardId) + " where id = " + str(key)
+                            informationIdtobeSent) + " where id = " + str(key)
                         # print(updateSqlQuery)
                         cursor.execute(updateSqlQuery)
 
