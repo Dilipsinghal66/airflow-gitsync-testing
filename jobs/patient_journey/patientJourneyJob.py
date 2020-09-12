@@ -23,7 +23,7 @@ def getPatientStatus():
         currentDate = datetime.now().date()
         for row in cursor.fetchall():
             datedel = currentDate - row[3]
-            patientIds[row[0]] = datedel.date
+            patientIds[row[0]] = datedel.days
             log.info(row)
         
         return patientIds
