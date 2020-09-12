@@ -40,7 +40,7 @@ def getPatientStatus():
 
 def getJourneyMessages():
     try:
-        mongo_conn = MongoHook(conn_id="mongo_prod", {“srv”: true, “replicaSet”: “test”, “ssl”: true, “connectTimeoutMS”: 30000}).get_conn()
+        mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
         collection = mongo_conn.get_database("trialMessageJourney").get_collection("messages")
         results = collection.find({Time: '8:30 AM'})
         messages = {}
