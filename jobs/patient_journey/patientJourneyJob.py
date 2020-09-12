@@ -5,6 +5,7 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from common.helpers import send_chat_message_patient_id
+from datetime import datetime
 
 
 log = LoggingMixin().log
