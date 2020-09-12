@@ -51,7 +51,7 @@ def initializer(**kwargs):
     log.info(time)
     log.info("Starting...")
     patients = getPatientStatus()
-    messages = getJourneyMessages()
+    messages = getJourneyMessages(time)
 
     for p in patients:
         payload = {
