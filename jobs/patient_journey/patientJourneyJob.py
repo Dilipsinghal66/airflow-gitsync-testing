@@ -57,10 +57,11 @@ def initializer(**kwargs):
     messages = getJourneyMessages(time)
 
     for p in patients:
-        payload = {
-            "action": "dynamic_message",
-            "message": messages[patients[p]],
-            "is_notification": False
-        }
-        #send_chat_message_patient_id(patient_id=int(p), payload=payload)
-        log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
+        if patients[p] > 0:
+            payload = {
+                "action": "dynamic_message",
+                "message": messages[patients[p]],
+                "is_notification": False
+            }
+            #send_chat_message_patient_id(patient_id=int(p), payload=payload)
+            log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
