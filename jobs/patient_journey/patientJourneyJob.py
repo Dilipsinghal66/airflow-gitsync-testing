@@ -63,5 +63,5 @@ def initializer(**kwargs):
                 "message": messages[patients[p]],
                 "is_notification": False
             }
-            #send_chat_message_patient_id(patient_id=int(p), payload=payload)
+            send_chat_message_patient_id(patient_id=int(p), payload=payload)
             log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
