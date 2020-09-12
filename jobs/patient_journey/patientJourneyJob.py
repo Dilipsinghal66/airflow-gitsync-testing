@@ -20,7 +20,7 @@ def getPatientStatus():
 
         cursor.execute("select patient_id,from_status,to_status,updated_on from zylaapi.patient_status_audit")
         patientIds = {}
-        currentDate = datetime.now()
+        currentDate = datetime.now().date()
         for row in cursor.fetchall():
             patientIds[row[0]] = currentDate - row[3]
             log.info(row)
