@@ -40,7 +40,8 @@ def getPatientStatus():
 
 def getJourneyMessages():
     try:
-        questions = MongoHook("mongo_default").get_conn().get_collection("messages", "trialMessageJourney")
+        questions = get_data_from_db(db_type="mongo", conn_id="mongo_journey", collection="messages")
+        print(questions)
         for q in questions:
             log.info(q)
     except Exception as e:
