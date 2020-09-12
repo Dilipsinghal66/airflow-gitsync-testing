@@ -40,9 +40,12 @@ def getPatientStatus():
 
 def getJourneyMessages():
     try:
-        questions = get_data_from_db(db_type="mongo", conn_id="mongo_journey", collection="messages")
-        print(questions)
-        for q in questions:
+        mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
+        collection = mongo_conn.get_database("trialMessageJourney").get_collection("messages")
+        results = collection.find({})
+
+        print(results)
+        for q in results:
             log.info(q)
     except Exception as e:
         log.info("Error Exception raised")
