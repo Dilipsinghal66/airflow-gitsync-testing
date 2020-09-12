@@ -47,7 +47,7 @@ def getJourneyMessages():
         log.info("Error Exception raised")
         log.info(e) 
 
-def initializer():
+def initializer(**kwargs):
     log.info("Starting...")
     patients = getPatientStatus()
     log.info(patients)
