@@ -61,4 +61,4 @@ def initializer(**kwargs):
     messages = getJourneyMessages()
 
     for p in patients:
-        log.info("Sending ", p, " message for day ", patients[p], " ", messages[patients[p]])
+        log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
