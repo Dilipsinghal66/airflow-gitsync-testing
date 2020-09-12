@@ -4,20 +4,11 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
+from common.helpers import send_chat_message_patient_id
 
 
 log = LoggingMixin().log
 
-def sendMessage(message, user_id):
-    payload = {
-        "action": "dynamic_message",
-        "message": str(message),
-    }
-    str(informationIdtobeSent)
-    endpoint = "user/" + str(round(user_id)) + "/message"
-    status, body = make_http_request(
-        conn_id="http_chat_service_url",
-        endpoint=endpoint, method="POST", payload=payload)
 
 
 def getPatientStatus():
@@ -38,11 +29,11 @@ def getPatientStatus():
         log.info("Error Exception raised")
         log.info(e)
 
-def getJourneyMessages():
+def getJourneyMessages(time):
     try:
         mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
         collection = mongo_conn.get_database("trialMessageJourney").get_collection("messages")
-        results = collection.find({'Time': '8:30 AM'})
+        results = collection.find({'Time': time})
         messages = {}
 
         print(results)
@@ -56,9 +47,17 @@ def getJourneyMessages():
         log.info(e) 
 
 def initializer(**kwargs):
+    time = kwargs['time']
+    log.info(time)
     log.info("Starting...")
     patients = getPatientStatus()
     messages = getJourneyMessages()
 
     for p in patients:
+        payload = {
+            "action": "dynamic_message",
+            "message": messages[patients[p]],
+            "is_notification": False
+        }
+        #send_chat_message_patient_id(patient_id=int(p), payload=payload)
         log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
