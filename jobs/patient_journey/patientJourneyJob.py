@@ -40,13 +40,17 @@ def getPatientStatus():
 
 def getJourneyMessages():
     try:
-        mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
+        mongo_conn = MongoHook(conn_id="mongo_prod", {“srv”: true, “replicaSet”: “test”, “ssl”: true, “connectTimeoutMS”: 30000}).get_conn()
         collection = mongo_conn.get_database("trialMessageJourney").get_collection("messages")
-        results = collection.find({})
+        results = collection.find({Time: '8:30 AM'})
+        messages = {}
 
         print(results)
         for q in results:
+            messages[q['Day']] = q['Message']
             log.info(q)
+        
+        return messages
     except Exception as e:
         log.info("Error Exception raised")
         log.info(e) 
@@ -54,5 +58,7 @@ def getJourneyMessages():
 def initializer(**kwargs):
     log.info("Starting...")
     patients = getPatientStatus()
-    log.info(patients)
-    getJourneyMessages()
+    messages = getJourneyMessages()
+
+    for p in patients:
+        log.info("Sending ", p, " message for day ", patients[p], " ", messages[patients[p]])
