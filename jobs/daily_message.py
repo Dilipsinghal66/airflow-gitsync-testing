@@ -10,7 +10,7 @@ from jobs.daily_message_jobs import daily_message
 daily_message_cron = str(Variable.get("daily_message_cron", '45 21 * * *'))
 
 daily_message_dag = DAG(
-    dag_id="broadcast_active",
+    dag_id="daily_message",
     default_args=default_args,
     schedule_interval=daily_message_cron,
     catchup=False,
