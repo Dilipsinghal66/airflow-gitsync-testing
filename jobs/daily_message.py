@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from jobs.daily_message_jobs import daily_message
 
-daily_message_cron = str(Variable.get("daily_message_cron", '@yearly'))
+daily_message_cron = str(Variable.get("daily_message_cron", '45 21 * * *'))
 
 daily_message_dag = DAG(
     dag_id="broadcast_active",
