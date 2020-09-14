@@ -18,7 +18,7 @@ def getPatientStatus():
         connection = engine.get_conn()
         cursor = connection.cursor()
 
-        cursor.execute("select patient_id,from_status,to_status,updated_on from zylaapi.patient_status_audit")
+        cursor.execute("select patient_id,from_status,to_status,updated_on from zylaapi.patient_status_audit where to_status=11")
         patientIds = {}
         currentDate = datetime.now().date()
         for row in cursor.fetchall():
@@ -63,5 +63,10 @@ def initializer(**kwargs):
                 "message": messages[patients[p]],
                 "is_notification": False
             }
-            send_chat_message_patient_id(patient_id=int(p), payload=payload)
-            log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
+            try:
+                send_chat_message_patient_id(patient_id=int(p), payload=payload)
+                log.info("Sending {} day {} message {}".format(p, patients[p], messages[patients[p]]))
+            except Exception as e:
+                log.info("Error Exception raised")
+                log.info(e) 
+
