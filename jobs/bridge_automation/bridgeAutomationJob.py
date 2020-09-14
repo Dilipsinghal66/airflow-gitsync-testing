@@ -6,6 +6,8 @@ from common.custom_hooks.google_sheets_hook import GSheetsHook
 import pandas as pd
 from airflow.models import Variable
 
+log = LoggingMixin().log
+
 def get_patient_data():
     sheetId = "1bEk3es8SPz8VmfQw50XMTdpHkxGkRjQvuAoHV6JMuBU"
     conn_id = "gcp_sheet"
@@ -27,3 +29,9 @@ def get_patient_data():
 
     spreadsheet_data = sheet_hook.get_values(range_=column_range, major_dimension=major_dimensions).get('values')
     print(spreadsheet_data)
+    log.info(spreadsheet_data)
+
+
+def initializer(**kargs):
+    log.info("Starting....")
+    get_patient_data()
