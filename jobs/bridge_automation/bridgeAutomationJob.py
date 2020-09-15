@@ -1,4 +1,5 @@
 from airflow.models import Variable
+import json
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import send_chat_message_patient_id
 from datetime import datetime
