@@ -82,13 +82,14 @@ def create_patient(docCode, phoneno, name, gender):
         log.error(e)
         
     
-    log.info("Assigning doc code") 
     assign_code_payload = {
         "doctorCode": docCode
     }
 
     #endpoint = str(patient_id) + "/referrer"
     try:
+        log.info("Assigning doc code") 
+        log.info(assign_code_payload)
         #status, body = make_http_request(
         #                conn_id="http_patient_url",
         #                endpoint=endpoint, method="PUT", payload=payload)
