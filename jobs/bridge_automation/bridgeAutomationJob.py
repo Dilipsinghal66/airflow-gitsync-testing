@@ -40,7 +40,9 @@ def get_patient_data():
 
     spreadsheet_data = sheet_hook.get_values(range_=column_range, major_dimension=major_dimensions).get('values')
     spreadsheet_data = spreadsheet_data[1:]
+    log.info(spreadsheet_data)
     for d in spreadsheet_data:
+        log.info(d)
         # Map Gender
         if d[3] == "Male":
             d[3] = 2
