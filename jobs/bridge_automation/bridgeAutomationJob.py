@@ -6,6 +6,7 @@ from datetime import datetime
 from common.custom_hooks.google_sheets_hook import GSheetsHook
 import pandas as pd
 from common.pyjson import PyJSON
+from common.http_functions import make_http_request
 
 log = LoggingMixin().log
 
@@ -38,10 +39,69 @@ def get_patient_data():
     
 
     spreadsheet_data = sheet_hook.get_values(range_=column_range, major_dimension=major_dimensions).get('values')
-    print(spreadsheet_data)
-    log.info(spreadsheet_data)
+    spreadsheet_data = spreadsheet_data[1:]
+    for d in spreadsheet_data:
+        # Map Gender
+        if d[3] == "Male":
+            d[3] = 2
+        elif d[3] == "Female":
+            d[3] = 1
+        else:
+            d[3] = 0
+
+        # Clean phone number
+        d[2] = d[2].replace(" ", "")
+        d[2] = d[2].replace("-", "")
+
+
+    return spreadsheet_data
+
+def create_patient(docCode, phoneno, name, gender):
+    #{"phoneno":9599171868,"firstName":"P","lastName":"P","age":18,"location":"na","gender":1,"email":"care@zyla.in","type":1,"status":4}
+
+    payload = {
+        "phoneno": phoneno,
+        "firstName": name.split(" ")[0],
+        "lastName": " ".join(name.split(" ")[1:]),
+        "gender": gender,
+        "type": 1,
+        "email": "care@zyla.in",
+        "status": 4
+    }
+    log.info("Creating patient: ")
+    try:
+        #status, body = make_http_request(
+        #                conn_id="http_patient_url",
+        #                endpoint="new", method="POST", payload=payload)
+        log.info("Patient created: ")
+        log.info(payload)
+        # patient_id = body.id
+    except Exception as e:
+        log.error("Something went wrong ")
+        log.error(payload)
+        log.error(e)
+        
+    
+    log.info("Assigning doc code") 
+    assign_code_payload = {
+        "doctorCode": docCode
+    }
+
+    #endpoint = str(patient_id) + "/referrer"
+    try:
+        #status, body = make_http_request(
+        #                conn_id="http_patient_url",
+        #                endpoint=endpoint, method="PUT", payload=payload)
+        #)
+    except Exception as e:
+        log.error(e)
+
 
 
 def initializer(**kargs):
     log.info("Starting....")
-    get_patient_data()
+    patient_data = get_patient_data()
+    log.info(patient_data)
+    #AZCE1064	9923729053	Niti	Female
+    for p in patient_data:
+        create_patient(p[0], p[1], p[2], p[3])
