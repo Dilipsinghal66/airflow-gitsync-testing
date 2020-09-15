@@ -4,14 +4,22 @@ from common.helpers import send_chat_message_patient_id
 from datetime import datetime
 from common.custom_hooks.google_sheets_hook import GSheetsHook
 import pandas as pd
-from airflow.models import Variable
 
 log = LoggingMixin().log
 
 def get_patient_data():
-    sheetId = "1bEk3es8SPz8VmfQw50XMTdpHkxGkRjQvuAoHV6JMuBU"
+
+    config_var = Variable.get('bridge_account_creation', None)
+
+    if config_var:
+        config_var = json.loads(config_var)
+        config_obj = PyJSON(d=config_var)
+    else:
+        raise ValueError("Config variables not defined")
+
+    sheetId = config_obj.sheet
     conn_id = "gcp_sheet"
-    column_range = "Form Responses 1!A:F"
+    column_range = config_obj.range
     major_dimensions = "ROWS"
     
     try:
