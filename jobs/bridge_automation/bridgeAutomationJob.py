@@ -60,7 +60,7 @@ def get_patient_data():
             # Clean phone number
             row["Patient's phone number"] = row["Patient's phone number"].replace(" ", "")
             row["Patient's phone number"] = row["Patient's phone number"].replace("-", "")
-            log.info(row)
+            #log.info(row)
     except Exception as e:
         log.error(e)
 
@@ -134,8 +134,8 @@ def initializer(**kargs):
     log.info("Starting....")
     patient_data = get_patient_data()
     log.info(patient_data)
-    log.info("Creating a test patient")
-    create_patient("ZH0000", "9999999999", "Test", 2)
+    #log.info("Creating a test patient")
+    #create_patient("ZH0000", "9999999999", "Test", 2)
     #AZCE1064	9923729053	Niti	Female
-    #for i, row in patient_data.iterrows():
-    #    create_patient(row["Doctor code/ Phone number"], row["Patient's phone number"], row["Patient's name"], row["Patient's gender"])
+    for i, row in patient_data.iterrows():
+        create_patient(row["Doctor code/ Phone number"], row["Patient's phone number"], row["Patient's name"], row["Patient's gender"])
