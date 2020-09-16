@@ -104,7 +104,6 @@ def create_patient(docCode, phoneno, name, gender):
         status, body = make_http_request(
                         conn_id="http_patient_url",
                         endpoint=endpoint, method="PUT", payload=payload)
-        )
     except Exception as e:
         log.error(e)
 
