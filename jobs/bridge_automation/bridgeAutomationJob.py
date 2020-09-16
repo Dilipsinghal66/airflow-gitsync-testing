@@ -60,6 +60,8 @@ def get_patient_data():
             row["Patient's phone number"] = row["Patient's phone number"].replace(" ", "")
             row["Patient's phone number"] = row["Patient's phone number"].replace("-", "")
             log.info(row)
+    except Exception as e:
+        log.error(e)
 
 
     return spreadsheet_data
