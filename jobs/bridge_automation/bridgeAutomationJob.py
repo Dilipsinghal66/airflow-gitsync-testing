@@ -121,7 +121,7 @@ def create_patient(docCode, phoneno, name, gender):
             log.info("Assigning doc code") 
             log.info(assign_code_payload)
             hook_obj = HttpHook(method="PUT", http_conn_id="http_patient_url")
-            payload = json.dumps(payload)
+            assign_code_payload = json.dumps(assign_code_payload)
             response = hook_obj.run(endpoint=endpoint, data=payload, headers=headers)
             body = response.json() 
             status = response.status_code
