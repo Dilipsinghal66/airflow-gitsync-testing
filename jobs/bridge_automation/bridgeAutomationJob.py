@@ -122,7 +122,7 @@ def create_patient(docCode, phoneno, name, gender):
             log.info(assign_code_payload)
             hook_obj = HttpHook(method="PUT", http_conn_id="http_patient_url")
             assign_code_payload = json.dumps(assign_code_payload)
-            response = hook_obj.run(endpoint=endpoint, data=payload, headers=headers)
+            response = hook_obj.run(endpoint=endpoint, data=assign_code_payload, headers=headers)
             body = response.json() 
             status = response.status_code
         except Exception as e:
