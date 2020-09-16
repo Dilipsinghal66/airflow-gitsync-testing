@@ -104,7 +104,7 @@ def create_patient(docCode, phoneno, name, gender):
         log.info("Patient created: ")
         log.info(payload)
         log.info(body)
-        patient_id = body.id
+        patient_id = body['id']
     except Exception as e:
         log.error("Something went wrong ")
         log.error(payload)
@@ -114,18 +114,19 @@ def create_patient(docCode, phoneno, name, gender):
     assign_code_payload = {
         "doctorCode": docCode
     }
-
-    endpoint = str(patient_id) + "/referrer"
-    try:
-        log.info("Assigning doc code") 
-        log.info(assign_code_payload)
-        hook_obj = HttpHook(method="PUT", http_conn_id="http_patient_url")
-        payload = json.dumps(payload)
-        response = hook_obj.run(endpoint=endpoint, data=payload, headers=headers)
-        body = response.json() 
-        status = response.status_code
-    except Exception as e:
-        log.error(e)
+    
+    if patient_id:
+        endpoint = str(patient_id) + "/referrer"
+        try:
+            log.info("Assigning doc code") 
+            log.info(assign_code_payload)
+            hook_obj = HttpHook(method="PUT", http_conn_id="http_patient_url")
+            payload = json.dumps(payload)
+            response = hook_obj.run(endpoint=endpoint, data=payload, headers=headers)
+            body = response.json() 
+            status = response.status_code
+        except Exception as e:
+            log.error(e)
 
 
 
