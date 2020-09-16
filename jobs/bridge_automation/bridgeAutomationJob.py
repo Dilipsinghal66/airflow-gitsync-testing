@@ -7,6 +7,7 @@ from common.custom_hooks.google_sheets_hook import GSheetsHook
 import pandas as pd
 from common.pyjson import PyJSON
 from common.http_functions import make_http_request
+from airflow.hooks.http_hook import HttpHook
 
 log = LoggingMixin().log
 
@@ -69,6 +70,16 @@ def get_patient_data():
 def create_patient(docCode, phoneno, name, gender):
     #{"phoneno":9599171868,"firstName":"P","lastName":"P","age":18,"location":"na","gender":1,"email":"care@zyla.in","type":1,"status":4}
 
+    config_var = Variable.get('bridge_account_creation', None)
+
+    if config_var:
+        config_var = json.loads(config_var)
+        config_obj = PyJSON(d=config_var)
+    else:
+        raise ValueError("Config variables not defined")
+    
+    headers = config_obj.headers
+
     payload = {
         "phoneno": phoneno,
         "firstName": name.split(" ")[0],
@@ -80,9 +91,11 @@ def create_patient(docCode, phoneno, name, gender):
     }
     log.info("Creating patient: ")
     try:
-        status, body = make_http_request(
-                        conn_id="http_patient_url",
-                        endpoint="new", method="POST", payload=payload)
+        hook_obj = HttpHook(method="POST", http_conn_id="http_patient_url")
+        payload = json.dumps(payload)
+        response = hook_obj.run(endpoint="new", data=payload, headers=headers)
+        body = response.json() 
+        status = response.status_code
         log.info("Patient created: ")
         log.info(payload)
         log.info(body)
@@ -101,9 +114,11 @@ def create_patient(docCode, phoneno, name, gender):
     try:
         log.info("Assigning doc code") 
         log.info(assign_code_payload)
-        status, body = make_http_request(
-                        conn_id="http_patient_url",
-                        endpoint=endpoint, method="PUT", payload=payload)
+        hook_obj = HttpHook(method="PUT", http_conn_id="http_patient_url")
+        payload = json.dumps(payload)
+        response = hook_obj.run(endpoint=endpoint, data=payload, headers=headers)
+        body = response.json() 
+        status = response.status_code
     except Exception as e:
         log.error(e)
 
