@@ -80,12 +80,13 @@ def create_patient(docCode, phoneno, name, gender):
     }
     log.info("Creating patient: ")
     try:
-        #status, body = make_http_request(
-        #                conn_id="http_patient_url",
-        #                endpoint="new", method="POST", payload=payload)
+        status, body = make_http_request(
+                        conn_id="http_patient_url",
+                        endpoint="new", method="POST", payload=payload)
         log.info("Patient created: ")
         log.info(payload)
-        # patient_id = body.id
+        log.info(body)
+        patient_id = body.id
     except Exception as e:
         log.error("Something went wrong ")
         log.error(payload)
@@ -96,14 +97,14 @@ def create_patient(docCode, phoneno, name, gender):
         "doctorCode": docCode
     }
 
-    #endpoint = str(patient_id) + "/referrer"
+    endpoint = str(patient_id) + "/referrer"
     try:
         log.info("Assigning doc code") 
         log.info(assign_code_payload)
-        #status, body = make_http_request(
-        #                conn_id="http_patient_url",
-        #                endpoint=endpoint, method="PUT", payload=payload)
-        #)
+        status, body = make_http_request(
+                        conn_id="http_patient_url",
+                        endpoint=endpoint, method="PUT", payload=payload)
+        )
     except Exception as e:
         log.error(e)
 
@@ -113,6 +114,8 @@ def initializer(**kargs):
     log.info("Starting....")
     patient_data = get_patient_data()
     log.info(patient_data)
+    log.info("Creating a test patient")
+    create_patient("ZH0000", "9999999999", "Test", 2)
     #AZCE1064	9923729053	Niti	Female
-    for i, row in patient_data.iterrows():
-        create_patient(row["Doctor code/ Phone number"], row["Patient's phone number"], row["Patient's name"], row["Patient's gender"])
+    #for i, row in patient_data.iterrows():
+    #    create_patient(row["Doctor code/ Phone number"], row["Patient's phone number"], row["Patient's name"], row["Patient's gender"])
