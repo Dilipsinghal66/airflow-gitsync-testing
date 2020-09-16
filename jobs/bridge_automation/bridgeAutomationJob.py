@@ -39,21 +39,27 @@ def get_patient_data():
     
 
     spreadsheet_data = sheet_hook.get_values(range_=column_range, major_dimension=major_dimensions).get('values')
-    spreadsheet_data = spreadsheet_data[1:]
-    log.info(spreadsheet_data)
-    for d in spreadsheet_data:
-        log.info(d)
-        # Map Gender
-        if d[3] == "Male":
-            d[3] = 2
-        elif d[3] == "Female":
-            d[3] = 1
-        else:
-            d[3] = 0
+    spreadsheet_data = pd.DataFrame(data=spreadsheet_data[1:],
+                                columns=spreadsheet_data[0])
+    spreadsheet_data.fillna('', inplace=True)
 
-        # Clean phone number
-        d[2] = d[2].replace(" ", "")
-        d[2] = d[2].replace("-", "")
+    log.info(spreadsheet_data)
+
+    try:
+        for i, row in spreadsheet_data.iterrows():
+            #log.info(d)
+            # Map Gender
+            if row["Patient's gender"] == "Male":
+                row["Patient's gender"] = 2
+            elif row["Patient's gender"] == "Female":
+                row["Patient's gender"] = 1
+            else:
+                row["Patient's gender"] = 0
+
+            # Clean phone number
+            row["Patient's phone number"] = row["Patient's phone number"].replace(" ", "")
+            row["Patient's phone number"] = row["Patient's phone number"].replace("-", "")
+            log.info(row)
 
 
     return spreadsheet_data
@@ -106,5 +112,5 @@ def initializer(**kargs):
     patient_data = get_patient_data()
     log.info(patient_data)
     #AZCE1064	9923729053	Niti	Female
-    for p in patient_data:
-        create_patient(p[0], p[1], p[2], p[3])
+    for i, row in patient_data.iterrows():
+        create_patient(row["Doctor code/ Phone number"], row["Patient's phone number"], row["Patient's name"], row["Patient's gender"])
