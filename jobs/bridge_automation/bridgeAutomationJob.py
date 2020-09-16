@@ -79,7 +79,7 @@ def create_patient(docCode, phoneno, name, gender):
         raise ValueError("Config variables not defined")
     
     headers = {
-        "access_token": config_obj['access_token'],
+        "access_token": config_obj['auth_token'],
         "phone_no": config_obj['phone_no'],
         "client": config_obj['client'],
         "Content-Type": "application/json"
