@@ -79,6 +79,7 @@ def create_patient(docCode, phoneno, name, gender):
         raise ValueError("Config variables not defined")
     
     headers = config_obj.headers
+    headers = json.dumps(headers)
 
     payload = {
         "phoneno": phoneno,
