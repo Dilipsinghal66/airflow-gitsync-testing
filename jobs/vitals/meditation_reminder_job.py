@@ -26,7 +26,7 @@ def meditation_reminder_func():
 
         day = todayDate.weekday()
 
-        if(day == 2) or (day == 6):
+        if(day == 0) or (day == 3):
 
             meditation_id = int(Variable.get("meditation_reminder_id", '0'))
 
@@ -38,7 +38,7 @@ def meditation_reminder_func():
             connection = engine.get_conn()
             cursor = connection.cursor()
             cursor.execute("select id from "
-                           "zylaapi.patient_profile")
+                           "zylaapi.patient_profile where status = 4 and new_chat = 1")
             patient_id_list = []
             for row in cursor.fetchall():
                 for _id in row:
