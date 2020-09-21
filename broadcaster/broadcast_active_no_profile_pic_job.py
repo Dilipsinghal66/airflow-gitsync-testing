@@ -20,7 +20,7 @@ def broadcast_active_patients_no_profile_pic():
     sql_query = str(Variable.get("no_profile_pic_patients",
                                  "SELECT id FROM "
                                  "zylaapi.patient_profile "
-                                 "WHERE status = 4 AND profile_image = ''"))
+                                 "WHERE status = 4 AND profile_image = '' AND new_chat=1"))
 
     try:
         log.debug(sql_query)

@@ -20,7 +20,7 @@ def broadcast_active_fm():
     sql_query_female = str(Variable.get("paid_female_patients",
                                         'SELECT id FROM '
                                         'zylaapi.patient_profile '
-                                        'WHERE status = 4 AND gender = 1'))
+                                        'WHERE status = 4 AND gender = 1 AND new_chat=1'))
 
     try:
         log.debug(sql_query_female)

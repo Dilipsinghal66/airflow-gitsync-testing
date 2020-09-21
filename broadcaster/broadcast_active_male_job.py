@@ -20,7 +20,7 @@ def broadcast_active_male():
     sql_query_male = str(Variable.get("paid_male_patients",
                                       'SELECT id FROM '
                                       'zylaapi.patient_profile '
-                                      'WHERE status = 4 AND gender = 2'))
+                                      'WHERE status = 4 AND gender = 2 AND new_chat=1'))
 
     try:
         log.debug(sql_query_male)
