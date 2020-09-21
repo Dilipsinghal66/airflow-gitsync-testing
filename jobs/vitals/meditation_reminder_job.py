@@ -7,10 +7,6 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 
 log = LoggingMixin().log
 
-meditation_arr = [6667034930268078080, 6667034954884448256, 6667034889881124864,
-                  6667034872604786688, 6667034965844164608, 6667034906368933888,
-                  6667034811430862848, 6667034858906189824, 6667034826157064192,
-                  6667034784109166592]
 
 def meditation_reminder_func():
     try:
@@ -30,7 +26,7 @@ def meditation_reminder_func():
 
             meditation_id = int(Variable.get("meditation_reminder_id", '0'))
 
-            meditation_id = meditation_id % len(meditation_arr)
+            meditation_id = meditation_id % 13 + 1
 
             Variable.set(key="meditation_reminder_id", value=meditation_id+1)
 
@@ -45,7 +41,7 @@ def meditation_reminder_func():
                     patient_id_list.append(_id)
 
             for patient_id in patient_id_list:
-                message = str(meditation_arr[meditation_id])
+                message = str(meditation_id)
 
                 action = "meditation_reminders"
                 log.info("patient_id " + str(patient_id))
