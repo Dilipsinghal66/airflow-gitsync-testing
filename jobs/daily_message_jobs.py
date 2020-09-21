@@ -31,7 +31,7 @@ def daily_message():
 
     for patient_id in patient_id_list:
         message = str(Variable.get("daily_message_msg", ""))
-        if not message:
+        if message:
             try:
                 patient_id_message_send(patient_id, message, "dynamic_message")
             except Exception as e:
