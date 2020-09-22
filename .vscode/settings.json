@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/opt/conda/envs/scheduled-tasks/bin/python",
+    "python.pythonPath": "/usr/local/bin/python3",
     "sonarlint.connectedMode.project": {
         "projectKey": "scheduled-tasks"
     }
