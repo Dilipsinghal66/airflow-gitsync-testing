@@ -60,7 +60,7 @@ def initializer(**kwargs):
     log.info("Starting...")
     patients, patientStatuses = getPatientStatus()
     messages = getJourneyMessages(time)
-    print(patientStatuses, patients)
+    print(patientStatuses[91943])
 
     for p in patients:
         if patients[p] > 0 and patientStatuses[p] == 11:
