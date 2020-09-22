@@ -36,6 +36,7 @@ def send_chat_message(user_id=None, payload=None):
     except Exception as e:
         raise ValueError(str(e))
 
+
 def send_chat_message_patient_id(patient_id=None, payload=None):
     try:
         endpoint = "users/patients/" + str(
@@ -96,7 +97,6 @@ def task_success_callback(context):
                       payload=success_payload, endpoint=endpoint)
 
 
-
 def process_dynamic_task_sql_no_az(sql_query, message, action):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
@@ -109,11 +109,11 @@ def process_dynamic_task_sql_no_az(sql_query, message, action):
             message_replace_data[patient_id] = patient
 
     log.info(patient_id_list)
-    patient_user_id_conv_msg_no_az\
-        (patient_id_list, message_replace_data, message, action)
+    patient_user_id_conv_msg_no_az(
+        patient_id_list, message_replace_data, message, action)
 
-def patient_user_id_conv_msg_no_az\
-                (patient_id_list, message_replace_data, message, action):
+
+def patient_user_id_conv_msg_no_az(patient_id_list, message_replace_data, message, action):
     mongo_filter_field = "patientId"
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
@@ -176,8 +176,8 @@ def process_dynamic_message(_filter, projection,
             payload["message"] = patient_message
         else:
             payload["message"] = message
-        log.info("Sending message for user ID " + str(user_id))
-        send_chat_message(user_id=user_id, payload=payload)
+        log.info("Sending message for patient ID " + str(patient_id))
+        send_chat_message_patient_id(patient_id=patient_id, payload=payload)
 
 
 def process_health_plan_not_created(patient_list):
