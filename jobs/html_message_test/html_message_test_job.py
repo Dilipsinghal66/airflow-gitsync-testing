@@ -26,6 +26,8 @@ def send_test_message(**kargs):
     try:
         send_chat_message_patient_id(
             patient_id=int(config_obj.patient_id), payload=payload)
+        log.info("Sending {} to {}".format(
+            config_obj.message, config_obj.patient_id))
     except Exception as e:
         log.info("Error Exception raised")
         log.info(e)
