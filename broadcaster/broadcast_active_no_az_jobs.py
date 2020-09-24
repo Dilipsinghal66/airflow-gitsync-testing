@@ -13,7 +13,7 @@ def broadcast_active_no_az():
     sql_query = str(Variable.get("broadcast_active_sql_query",
                                  'select id from '
                                  'zylaapi.patient_profile '
-                                 'where status = 4'))
+                                 'where status = 4 AND new_chat=1'))
 
     message = str(Variable.get("broadcast_active_no_az_msg", ''))
     action = "dynamic_message"
