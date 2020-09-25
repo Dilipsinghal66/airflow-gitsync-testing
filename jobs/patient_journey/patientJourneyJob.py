@@ -35,13 +35,19 @@ def getPatientStatus():
         log.info(e)
 
 
-def getJourneyMessages(time):
+def getJourneyMessages(time, journeyType=None):
     try:
         mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
-        collection = mongo_conn.get_database(
-            "trialMessageJourney").get_collection("messages")
-        results = collection.find({'Time': time})
-        messages = {}
+        if not journeyType:
+            collection = mongo_conn.get_database(
+                "trialMessageJourney").get_collection("messages")
+            results = collection.find({'Time': time})
+            messages = {}
+        elif journeyType == "premium":
+            collection = mongo_conn.get_database(
+                "trialMessageJourney").get_collection("premiumMessages")
+            results = collection.find({'Time': time})
+            messages = {}
 
         print(results)
         for q in results:
@@ -56,21 +62,29 @@ def getJourneyMessages(time):
 
 def initializer(**kwargs):
     time = kwargs['time']
+    patientType = kwargs.get('type')
     log.info(time)
     log.info("Starting...")
     patients, patientStatuses = getPatientStatus()
-    messages = getJourneyMessages(time)
+    messages = getJourneyMessages(time, patientType)
+
+    if not patientType:
+        status = 11
+        totalDays = 14
+    else:
+        status = 4
+        totalDays = 7
 
     for p in patients:
-        if patients[p] > 0 and patientStatuses[p] == 11:
+        if patients[p] > 0 and patientStatuses[p] == status and patients[p] <= totalDays:
             payload = {
                 "action": "dynamic_message",
                 "message": messages[patients[p]],
                 "is_notification": False
             }
             try:
-                send_chat_message_patient_id(
-                    patient_id=int(p), payload=payload)
+                # send_chat_message_patient_id(
+                #     patient_id=int(p), payload=payload)
                 log.info("Sending {} day {} message {}".format(
                     p, patients[p], messages[patients[p]]))
             except Exception as e:

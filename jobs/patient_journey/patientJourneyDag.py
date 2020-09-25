@@ -9,7 +9,6 @@ from airflow.models import Variable
 import json
 
 
-
 patient_journey_dag_8_30 = DAG(
     dag_id="patient_journey_dag_8_30_am",
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
@@ -62,6 +61,25 @@ patient_journey_task_9_45 = PythonOperator(
     python_callable=initializer,
     dag=patient_journey_dag_9_45,
     op_kwargs={"time": "9:45 PM"},
+    pool="scheduled_jobs_pool",
+    retry_exponential_backoff=True,
+    provide_context=True
+)
+
+premium_patient_journey_dag_9_45 = DAG(
+    dag_id="premium_patient_journey_dag_9_45_pm",
+    start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
+                        microsecond=0, tzinfo=local_tz),
+    schedule_interval="45 21 * * *",
+    catchup=False
+)
+
+premium_patient_journey_task_9_45 = PythonOperator(
+    task_id="premium_patient_journey_dag_9_45_pm",
+    task_concurrency=1,
+    python_callable=initializer,
+    dag=premium_patient_journey_dag_9_45,
+    op_kwargs={"time": "9:45 PM", "type": "premium"},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True,
     provide_context=True
