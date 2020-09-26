@@ -144,7 +144,7 @@ def process_dynamic_task_sql(sql_query, message, action):
         "is_notification": False
     }
     for pid in patient_id_list:
-        send_chat_message_patient_id(patient_id=patient_id, payload=payload)
+        send_chat_message_patient_id(patient_id=pid, payload=payload)
     # patient_user_id_conv_msg(patient_id_list,
     #                          message_replace_data, message, action)
 
