@@ -138,8 +138,15 @@ def process_dynamic_task_sql(sql_query, message, action):
             message_replace_data[patient_id] = patient
 
     log.info(patient_id_list)
-    patient_user_id_conv_msg(patient_id_list,
-                             message_replace_data, message, action)
+    payload = {
+        "action": action,
+        "message": message,
+        "is_notification": False
+    }
+    for pid in patient_id_list:
+        send_chat_message_patient_id(patient_id=patient_id, payload=payload)
+    # patient_user_id_conv_msg(patient_id_list,
+    #                          message_replace_data, message, action)
 
 
 def patient_user_id_conv_msg(patient_id_list,
