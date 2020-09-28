@@ -33,8 +33,9 @@ def meditation_reminder_func():
             engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
             connection = engine.get_conn()
             cursor = connection.cursor()
-            cursor.execute("select id from "
-                           "zylaapi.patient_profile where status = 4 and new_chat = 1")
+            cursor.execute("select id from zylaapi.patient_profile where status = 4 and new_chat = 1 "
+                           "and id not in (select patient_id from zylaapi.patient_status_audit "
+                           "where to_status = 4 and updated_on > CURDATE() - 14)")
             patient_id_list = []
             for row in cursor.fetchall():
                 for _id in row:
