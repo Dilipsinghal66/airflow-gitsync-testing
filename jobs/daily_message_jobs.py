@@ -32,7 +32,7 @@ def daily_message():
                                                            "and id not in (select patient_id from "
                                                            "zylaapi.patient_status_audit "
                                                            "where to_status = 4 and "
-                                                           "updated_on > CURDATE() - 14)"))
+                                                           "updated_on > CURDATE() - 7)"))
     cursor.execute(sql_query)
     patient_id_list = []
     for row in cursor.fetchall():
