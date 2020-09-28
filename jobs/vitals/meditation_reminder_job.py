@@ -7,6 +7,7 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 
 log = LoggingMixin().log
 
+meditation_arr = [12, 13, 10, 3, 7, 9]
 
 def meditation_reminder_func():
     try:
@@ -26,22 +27,23 @@ def meditation_reminder_func():
 
             meditation_id = int(Variable.get("meditation_reminder_id", '0'))
 
-            meditation_id = meditation_id % 13 + 1
+            meditation_id = meditation_id % len(meditation_arr)
 
             Variable.set(key="meditation_reminder_id", value=meditation_id+1)
 
             engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
             connection = engine.get_conn()
             cursor = connection.cursor()
-            cursor.execute("select id from "
-                           "zylaapi.patient_profile where status = 4 and new_chat = 1")
+            cursor.execute("select id from zylaapi.patient_profile where status = 4 and new_chat = 1 "
+                           "and id not in (select patient_id from zylaapi.patient_status_audit "
+                           "where to_status = 4 and updated_on > CURDATE() - 14)")
             patient_id_list = []
             for row in cursor.fetchall():
                 for _id in row:
                     patient_id_list.append(_id)
 
             for patient_id in patient_id_list:
-                message = str(meditation_id)
+                message = str(meditation_arr[meditation_id])
 
                 action = "meditation_reminders"
                 log.info("patient_id " + str(patient_id))
