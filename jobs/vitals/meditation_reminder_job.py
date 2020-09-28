@@ -36,7 +36,7 @@ def meditation_reminder_func():
             cursor = connection.cursor()
             cursor.execute("select id from zylaapi.patient_profile where status = 4 and new_chat = 1 "
                            "and id not in (select patient_id from zylaapi.patient_status_audit "
-                           "where to_status = 4 and updated_on > CURDATE() - 14)")
+                           "where to_status = 4 and updated_on > CURDATE() - 7)")
             patient_id_list = []
             for row in cursor.fetchall():
                 for _id in row:
