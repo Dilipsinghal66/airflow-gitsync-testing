@@ -9,7 +9,7 @@ log = LoggingMixin().log
 
 
 def send_test_message(**kargs):
-    html_test_message = Variable.get('html_test_message', None)
+    html_test_message = Variable.get('html_test_message_dag_msg', None)
     html_test_patient_id = Variable.get('html_test_patient_id', None)
 
     if not html_test_message or not html_test_patient_id:
