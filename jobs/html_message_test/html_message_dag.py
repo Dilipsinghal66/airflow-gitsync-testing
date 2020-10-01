@@ -8,12 +8,13 @@ from common.pyjson import PyJSON
 from airflow.models import Variable
 import json
 
+html_test_message_dag_cron = str(Variable.get("html_test_message_dag_cron", '@yearly'))
 
 html_test_message_dag = DAG(
     dag_id="html_test_message_dag",
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    schedule_interval="0 0 * * *",
+    schedule_interval=html_test_message_dag_cron,
     catchup=False
 )
 
