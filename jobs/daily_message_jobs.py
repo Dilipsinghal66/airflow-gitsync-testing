@@ -26,13 +26,13 @@ def daily_message():
     engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
     connection = engine.get_conn()
     cursor = connection.cursor()
-    sql_query = str(Variable.get("daily_message_sql_query","select id "
-                                                           "from zylaapi.patient_profile "
-                                                           "where status = 4 and new_chat = 1 "
-                                                           "and id not in (select patient_id from "
-                                                           "zylaapi.patient_status_audit "
-                                                           "where to_status = 4 and "
-                                                           "updated_on > CURDATE() - 7)"))
+    sql_query = str(Variable.get("daily_message_sql_query", "select id "
+                                 "from zylaapi.patient_profile "
+                                 "where status = 4 and new_chat = 1 "
+                                 "and id not in (select patient_id from "
+                                 "zylaapi.patient_status_audit "
+                                 "where to_status = 4 and "
+                                 "updated_on > DATE_ADD(curdate(), INTERVAL -7 DAY))"))
     cursor.execute(sql_query)
     patient_id_list = []
     for row in cursor.fetchall():
@@ -47,4 +47,3 @@ def daily_message():
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
-
