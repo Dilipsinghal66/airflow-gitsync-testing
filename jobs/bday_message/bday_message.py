@@ -10,7 +10,7 @@ from jobs.bday_message.bday_message_job import bday_message
 bday_message_cron = str(Variable.get("bday_message_cron", '00 10 * * *'))
 
 bday_message_dag = DAG(
-    dag_id="daily_message",
+    dag_id="bday_message",
     default_args=default_args,
     schedule_interval=bday_message_cron,
     catchup=False,
