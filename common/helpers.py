@@ -144,7 +144,11 @@ def process_dynamic_task_sql(sql_query, message, action):
         "is_notification": False
     }
     for pid in patient_id_list:
-        send_chat_message_patient_id(patient_id=pid, payload=payload)
+        try:
+            send_chat_message_patient_id(patient_id=pid, payload=payload)
+        except:
+            log.error("User not found " + str(pid))
+
     # patient_user_id_conv_msg(patient_id_list,
     #                          message_replace_data, message, action)
 
