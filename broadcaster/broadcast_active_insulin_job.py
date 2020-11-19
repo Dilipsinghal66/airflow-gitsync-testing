@@ -14,7 +14,7 @@ def get_patient_ids():
     try:
         mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
         collection = mongo_conn.get_database(
-            "datatable-service").get_collection("md_tracking")
+            "tracking").get_collection("md_tracking")
         medicines = ["MED2266", "MED2267", "MED3655", "MED3656", "MED3657", "MED3658", "MED10529", "MED10530", "MED10531", "MED10532",
                      "MED10533", "MED10534", "MED12862", "MED12863", "MED14520", "MED14522", "MED16168", "MED16169", "MED16170", "MED16171"]
         results = collection.find(
