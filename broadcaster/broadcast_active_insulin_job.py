@@ -3,6 +3,7 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
+from common.db_functions import get_data_from_db
 from common.helpers import send_chat_message_patient_id
 from datetime import datetime
 
@@ -22,9 +23,19 @@ def get_patient_ids():
         patientIds = []
         for q in results:
             patientIds.append(q['patientId'])
-            log.info(q)
 
-        return patientIds
+        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+        connection = engine.get_conn()
+        cursor = connection.cursor()
+        filter_active_patient_query = "select id from patient_profile where status=4 and new_chat=1 and id in (" + ','.join(
+            str(x) for x in patientIds) + ")"
+
+        cursor.execute(filter_active_patient_query)
+        activePatientIds = {}
+        for row in cursor.fetchall():
+            activePatientIds.append(row[0])
+
+        return activePatientIds
     except Exception as e:
         log.info("Error Exception raised")
         log.info(e)
