@@ -22,7 +22,6 @@ def get_patient_ids():
         patientIds = []
         for q in results:
             patientIds.append(q['patientId'])
-            log.info(q)
 
         return patientIds
     except Exception as e:
