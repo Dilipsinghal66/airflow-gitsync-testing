@@ -31,7 +31,7 @@ def get_patient_ids():
             str(x) for x in patientIds) + ")"
 
         cursor.execute(filter_active_patient_query)
-        activePatientIds = {}
+        activePatientIds = []
         for row in cursor.fetchall():
             activePatientIds.append(row[0])
 
