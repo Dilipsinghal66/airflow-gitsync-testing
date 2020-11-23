@@ -4,7 +4,7 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from common.db_functions import get_data_from_db
-from common.helpers import send_chat_message_patient_id
+from common.helpers import patient_id_message_send
 from datetime import datetime
 
 
@@ -18,7 +18,7 @@ def get_patient_ids():
             "tracking").get_collection("dh_tracking")
         icds = ["ICD5974", "ICD5975", "ICD5976", "ICD6024", "ICD43954"]
         results = collection.find(
-            {"diagnosisHistory.diagnosis": {"$in": icds}})
+            {"$and": [{"diagnosisHistory.diagnosis": {"$in": icds}},   {"diagnosisHistory.ongoing": True}]})
         patientIds = []
         for q in results:
             patientIds.append(q['patientId'])
@@ -43,3 +43,17 @@ def get_patient_ids():
 def broadcast_active_sleep_issues():
     patientIds = get_patient_ids()
     print(patientIds)
+    process_broadcast_active = int(Variable.get("process_broadcast_active_sleep_issues",
+                                                '1'))
+    if process_broadcast_active == 1:
+        return
+
+    message = str(Variable.get("broadcast_active_sleep_issues_msg", ""))
+    for patient_id in patientIds:
+        if message:
+            try:
+                patient_id_message_send(patient_id, message, "dynamic_message")
+                print(patient_id)
+            except Exception as e:
+                print("Error Exception raised")
+                print(e)
