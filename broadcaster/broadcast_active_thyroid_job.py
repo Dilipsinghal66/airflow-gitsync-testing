@@ -18,8 +18,9 @@ def get_patient_ids():
             "tracking").get_collection("md_tracking")
         medicines = ["MED2829", "MED12041", "MED12039", "MED12040", "MED12037", "MED12036", "MED12774", "MED15760", "MED20530", "MED20529",
                      "MED20528", "MED20531", "MED30608", "MED30679", "MED30660", "MED30669", "MED30668", "MED30666", "MED30665", "MED30675"]
+        notTimePeriods = ["REFLD197", "REFLD198"]
         results = collection.find(
-            {"medicineDetails.medicine": {"$in": medicines}})
+            {"$and": [{"medicineDetails.medicine": {"$in": medicines}}, {"medicineDetails.timePeriod": {"$nin": notTimePeriods}}]})
         patientIds = []
         for q in results:
             patientIds.append(q['patientId'])
