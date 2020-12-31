@@ -16,7 +16,7 @@ def send_test_message(**kargs):
         raise ValueError("Config variables not defined")
 
     payload = {
-        "action": "dynamic_message",
+        "action": "custom_message",
         "message": str(html_test_message),
         "is_notification": False
     }
