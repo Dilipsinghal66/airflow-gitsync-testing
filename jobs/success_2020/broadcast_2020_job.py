@@ -32,4 +32,3 @@ def broadcast_2020():
             warning_message = "Cannot send message"
             log.warning(warning_message)
             log.error(e, exc_info=True)
-            raise e
