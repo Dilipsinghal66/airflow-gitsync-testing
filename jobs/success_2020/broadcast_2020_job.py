@@ -27,7 +27,7 @@ def broadcast_2020():
                 "message": message,
                 "is_notification": False
             }
-            send_chat_message_patient_id(int(pid.strip()), message)
+            send_chat_message_patient_id(int(pid.strip()), payload)
         except Exception as e:
             warning_message = "Cannot send message"
             log.warning(warning_message)
