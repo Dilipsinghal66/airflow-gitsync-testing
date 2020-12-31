@@ -5,7 +5,7 @@ from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
 from config import local_tz, default_args
-from broadcaster.broadcast_2020_job import broadcast_2020
+from jobs.success_2020.broadcast_2020_job import broadcast_2020
 
 broadcast_2020_cron = str(Variable.get("broadcast_2020_cron", '@yearly'))
 
