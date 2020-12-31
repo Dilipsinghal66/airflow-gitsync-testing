@@ -21,13 +21,13 @@ def broadcast_2020():
         try:
             action = "dynamic_message"
             message = str(Variable.get("broadcast_2020_msg", ''))
-            message += pid
+            message += pid.strip()
             payload = {
                 "action": action,
                 "message": message,
                 "is_notification": False
             }
-            send_chat_message_patient_id(pid, message)
+            send_chat_message_patient_id(int(pid.strip()), message)
         except Exception as e:
             warning_message = "Cannot send message"
             log.warning(warning_message)
