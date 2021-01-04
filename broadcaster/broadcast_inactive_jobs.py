@@ -12,7 +12,7 @@ def broadcast_inactive():
 
     sql_query = str(Variable.get("broadcast_inactive_jobs_sql_query",
                                  '''
-                                 select id from patient_profile where status=11 and new_chat=1
+                                 select id from patient_profile where status in (11, 12, 5, 9) and new_chat=1
                                 '''))
 
     message = str(Variable.get("broadcast_inactive_msg", ''))
