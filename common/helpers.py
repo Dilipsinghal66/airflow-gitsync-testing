@@ -23,6 +23,15 @@ enable_message = bool(int(Variable.get("enable_message", "1")))
 log = LoggingMixin().log
 
 
+def send_chat_message_log(user_id=None, payload=None):
+    try:
+        endpoint = "user/" + str(
+            round(user_id)) + "/message"
+        log.info(endpoint)
+        log.info(payload)
+    except Exception as e:
+        raise ValueError(str(e))
+
 def send_chat_message(user_id=None, payload=None):
     try:
         endpoint = "user/" + str(
@@ -149,6 +158,60 @@ def process_dynamic_task_sql(sql_query, message, action):
         except:
             log.error("User not found " + str(pid))
 
+
+def process_custom_message_sql(sql_query, message):
+        sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                                    sql_query=sql_query, execute_query=True)
+        user_id_list = []
+        if sql_data:
+            for user in sql_data:
+                user_id = user[0]
+                user_id_list.append(user_id)
+
+        log.info(user_id_list)
+        query_endpoint = message
+        query_status, query_data = make_http_request(conn_id="http_query_url",
+                                                     endpoint=query_endpoint, method="GET")
+
+        dyn_message = query_data["content"]["message"]["metadata"]["body"]
+        log.info(dyn_message)
+        payload_dynamic = {
+            "action": "dynamic_message",
+            "message": dyn_message,
+            "is_notification": False
+        }
+        payload_custom = {
+            "action": "custom_message",
+            "message": message,
+            "is_notification": False
+        }
+        for uid in user_id_list:
+            try:
+                endpoint = str(uid) + "/latest"
+                status, data = make_http_request(conn_id="http_device_url",
+                                                 endpoint=endpoint, method="GET")
+                log(data["appVersion"])
+                log(data["device"])
+                if str(data["device"]).lower() == "android":
+                    ver = str(data["appVersion"]).split(".")
+                    if len(ver) == 3:
+                        if int(ver[1]) >= 1 and int(ver[2]) >=6:
+                            send_chat_message_log(user_id=uid, payload=payload_custom)
+                        else:
+                            send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                    else:
+                        send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                else:
+                    ver = str(data["appVersion"]).split(".")
+                    if len(ver) == 3:
+                        if int(ver[2]) >= 5:
+                            send_chat_message_log(user_id=uid, payload=payload_custom)
+                        else:
+                            send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                    else:
+                        send_chat_message_log(user_id=uid, payload=payload_dynamic)
+            except:
+                log.error("User not found " + str(uid))
     # patient_user_id_conv_msg(patient_id_list,
     #                          message_replace_data, message, action)
 
