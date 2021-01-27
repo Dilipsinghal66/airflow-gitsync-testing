@@ -190,8 +190,8 @@ def process_custom_message_sql(sql_query, message):
                 endpoint = str(uid) + "/latest"
                 status, data = make_http_request(conn_id="http_device_url",
                                                  endpoint=endpoint, method="GET")
-                log(data["appVersion"])
-                log(data["device"])
+                log.info(data["appVersion"])
+                log.info(data["device"])
                 if str(data["device"]).lower() == "android":
                     ver = str(data["appVersion"]).split(".")
                     if len(ver) == 3:
