@@ -11,7 +11,7 @@ def broadcast_active_not_hh_cc_945():
         return
 
     sql_query = str(Variable.get("broadcast_active_not_hh_cc_sql_query", 'SELECT id from zylaapi.auth where phoneno '
-                                                                         'in (SELECT pp.id FROM (SELECT * FROM '
+                                                                         'in (SELECT pp.phoneno FROM (SELECT * FROM '
                                                                          'zylaapi.patient_profile WHERE status=4 '
                                                                          'and new_chat=1) pp LEFT JOIN '
                                                                          '(SELECT * FROM zylaapi.doc_profile) '
