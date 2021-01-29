@@ -1,6 +1,6 @@
 from airflow.models import Variable
 
-from common.helpers import process_dynamic_task_sql
+from common.helpers import process_custom_message_sql
 
 
 def broadcast_active_hh_cc_945():
@@ -12,7 +12,8 @@ def broadcast_active_hh_cc_945():
 
     sql_query = str(Variable.get("broadcast_active_hh_cc_945_sql_query",
                                  '''
-                                SELECT 
+                                SELECT id from zylaapi.auth where phoneno in 
+                                (SELECT 
                                     pp.id
                                 FROM
                                     (SELECT 
@@ -25,10 +26,9 @@ def broadcast_active_hh_cc_945():
                                     (SELECT 
                                         *
                                     FROM
-                                        doc_profile
-                                    ) dp ON pp.referred_by = dp.id where dp.code like 'HH%' or dp.code like 'CC%';
+                                        zylaapi.doc_profile
+                                    ) dp ON pp.referred_by = dp.id where dp.code like 'HH%' or dp.code like 'CC%');
                                  '''))
 
     message = str(Variable.get("broadcast_active_hh_cc_945_msg", ''))
-    action = "dynamic_message"
-    process_dynamic_task_sql(sql_query, message, action)
+    process_custom_message_sql(sql_query, message)
