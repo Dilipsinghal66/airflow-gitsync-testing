@@ -223,9 +223,7 @@ def process_custom_message_sql_patient(message, patient_phonenos):
     connection = engine.get_conn()
     cursor = connection.cursor()
 
-    placeholder = '?'
-    placeholders = ', '.join(placeholder for unused in patient_phonenos)
-    sql_query = 'SELECT id FROM zylaapi.auth WHERE phoneno IN (%s)' % placeholders
+    sql_query = 'SELECT id FROM zylaapi.auth WHERE phoneno IN (' + ','.join(map(str, patient_phonenos)) + ')'
 
     log.info(sql_query)
     cursor.execute(sql_query, patient_phonenos)
