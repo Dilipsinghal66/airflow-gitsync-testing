@@ -226,7 +226,7 @@ def process_custom_message_sql_patient(message, patient_phonenos):
     sql_query = 'SELECT id FROM zylaapi.auth WHERE phoneno IN (' + ','.join(map(str, patient_phonenos)) + ')'
 
     log.info(sql_query)
-    cursor.execute(sql_query, patient_phonenos)
+    cursor.execute(sql_query)
     user_id_list = []
     for row in cursor.fetchall():
         for _id in row:

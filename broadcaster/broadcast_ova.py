@@ -11,7 +11,7 @@ broadcast_ova_cron = str(Variable.get(
     "broadcast_ova_cron", '@once'))
 
 broadcast_ova_dag = DAG(
-    dag_id="broadcast_ova_renewal",
+    dag_id="broadcast_ova",
     default_args=default_args,
     schedule_interval=broadcast_ova_cron,
     catchup=False,
