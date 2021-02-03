@@ -217,6 +217,72 @@ def process_custom_message_sql(sql_query, message):
     #                          message_replace_data, message, action)
 
 
+def process_custom_message_sql_patient(message, patient_phonenos):
+
+    engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+    connection = engine.get_conn()
+    cursor = connection.cursor()
+
+    placeholder = '?'
+    placeholders = ', '.join(placeholder for unused in patient_phonenos)
+    sql_query = 'SELECT id FROM zylaapi.auth WHERE phoneno IN (%s)' % placeholders
+
+    log.info(sql_query)
+    cursor.execute(sql_query, patient_phonenos)
+    user_id_list = []
+    for row in cursor.fetchall():
+        for _id in row:
+            user_id_list.append(_id)
+
+    log.info(user_id_list)
+    query_endpoint = message
+    query_status, query_data = make_http_request(conn_id="http_query_url",
+                                                 endpoint=query_endpoint, method="GET")
+
+    dyn_message = query_data["content"]["message"]["metadata"]["body"]
+    log.info(dyn_message)
+    payload_dynamic = {
+        "action": "dynamic_message",
+        "message": dyn_message,
+        "is_notification": False
+    }
+    payload_custom = {
+        "action": "custom_message",
+        "message": message,
+        "is_notification": False
+    }
+    for uid in user_id_list:
+        try:
+            endpoint = str(uid) + "/latest"
+            status, data = make_http_request(conn_id="http_device_url",
+                                             endpoint=endpoint, method="GET")
+            log.info(data["appVersion"])
+            log.info(data["device"])
+            if str(data["device"]).lower() == "android":
+                ver = str(data["appVersion"]).split(".")
+                if len(ver) == 3:
+                    if int(ver[1]) >= 1 and int(ver[2]) >= 6:
+                        send_chat_message_log(user_id=uid, payload=payload_custom)
+                    else:
+                        send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                else:
+                    send_chat_message_log(user_id=uid, payload=payload_dynamic)
+            else:
+                ver = str(data["appVersion"]).split(".")
+                if len(ver) == 3:
+                    if int(ver[2]) >= 5:
+                        send_chat_message_log(user_id=uid, payload=payload_custom)
+                    else:
+                        send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                else:
+                    send_chat_message_log(user_id=uid, payload=payload_dynamic)
+        except:
+            log.error("User not found " + str(uid))
+
+
+# patient_user_id_conv_msg(patient_id_list,
+#                          message_replace_data, message, action)
+
 def patient_user_id_conv_msg(patient_id_list,
                              message_replace_data, message, action):
     mongo_filter_field = "patientId"
