@@ -1,6 +1,6 @@
 from airflow.models import Variable
 
-from common.helpers import process_dynamic_task_sql
+from common.helpers import process_custom_message_sql
 
 
 def broadcast_inactive():
@@ -10,11 +10,10 @@ def broadcast_inactive():
     if process_broadcast_active == 1:
         return
 
-    sql_query = str(Variable.get("broadcast_inactive_jobs_sql_query",
-                                 '''
-                                 select id from patient_profile where status in (11, 12, 5, 9) and new_chat=1
-                                '''))
+    sql_query = str(Variable.get("broadcast_inactive_jobs_sql_query", "select id from zylaapi.auth where phoneno in "
+                                                                      "(select phoneno from patient_profile "
+                                                                      "where status in (11, 12, 5, 9) and new_chat=1)"))
 
     message = str(Variable.get("broadcast_inactive_msg", ''))
-    action = "dynamic_message"
-    process_dynamic_task_sql(sql_query, message, action)
+    process_custom_message_sql(sql_query, message)
+

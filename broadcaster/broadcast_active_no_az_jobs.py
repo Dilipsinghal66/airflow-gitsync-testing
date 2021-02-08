@@ -1,6 +1,6 @@
 from airflow.models import Variable
 
-from common.helpers import process_dynamic_task_sql
+from common.helpers import process_custom_message_sql
 
 
 def broadcast_active_no_az():
@@ -10,11 +10,9 @@ def broadcast_active_no_az():
     if process_broadcast_active == 1:
         return
 
-    sql_query = str(Variable.get("broadcast_active_sql_query",
-                                 'select id from '
-                                 'zylaapi.patient_profile '
-                                 'where status = 4 AND new_chat=1 and referred_by=0'))
+    sql_query = str(Variable.get("broadcast_active_sql_query", 'select id from zylaapi.auth where phoneno in '
+                                                               '(select phoneno from zylaapi.patient_profile '
+                                                               'where status = 4 AND new_chat=1 and referred_by=0)'))
 
     message = str(Variable.get("broadcast_active_no_az_msg", ''))
-    action = "dynamic_message"
-    process_dynamic_task_sql(sql_query, message, action)
+    process_custom_message_sql(sql_query, message)
