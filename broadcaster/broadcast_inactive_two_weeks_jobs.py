@@ -15,7 +15,8 @@ def broadcast_inactive_two_weeks():
                                                                                         "profile where status not in "
                                                                                         "(4, 5) and new_chat=1 and "
                                                                                         "created_at <= now() - "
-                                                                                        "INTERVAL 7 DAY)"))
+                                                                                        "INTERVAL 7 DAY and "
+                                                                                        "referred_by = 0)"))
 
     message = str(Variable.get("broadcast_inactive_two_weeks_msg", ''))
     process_custom_message_sql(sql_query, message)
