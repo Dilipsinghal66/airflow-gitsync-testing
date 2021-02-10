@@ -23,7 +23,7 @@ def broadcast_active_ancillary_lab():
                                     FROM
                                         patient_profile
                                     WHERE
-                                        referred_by NOT IN (0 , 68) and new_chat=1 )  pp
+                                        referred_by NOT IN (0 , 68) and new_chat=1 and status=4 )  pp
                                     LEFT JOIN doc_profile dp ON pp.referred_by = dp.id) t
                                         LEFT JOIN
                                     doc_onboarding dob ON t.code = dob.doc_code
