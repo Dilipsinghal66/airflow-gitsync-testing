@@ -44,6 +44,22 @@ def send_chat_message(user_id=None, payload=None):
             log.info(status)
     except Exception as e:
         raise ValueError(str(e))
+    
+def send_event_request(user_id,event):
+    try:
+        endpoint = "event/newevent"
+        payload={
+            "userId"=user_id,
+            "event"=event
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
 
 
 def send_chat_message_patient_id(patient_id=None, payload=None):
