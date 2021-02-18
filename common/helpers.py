@@ -47,7 +47,7 @@ def send_chat_message(user_id=None, payload=None):
     
 def send_event_request(user_id,event):
     try:
-        endpoint = "event/newevent"
+        endpoint = "newevent"
         payload={
             "userId"=user_id,
             "event"=event
@@ -55,7 +55,7 @@ def send_event_request(user_id,event):
         log.info(endpoint)
         if enable_message:
             status, body = make_http_request(
-                conn_id="",
+                conn_id="http_zylawhatsapp_service_url",
                 endpoint=endpoint, method="POST", payload=payload)
             log.info(status)
     except Exception as e:
