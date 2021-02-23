@@ -23,7 +23,7 @@ def broadcast_newuser_whatsapp():
                     case when TIMESTAMPDIFF(minute,MAX(updated_at),NOW()) 
                     Between 15 and 30 then 'T' ELSE 'F' END as time ,  
                      max(updated_at) FROM zylaapi.patient_status_audit
-                    where to_status in (6,8,9) group by 1
+                    where to_status in (6,8,9,11) group by 1
                     order by updated_at desc) as q where q.time ='T') as
                     p INNER JOIN zylaapi.patient_profile as r ON p.patient_id=r.id")
     
