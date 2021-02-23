@@ -52,7 +52,7 @@ def broadcast_active_diabetes():
     for patient_id in patientIds:
         if message:
             try:
-                #patient_id_message_send(patient_id, message, "dynamic_message")
+                patient_id_message_send(patient_id, message, "dynamic_message")
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")
