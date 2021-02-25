@@ -18,7 +18,7 @@ def broadcast_newuser_whatsapp():
         # print("got the cursor")
 
         cursor.execute("Select p.patient_id,p.to_status,p.time, r.phoneno,r.countrycode from "
-                       "(select * from (select patient_id , to_status , case when TIMESTAMPDIF"
+                       "(select * from (select patient_id , to_status , case when TIMESTAMPDIFF"
                        "(minute,MAX(updated_at),NOW()) Between 15 and 30 then 'T' ELSE 'F' END as time , "
                        "max(updated_at) FROM zylaapi.patient_status_audit where to_status in (6,8,9,11) "
                        "group by 1 order by updated_at desc) as q where q.time ='T') as p "
