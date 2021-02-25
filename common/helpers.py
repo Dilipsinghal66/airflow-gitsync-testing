@@ -72,7 +72,7 @@ def getStatusString(status):
 def send_event_request(user_id, event, phone_no, countrycode):
     try:
         eventString = getStatusString(event)
-        countrycodeString = "+" + countrycode
+        countrycodeString = "+" + str(countrycode)
         endpoint = "event"
         payload = {
             "userId": str(user_id),
