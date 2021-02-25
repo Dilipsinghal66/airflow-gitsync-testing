@@ -44,6 +44,49 @@ def send_chat_message(user_id=None, payload=None):
             log.info(status)
     except Exception as e:
         raise ValueError(str(e))
+ 
+def getStatusString(status):
+  switcher = {
+    1: "Pending",
+    2: "Blocked",
+    3: "Inactive",
+    4: "Active",
+    5: "Renewal Due",
+    6: "WA_New",
+    7: "Contacted",
+    8: "WA_PAStarted",
+    9: "WA_PACompleted",
+    10: "Invited",
+    11: "WA_OnTrial",
+    12: "Requested Callback",
+    13: "Pursuing Purchase",
+    14: "Declined",
+    15: "Cold",
+    16: "Post Trial",
+    17: "Graduated",
+    18: "After Care"
+  }
+  return switcher.get(status, "Invalid Status")
+    
+def send_event_request(user_id,event,phone_no,countrycode):
+    try:
+        eventString = getStatusString(event)
+        countrycodeString = "+"+countrycode
+        endpoint = "event"
+        payload={
+            "userId"=str(user_id),
+            "event"=eventString,
+            "phoneNumber"=str(phone_no),
+            "countryCode"=countrycodeString
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_zylawhatsapp_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
 
 
 def send_chat_message_patient_id(patient_id=None, payload=None):
