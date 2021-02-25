@@ -67,17 +67,18 @@ def getStatusString(status):
     18: "After Care"
   }
   return switcher.get(status, "Invalid Status")
-    
-def send_event_request(user_id,event,phone_no,countrycode):
+
+
+def send_event_request(user_id, event, phone_no, countrycode):
     try:
         eventString = getStatusString(event)
-        countrycodeString = "+"+countrycode
+        countrycodeString = "+" + countrycode
         endpoint = "event"
-        payload={
-            "userId"=str(user_id),
-            "event"=eventString,
-            "phoneNumber"=str(phone_no),
-            "countryCode"=countrycodeString
+        payload = {
+            "userId": str(user_id),
+            "event": eventString,
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString
         }
         log.info(endpoint)
         if enable_message:
