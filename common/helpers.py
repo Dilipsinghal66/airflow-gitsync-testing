@@ -67,17 +67,18 @@ def getStatusString(status):
     18: "After Care"
   }
   return switcher.get(status, "Invalid Status")
-    
-def send_event_request(user_id,event,phone_no,countrycode):
+
+
+def send_event_request(user_id, event, phone_no, countrycode):
     try:
         eventString = getStatusString(event)
-        countrycodeString = "+"+countrycode
+        countrycodeString = "+" + str(countrycode)
         endpoint = "event"
-        payload={
-            "userId"=str(user_id),
-            "event"=eventString,
-            "phoneNumber"=str(phone_no),
-            "countryCode"=countrycodeString
+        payload = {
+            "userId": str(user_id),
+            "event": eventString,
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString
         }
         log.info(endpoint)
         if enable_message:
@@ -259,6 +260,57 @@ def process_custom_message_sql(sql_query, message):
     # patient_user_id_conv_msg(patient_id_list,
     #                          message_replace_data, message, action)
 
+
+def process_custom_message(user_id_list, message):
+
+    log.info(user_id_list)
+    query_endpoint = message
+    query_status, query_data = make_http_request(conn_id="http_query_url",
+                                                 endpoint=query_endpoint, method="GET")
+
+    dyn_message = query_data["content"]["message"]["metadata"]["body"]
+    log.info(dyn_message)
+    payload_dynamic = {
+        "action": "dynamic_message",
+        "message": dyn_message,
+        "is_notification": False
+    }
+    payload_custom = {
+        "action": "custom_message",
+        "message": message,
+        "is_notification": False
+    }
+    for uid in user_id_list:
+        try:
+            endpoint = str(uid) + "/latest"
+            status, data = make_http_request(conn_id="http_device_url",
+                                             endpoint=endpoint, method="GET")
+            log.info(data["appVersion"])
+            log.info(data["device"])
+            if str(data["device"]).lower() == "android":
+                ver = str(data["appVersion"]).split(".")
+                if len(ver) == 3:
+                    if int(ver[1]) >= 1 and int(ver[2]) >= 6:
+                        send_chat_message(user_id=uid, payload=payload_custom)
+                    else:
+                        send_chat_message(user_id=uid, payload=payload_dynamic)
+                else:
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
+            else:
+                ver = str(data["appVersion"]).split(".")
+                if len(ver) == 3:
+                    if int(ver[2]) >= 5:
+                        send_chat_message(user_id=uid, payload=payload_custom)
+                    else:
+                        send_chat_message(user_id=uid, payload=payload_dynamic)
+                else:
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
+        except:
+            log.error("User not found " + str(uid))
+
+
+# patient_user_id_conv_msg(patient_id_list,
+#                          message_replace_data, message, action)
 
 def process_custom_message_sql_patient(message, patient_phonenos):
 
