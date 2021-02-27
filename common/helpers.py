@@ -164,10 +164,10 @@ def get_medicine_details(patient_id):
                 for med in med_details:
                     medcine_msg = med['formulation'] + "  " + med['medicineCode']['label'] + "  " \
                                   + str(med['morningFrequency']) + "-" + str(med['afternoonFrequency']) \
-                                  + "-" + str(med['eveningFrequency']) + "   " + str(med['yearDuration']) + "year " \
-                                  + str(med['monthDuration']) + "month " + str(med['dayDuration']) + "day "
-                    ret_value.append(medcine_msg)
+                                  + "-" + str(med['eveningFrequency'])
                     
+                    ret_value.append(medcine_msg)
+
     except Exception as e:
         raise ValueError(str(e))
     return ret_value
