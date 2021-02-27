@@ -153,7 +153,7 @@ def task_success_callback(context):
 def get_medicine_details(patient_id):
     ret_value = {}
     try:
-        endpoint = patient_id + "/latest"
+        endpoint = str(patient_id) + "/latest"
 
         if enable_message:
             status, body = make_http_request(
@@ -162,11 +162,12 @@ def get_medicine_details(patient_id):
             if body:
                 med_details = body['medicineDetails']
                 for med in med_details:
-                    medcine_msg = (med['formulation'] + "  " + med['medicineCode']['label'] + "  "
-                                   + str(med['morningFrequency']) + "-" + str(med['afternoonFrequency']) + "-"
-                                   + str(med['eveningFrequency']) + "   " + str(med['yearDuration']) + "year "
-                                   + str(med['monthDuration']) + "month " + str(med['dayDuration']) + "day ")
+                    medcine_msg = med['formulation'] + "  " + med['medicineCode']['label'] + "  " \
+                                  + str(med['morningFrequency']) + "-" + str(med['afternoonFrequency']) \
+                                  + "-" + str(med['eveningFrequency'])
+                    
                     ret_value.append(medcine_msg)
+
     except Exception as e:
         raise ValueError(str(e))
     return ret_value
