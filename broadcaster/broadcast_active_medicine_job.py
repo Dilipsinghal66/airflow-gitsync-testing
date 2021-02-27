@@ -28,7 +28,7 @@ def broadcast_active_medicine():
 
     for patient_id in patient_id_list:
         med_list = get_medicine_details(patient_id)
-        log(med_list)
+        log.info(med_list)
         if message:
             try:
                 log.info("sending for patient id " + str(patient_id))
