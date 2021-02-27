@@ -32,12 +32,17 @@ def broadcast_active_medicine():
         msg_str = '<br>'.join(med_list)
         if message:
             try:
-                user_id = "select id from zylaapi.auth where phoneno = (select phoneno from zylaapi.patient_profile" \
+                user_id_sql_query = "select id from zylaapi.auth where phoneno = (select phoneno from zylaapi.patient_profile" \
                                 " where id = "+ str(patient_id) +") and countrycode = (select countrycode from " \
                                                                  "zylaapi.patient_profile where id = " + \
                                 str(patient_id) + ") and who = 'patient' "
+                cursor.execute(user_id_sql_query)
+                user_id = 0
+                for row in cursor.fetchall():
+                    user_id = row[0]
                 log.info("sending for user id " + str(user_id))
-                process_custom_message_user_id(user_id, message, msg_str)
+                if user_id != 0:
+                    process_custom_message_user_id(user_id, message, msg_str)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
