@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from broadcaster.broadcast_newuser_whatsapp_jobs import broadcast_newuser_whatsapp
 
-broadcast_newuser_whatsapp_cron = str(Variable.get("broadcast_newuser_whatsapp_cron", '*/15  * * * *'))
+broadcast_newuser_whatsapp_cron = str(Variable.get("broadcast_newuser_whatsapp_cron", '*/15 * * * *'))
 
 broadcast_newuser_whatsapp_dag = DAG(
     dag_id="broadcast_newuser_whatsapp",
