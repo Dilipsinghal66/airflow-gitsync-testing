@@ -151,7 +151,7 @@ def task_success_callback(context):
 
 
 def get_medicine_details(patient_id):
-    ret_value = {}
+    ret_value = []
     try:
         endpoint = str(patient_id) + "/latest"
 
@@ -165,7 +165,7 @@ def get_medicine_details(patient_id):
                     medcine_msg = med['formulation'] + "  " + med['medicineCode']['label'] + "  " \
                                   + str(med['morningFrequency']) + "-" + str(med['afternoonFrequency']) \
                                   + "-" + str(med['eveningFrequency'])
-                    
+
                     ret_value.append(medcine_msg)
 
     except Exception as e:
