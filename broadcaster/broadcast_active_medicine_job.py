@@ -1,7 +1,7 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
-from common.helpers import process_custom_message_sql, get_medicine_details
+from common.helpers import process_custom_message_user_id, get_medicine_details
 
 log = LoggingMixin().log
 
@@ -29,14 +29,17 @@ def broadcast_active_medicine():
     for patient_id in patient_id_list:
         med_list = get_medicine_details(patient_id)
         log.info(med_list)
+        msg_str = '<br>'.join(med_list)
         if message:
             try:
-                log.info("sending for patient id " + str(patient_id))
-                #patient_id_message_send(patient_id, message, "start_trial")
+                user_id = "select id from zylaapi.auth where phoneno = (select phoneno from zylaapi.patient_profile" \
+                                " where id = "+ str(patient_id) +") and countrycode = (select countrycode from " \
+                                                                 "zylaapi.patient_profile where id = " + \
+                                str(patient_id) + ") and who = 'patient' "
+                log.info("sending for user id " + str(user_id))
+                process_custom_message_user_id(user_id, message, msg_str)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
 
-
-    #process_custom_message_sql(sql_query, message)
 
