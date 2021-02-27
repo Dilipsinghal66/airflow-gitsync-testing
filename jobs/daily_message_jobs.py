@@ -14,9 +14,6 @@ def daily_message():
     if process_broadcast_active == 1:
         return
 
-    engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
-    connection = engine.get_conn()
-    cursor = connection.cursor()
     sql_query = str(Variable.get("daily_message_sql_query",
                                  "SELECT id from zylaapi.auth where phoneno in (select phoneno "
                                  "from zylaapi.patient_profile "
@@ -25,6 +22,5 @@ def daily_message():
                                  "zylaapi.patient_status_audit "
                                  "where to_status = 4 and "
                                  "updated_on > DATE_ADD(curdate(), INTERVAL -7 DAY)))"))
-    cursor.execute(sql_query)
     message = str(Variable.get("daily_message_msg", ""))
     process_custom_message_sql(sql_query, message)

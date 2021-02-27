@@ -150,6 +150,28 @@ def task_success_callback(context):
                       payload=success_payload, endpoint=endpoint)
 
 
+def get_medicine_details(patient_id):
+    ret_value = {}
+    try:
+        endpoint = patient_id + "/latest"
+
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_da_service_url",
+                endpoint=endpoint, method="GET")
+            if body:
+                med_details = body['medicineDetails']
+                for med in med_details:
+                    medcine_msg = (med['formulation'] + "  " + med['medicineCode']['label'] + "  "
+                                   + str(med['morningFrequency']) + "-" + str(med['afternoonFrequency']) + "-"
+                                   + str(med['eveningFrequency']) + "   " + str(med['yearDuration']) + "year "
+                                   + str(med['monthDuration']) + "month " + str(med['dayDuration']) + "day ")
+                    ret_value.append(medcine_msg)
+    except Exception as e:
+        raise ValueError(str(e))
+    return ret_value
+
+
 def process_dynamic_task_sql_no_az(sql_query, message, action):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
