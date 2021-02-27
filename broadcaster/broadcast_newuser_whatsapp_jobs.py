@@ -17,12 +17,10 @@ def broadcast_newuser_whatsapp():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("Select p.patient_id,p.to_status,p.time, r.phoneno,r.countrycode from "
-                       "(select * from (select patient_id , to_status , case when TIMESTAMPDIFF"
-                       "(minute,MAX(updated_at),NOW()) Between 15 and 30 then 'T' ELSE 'F' END as time , "
-                       "max(updated_at) FROM zylaapi.patient_status_audit where to_status in (6,8,9,11) "
-                       "group by 1 order by updated_at desc) as q where q.time ='T') as p "
-                       "INNER JOIN zylaapi.patient_profile as r ON p.patient_id=r.id")
+        cursor.execute("select q.patient_id, q.to_status, q.updated_at, r.phoneno, r.countrycode from (select * from "
+                       "(select * from zylaapi.patient_status_audit where TIMESTAMPDIFF(minute,updated_at,NOW()) "
+                       "Between 15 and 30 group by patient_id Order By updated_at desc limit 1) as p where p.to_status "
+                       "in (6,8,9,11) )as q INNER JOIN zylaapi.patient_profile as r ON q.patient_id=r.id")
     
         for row in cursor.fetchall():
             send_event_request(row[0],row[1],row[3],row[4])
