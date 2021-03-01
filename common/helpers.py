@@ -360,20 +360,20 @@ def process_custom_message_user_id(uid, message, append_msg):
             ver = str(data["appVersion"]).split(".")
             if len(ver) == 3:
                 if int(ver[1]) >= 1 and int(ver[2]) >= 6:
-                    send_chat_message_log(user_id=uid, payload=payload_custom)
+                    send_chat_message(user_id=uid, payload=payload_custom)
                 else:
-                    send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
             else:
-                send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                send_chat_message(user_id=uid, payload=payload_dynamic)
         else:
             ver = str(data["appVersion"]).split(".")
             if len(ver) == 3:
                 if int(ver[2]) >= 5:
-                    send_chat_message_log(user_id=uid, payload=payload_custom)
+                    send_chat_message(user_id=uid, payload=payload_custom)
                 else:
-                    send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
             else:
-                send_chat_message_log(user_id=uid, payload=payload_dynamic)
+                send_chat_message(user_id=uid, payload=payload_dynamic)
     except:
         log.error("User not found " + str(uid))
 
