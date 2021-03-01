@@ -26,7 +26,7 @@ def broadcast_newuser_otp():
                        "p.countrycode=q.countrycode);")
 
         for row in cursor.fetchall():
-            send_event_request(None, 19, row[0], row[1])
+            send_event_request("", 19, row[0], row[1], "")
 
     except Exception as e:
         print("Error Exception raised")
