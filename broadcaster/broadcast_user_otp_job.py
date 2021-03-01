@@ -22,10 +22,11 @@ def broadcast_newuser_otp():
                        "zylaapi.auth where TIMESTAMPDIFF(minute,created_at,"
                        "NOW()) between 15 and 30) as p Where not exists ( "
                        "Select * from zylaapi.patient_profile as q where "
-                       "p.phoneno = q.phoneno);")
+                       "(p.phoneno = q.phoneno) and ("
+                       "p.countrycode=q.countrycode);")
 
         for row in cursor.fetchall():
-            send_event_request("", 19, row[0], row[1])
+            send_event_request(None, 19, row[0], row[1])
 
     except Exception as e:
         print("Error Exception raised")
