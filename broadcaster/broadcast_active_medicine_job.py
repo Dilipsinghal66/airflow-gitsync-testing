@@ -16,7 +16,7 @@ def broadcast_active_medicine():
     cursor = connection.cursor()
 
     sql_query = str(Variable.get("broadcast_active_medicine_sql_query", 'select id from zylaapi.patient_profile '
-                                                                        'where id = 5397'))
+                                                                        'where id = 69730'))
     cursor.execute(sql_query)
 
     patient_id_list = []
