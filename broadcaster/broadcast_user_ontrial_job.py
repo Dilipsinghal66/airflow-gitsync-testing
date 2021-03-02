@@ -3,10 +3,10 @@ from common.db_functions import get_data_from_db
 from common.helpers import send_event_request
 
 
-def broadcast_newuser_whatsapp():
-    process_broadcast_newuser_whatsapp = int(
-        Variable.get("process_broadcast_newuser_whatsapp", '0'))
-    if process_broadcast_newuser_whatsapp == 1:
+def broadcast_newuser_ontrial():
+    process_broadcast_newuser_ontrial = int(
+        Variable.get("process_broadcast_newuser_ontrial", '0'))
+    if process_broadcast_newuser_ontrial == 1:
         return
 
     try:
@@ -19,9 +19,8 @@ def broadcast_newuser_whatsapp():
 
         cursor.execute("Select id,status,created_at,phoneno,countrycode,"
                        "client_code from "
-                       "zylaapi.patient_profile where status != 4 and "
-                       "TIMESTAMPDIFF(minute,created_at,NOW()) between 15 and "
-                       "30;")
+                       "zylaapi.patient_profile where status = 11 and "
+                       "TIMESTAMPDIFF(day,created_at,NOW()) = 14 ")
 
         for row in cursor.fetchall():
             send_event_request(row[0], row[1], row[3], row[4], row[5])

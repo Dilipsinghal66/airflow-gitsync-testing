@@ -32,6 +32,7 @@ def send_chat_message_log(user_id=None, payload=None):
     except Exception as e:
         raise ValueError(str(e))
 
+
 def send_chat_message(user_id=None, payload=None):
     try:
         endpoint = "user/" + str(
@@ -44,41 +45,63 @@ def send_chat_message(user_id=None, payload=None):
             log.info(status)
     except Exception as e:
         raise ValueError(str(e))
- 
+
+
 def getStatusString(status):
-  switcher = {
-    1: "Pending",
-    2: "Blocked",
-    3: "Inactive",
-    4: "Active",
-    5: "Renewal Due",
-    6: "WA_New",
-    7: "Contacted",
-    8: "WA_PAStarted",
-    9: "WA_PACompleted",
-    10: "Invited",
-    11: "WA_OnTrial",
-    12: "Requested Callback",
-    13: "Pursuing Purchase",
-    14: "Declined",
-    15: "Cold",
-    16: "Post Trial",
-    17: "Graduated",
-    18: "After Care"
-  }
-  return switcher.get(status, "Invalid Status")
+    switcher = {
+        1: "Pending",
+        2: "Blocked",
+        3: "Inactive",
+        4: "Active",
+        5: "Renewal Due",
+        6: "WA_New",
+        7: "Contacted",
+        8: "WA_PAStarted",
+        9: "WA_PACompleted",
+        10: "Invited",
+        11: "WA_OnTrial",
+        12: "Requested Callback",
+        13: "Pursuing Purchase",
+        14: "Declined",
+        15: "Cold",
+        16: "Post Trial",
+        17: "Graduated",
+        18: "After Care",
+        19: "WA_OTP"
+    }
+    return switcher.get(status, "Invalid Status")
 
 
-def send_event_request(user_id, event, phone_no, countrycode):
+def getLead(lead):
+    result = ""
+    if lead == "AZ":
+        result = "AZDD"
+        return result
+    elif lead == "CC":
+        result = "AZCC"
+        return result
+    elif lead == "HH":
+        result = "AZHH"
+        return result
+    else:
+        result = lead
+        return result
+
+
+def send_event_request(user_id, event, phone_no, countrycode, Lead):
     try:
         eventString = getStatusString(event)
         countrycodeString = "+" + str(countrycode)
         endpoint = "event"
+        traits = {
+            "Lead": getLead(Lead)
+        }
         payload = {
             "userId": str(user_id),
             "event": eventString,
             "phoneNumber": str(phone_no),
-            "countryCode": countrycodeString
+            "countryCode": countrycodeString,
+            "traits": traits
         }
         log.info(endpoint)
         if enable_message:
@@ -187,7 +210,8 @@ def process_dynamic_task_sql_no_az(sql_query, message, action):
         patient_id_list, message_replace_data, message, action)
 
 
-def patient_user_id_conv_msg_no_az(patient_id_list, message_replace_data, message, action):
+def patient_user_id_conv_msg_no_az(patient_id_list, message_replace_data,
+                                   message, action):
     mongo_filter_field = "patientId"
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
@@ -225,69 +249,72 @@ def process_dynamic_task_sql(sql_query, message, action):
 
 
 def process_custom_message_sql(sql_query, message):
-        sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
-                                    sql_query=sql_query, execute_query=True)
-        log.info(sql_query)
-        user_id_list = []
-        if sql_data:
-            for user in sql_data:
-                user_id = user[0]
-                user_id_list.append(user_id)
-
-        log.info(user_id_list)
-        query_endpoint = message
-        query_status, query_data = make_http_request(conn_id="http_query_url",
-                                                     endpoint=query_endpoint, method="GET")
-
-        dyn_message = query_data["content"]["message"]["metadata"]["body"]
-        log.info(dyn_message)
-        payload_dynamic = {
-            "action": "dynamic_message",
-            "message": dyn_message,
-            "is_notification": False
-        }
-        payload_custom = {
-            "action": "custom_message",
-            "message": message,
-            "is_notification": False
-        }
-        for uid in user_id_list:
-            try:
-                endpoint = str(uid) + "/latest"
-                status, data = make_http_request(conn_id="http_device_url",
-                                                 endpoint=endpoint, method="GET")
-                log.info(data["appVersion"])
-                log.info(data["device"])
-                if str(data["device"]).lower() == "android":
-                    ver = str(data["appVersion"]).split(".")
-                    if len(ver) == 3:
-                        if int(ver[1]) >= 1 and int(ver[2]) >=6:
-                            send_chat_message(user_id=uid, payload=payload_custom)
-                        else:
-                            send_chat_message(user_id=uid, payload=payload_dynamic)
-                    else:
-                        send_chat_message(user_id=uid, payload=payload_dynamic)
-                else:
-                    ver = str(data["appVersion"]).split(".")
-                    if len(ver) == 3:
-                        if int(ver[2]) >= 5:
-                            send_chat_message(user_id=uid, payload=payload_custom)
-                        else:
-                            send_chat_message(user_id=uid, payload=payload_dynamic)
-                    else:
-                        send_chat_message(user_id=uid, payload=payload_dynamic)
-            except:
-                log.error("User not found " + str(uid))
-    # patient_user_id_conv_msg(patient_id_list,
-    #                          message_replace_data, message, action)
-
-
-def process_custom_message(user_id_list, message):
+    sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                                sql_query=sql_query, execute_query=True)
+    log.info(sql_query)
+    user_id_list = []
+    if sql_data:
+        for user in sql_data:
+            user_id = user[0]
+            user_id_list.append(user_id)
 
     log.info(user_id_list)
     query_endpoint = message
     query_status, query_data = make_http_request(conn_id="http_query_url",
-                                                 endpoint=query_endpoint, method="GET")
+                                                 endpoint=query_endpoint,
+                                                 method="GET")
+
+    dyn_message = query_data["content"]["message"]["metadata"]["body"]
+    log.info(dyn_message)
+    payload_dynamic = {
+        "action": "dynamic_message",
+        "message": dyn_message,
+        "is_notification": False
+    }
+    payload_custom = {
+        "action": "custom_message",
+        "message": message,
+        "is_notification": False
+    }
+    for uid in user_id_list:
+        try:
+            endpoint = str(uid) + "/latest"
+            status, data = make_http_request(conn_id="http_device_url",
+                                             endpoint=endpoint, method="GET")
+            log.info(data["appVersion"])
+            log.info(data["device"])
+            if str(data["device"]).lower() == "android":
+                ver = str(data["appVersion"]).split(".")
+                if len(ver) == 3:
+                    if int(ver[1]) >= 1 and int(ver[2]) >= 6:
+                        send_chat_message(user_id=uid, payload=payload_custom)
+                    else:
+                        send_chat_message(user_id=uid, payload=payload_dynamic)
+                else:
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
+            else:
+                ver = str(data["appVersion"]).split(".")
+                if len(ver) == 3:
+                    if int(ver[2]) >= 5:
+                        send_chat_message(user_id=uid, payload=payload_custom)
+                    else:
+                        send_chat_message(user_id=uid, payload=payload_dynamic)
+                else:
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
+        except:
+            log.error("User not found " + str(uid))
+
+
+# patient_user_id_conv_msg(patient_id_list,
+#                          message_replace_data, message, action)
+
+
+def process_custom_message(user_id_list, message):
+    log.info(user_id_list)
+    query_endpoint = message
+    query_status, query_data = make_http_request(conn_id="http_query_url",
+                                                 endpoint=query_endpoint,
+                                                 method="GET")
 
     dyn_message = query_data["content"]["message"]["metadata"]["body"]
     log.info(dyn_message)
@@ -379,12 +406,12 @@ def process_custom_message_user_id(uid, message, append_msg):
 
 
 def process_custom_message_sql_patient(message, patient_phonenos):
-
     engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
     connection = engine.get_conn()
     cursor = connection.cursor()
 
-    sql_query = 'SELECT id FROM zylaapi.auth WHERE phoneno IN (' + ','.join(map(str, patient_phonenos)) + ')'
+    sql_query = 'SELECT id FROM zylaapi.auth WHERE phoneno IN (' + ','.join(
+        map(str, patient_phonenos)) + ')'
 
     log.info(sql_query)
     cursor.execute(sql_query)
@@ -396,7 +423,8 @@ def process_custom_message_sql_patient(message, patient_phonenos):
     log.info(user_id_list)
     query_endpoint = message
     query_status, query_data = make_http_request(conn_id="http_query_url",
-                                                 endpoint=query_endpoint, method="GET")
+                                                 endpoint=query_endpoint,
+                                                 method="GET")
 
     dyn_message = query_data["content"]["message"]["metadata"]["body"]
     log.info(dyn_message)
