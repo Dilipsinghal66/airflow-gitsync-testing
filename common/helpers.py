@@ -67,7 +67,8 @@ def getStatusString(status):
         16: "Post Trial",
         17: "Graduated",
         18: "After Care",
-        19: "WA_OTP"
+        19: "WA_OTPgenerated",
+        20: "WA_OnTrial14day"
     }
     return switcher.get(status, "Invalid Status")
 

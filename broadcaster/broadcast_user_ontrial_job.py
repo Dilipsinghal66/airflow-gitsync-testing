@@ -23,7 +23,7 @@ def broadcast_newuser_ontrial():
                        "TIMESTAMPDIFF(day,created_at,NOW()) = 14 ")
 
         for row in cursor.fetchall():
-            send_event_request(row[0], row[1], row[3], row[4], row[5])
+            send_event_request(row[0], 20, row[3], row[4], row[5])
 
     except Exception as e:
         print("Error Exception raised")
