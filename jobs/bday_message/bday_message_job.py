@@ -35,7 +35,7 @@ def bday_message():
         message = str(Variable.get("bday_message_msg", ""))
         if message:
             try:
-                patient_id_message_send(patient_id, message, "dynamic_message")
+                patient_id_message_send(patient_id, message, "custom_message")
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")
