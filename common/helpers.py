@@ -206,6 +206,13 @@ def get_medicine_details(patient_id):
             if body:
                 med_details = body['medicineDetails']
                 for med in med_details:
+                    if med['morningFrequency'] is None:
+                        med['morningFrequency'] = 0
+                    if med['afternoonFrequency'] is None:
+                        med['afternoonFrequency'] = 0
+                    if med['eveningFrequency'] is None:
+                        med['eveningFrequency'] = 0
+
                     if med["ongoing"]:
                         if med['morningFrequency'] != 0 or med['afternoonFrequency'] != 0 \
                                 or med['eveningFrequency'] != 0:
