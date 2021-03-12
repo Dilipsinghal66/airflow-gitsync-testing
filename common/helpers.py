@@ -206,10 +206,13 @@ def get_medicine_details(patient_id):
             if body:
                 med_details = body['medicineDetails']
                 for med in med_details:
-                    medcine_msg = med['medicineCode']['label'] + "  " + str(med['morningFrequency']) + "-" \
-                                  + str(med['afternoonFrequency']) + "-" + str(med['eveningFrequency'])
+                    if med["ongoing"]:
+                        if med['morningFrequency'] != 0 or med['afternoonFrequency'] != 0 \
+                                or med['eveningFrequency'] != 0:
+                            medcine_msg = med['medicineCode']['label'] + "  " + str(med['morningFrequency']) + \
+                                          "-" + str(med['afternoonFrequency']) + "-" + str(med['eveningFrequency'])
+                            ret_value.append(medcine_msg)
 
-                    ret_value.append(medcine_msg)
     except Exception as e:
         log.error("Exception occuured for patient id " + str(patient_id))
     return ret_value
