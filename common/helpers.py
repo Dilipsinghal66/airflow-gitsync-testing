@@ -567,6 +567,28 @@ def process_health_plan_not_created(patient_list):
     return patient_list
 
 
+def fcm_message_send(registration_ids, message, title):
+    payload = {
+        "registration_ids": registration_ids,
+        "data": {
+            "title": title,
+            "body": "",
+            "description": message
+        },
+        "priority": "high",
+        "sound": "default",
+        "notification": {
+            "title": title,
+            "body": message,
+            "sound": "default"
+        }
+
+    }
+
+    make_http_request(conn_id="http_google_fcm_url", method="POST",
+                      payload=payload)
+
+
 def patient_id_message_send(patient_id, message, action):
     payload = {
         "action": action,
