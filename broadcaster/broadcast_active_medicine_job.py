@@ -33,7 +33,7 @@ def broadcast_active_medicine():
             #msg_str = '<br>'.join(med_list)
             msg_str = "<ul>"
             for med in med_list:
-                msg_str = "<li>" + med + "</li>"
+                msg_str = msg_str + "<li>" + med + "</li>"
 
             msg_str = msg_str + "</ul>"
             if message:
