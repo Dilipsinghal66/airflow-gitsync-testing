@@ -114,6 +114,26 @@ def send_event_request(user_id, event, phone_no, countrycode, Lead):
         raise ValueError(str(e))
 
 
+def send_event_request_event_name(user_id, eventString, phone_no, countrycode):
+    try:
+        countrycodeString = "+" + str(countrycode)
+        endpoint = "event"
+        payload = {
+            "userId": str(user_id),
+            "event": eventString,
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString,
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_zylawhatsapp_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
+
 def send_chat_message_patient_id(patient_id=None, payload=None):
     try:
         endpoint = "users/patients/" + str(
@@ -186,10 +206,13 @@ def get_medicine_details(patient_id):
             if body:
                 med_details = body['medicineDetails']
                 for med in med_details:
-                    medcine_msg = med['medicineCode']['label'] + "  " + str(med['morningFrequency']) + "-" \
-                                  + str(med['afternoonFrequency']) + "-" + str(med['eveningFrequency'])
+                    if med["ongoing"]:
+                        if med['morningFrequency'] != 0 or med['afternoonFrequency'] != 0 \
+                                or med['eveningFrequency'] != 0:
+                            medcine_msg = med['medicineCode']['label'] + "  " + str(med['morningFrequency']) + \
+                                          "-" + str(med['afternoonFrequency']) + "-" + str(med['eveningFrequency'])
+                            ret_value.append(medcine_msg)
 
-                    ret_value.append(medcine_msg)
     except Exception as e:
         log.error("Exception occuured for patient id " + str(patient_id))
     return ret_value
