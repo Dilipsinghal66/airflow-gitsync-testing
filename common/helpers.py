@@ -114,6 +114,26 @@ def send_event_request(user_id, event, phone_no, countrycode, Lead):
         raise ValueError(str(e))
 
 
+def send_event_request_event_name(user_id, eventString, phone_no, countrycode):
+    try:
+        countrycodeString = "+" + str(countrycode)
+        endpoint = "event"
+        payload = {
+            "userId": str(user_id),
+            "event": eventString,
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString,
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_zylawhatsapp_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
+
 def send_chat_message_patient_id(patient_id=None, payload=None):
     try:
         endpoint = "users/patients/" + str(
@@ -172,6 +192,38 @@ def task_success_callback(context):
     endpoint = task_mongo_id
     make_http_request(conn_id="http_jobs_url", method="PATCH",
                       payload=success_payload, endpoint=endpoint)
+
+
+def get_medicine_details(patient_id):
+    ret_value = []
+    try:
+        endpoint = str(patient_id) + "/latest"
+
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_da_service_url",
+                endpoint=endpoint, method="GET")
+            if body:
+                med_details = body['medicineDetails']
+                for med in med_details:
+                    if med['morningFrequency'] is None:
+                        med['morningFrequency'] = 0
+                    if med['afternoonFrequency'] is None:
+                        med['afternoonFrequency'] = 0
+                    if med['eveningFrequency'] is None:
+                        med['eveningFrequency'] = 0
+
+                    if med["ongoing"]:
+                        if med['morningFrequency'] != 0 or med['afternoonFrequency'] != 0 \
+                                or med['eveningFrequency'] != 0:
+                            medcine_msg = med['medicineCode']['label'] + "  ( " + str(med['morningFrequency']) + \
+                                          "-" + str(med['afternoonFrequency']) + "-" + str(med['eveningFrequency']) \
+                                          + " )"
+                            ret_value.append(medcine_msg)
+
+    except Exception as e:
+        log.error("Exception occuured for patient id " + str(patient_id))
+    return ret_value
 
 
 def process_dynamic_task_sql_no_az(sql_query, message, action):
@@ -337,8 +389,53 @@ def process_custom_message(user_id_list, message):
             log.error("User not found " + str(uid))
 
 
-# patient_user_id_conv_msg(patient_id_list,
-#                          message_replace_data, message, action)
+def process_custom_message_user_id(uid, message, append_msg):
+
+    query_endpoint = message
+    query_status, query_data = make_http_request(conn_id="http_query_url",
+                                                 endpoint=query_endpoint, method="GET")
+
+    dyn_message = query_data["content"]["message"]["metadata"]["body"]
+    log.info(dyn_message)
+    dyn_message = dyn_message + "   " + append_msg
+    payload_dynamic = {
+        "action": "dynamic_message",
+        "message": dyn_message,
+        "is_notification": False
+    }
+    payload_custom = {
+        "action": "custom_message",
+        "message": message,
+        "body": dyn_message,
+        "is_notification": False
+    }
+    try:
+        endpoint = str(uid) + "/latest"
+        status, data = make_http_request(conn_id="http_device_url",
+                                         endpoint=endpoint, method="GET")
+        log.info(data["appVersion"])
+        log.info(data["device"])
+        if str(data["device"]).lower() == "android":
+            ver = str(data["appVersion"]).split(".")
+            if len(ver) == 3:
+                if int(ver[1]) >= 1 and int(ver[2]) >= 6:
+                    send_chat_message(user_id=uid, payload=payload_custom)
+                else:
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
+            else:
+                send_chat_message(user_id=uid, payload=payload_dynamic)
+        else:
+            ver = str(data["appVersion"]).split(".")
+            if len(ver) == 3:
+                if int(ver[2]) >= 5:
+                    send_chat_message(user_id=uid, payload=payload_custom)
+                else:
+                    send_chat_message(user_id=uid, payload=payload_dynamic)
+            else:
+                send_chat_message(user_id=uid, payload=payload_dynamic)
+    except:
+        log.error("User not found " + str(uid))
+
 
 def process_custom_message_sql_patient(message, patient_phonenos):
     engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
@@ -468,6 +565,28 @@ def process_health_plan_not_created(patient_list):
     else:
         log.info("Health plan created for all patients. Nothing to do. ")
     return patient_list
+
+
+def fcm_message_send(registration_ids, message, title):
+    payload = {
+        "registration_ids": registration_ids,
+        "data": {
+            "title": title,
+            "body": "",
+            "description": message
+        },
+        "priority": "high",
+        "sound": "default",
+        "notification": {
+            "title": title,
+            "body": message,
+            "sound": "default"
+        }
+
+    }
+
+    make_http_request(conn_id="http_google_fcm_url", method="POST",
+                      payload=payload)
 
 
 def patient_id_message_send(patient_id, message, action):
