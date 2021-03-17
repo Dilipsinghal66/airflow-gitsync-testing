@@ -25,7 +25,7 @@ def send_dyn_func():
         # print("created connection from engine")
 
         cursor.execute("select count(*) from zylaapi.patient_profile "
-                       "where status = 4 and new_chat = 1")
+                       "where new_chat = 1")
         totalcount = cursor.fetchone()[0]
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
@@ -33,7 +33,7 @@ def send_dyn_func():
         for i in range(numberofPage):
             patientIdSqlQuerry = "select id, countDidYouKnow from " \
                                  "zylaapi.patient_profile where " \
-                                 "status = 4  and new_chat = 1 LIMIT " + str(i * PAGE_SIZE) + \
+                                 "new_chat = 1 LIMIT " + str(i * PAGE_SIZE) + \
                                  ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
             patientIdList = []

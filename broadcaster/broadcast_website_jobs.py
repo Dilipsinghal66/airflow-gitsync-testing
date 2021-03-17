@@ -41,8 +41,7 @@ def broadcast_website():
 
             print(firebase_id_list)
 
-            firebase_id_list_str = ','.join(firebase_id_list)
-            fcm_message_send(firebase_id_list_str, message, title)
+            fcm_message_send(firebase_id_list, message, title)
 
     except Exception as e:
         print("Error Exception raised")
