@@ -21,7 +21,8 @@ def broadcast_website():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("SELECT count(*) FROM ZylaWebsite.notifications")
+        cursor.execute("select count(distinct(fire_base_uid)) from ZylaWebsite.notifications "
+                       "where fire_base_uid is not null")
         totalcount = cursor.fetchone()[0]
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
@@ -31,8 +32,8 @@ def broadcast_website():
         title = str(Variable.get("broadcast_website_title", ''))
 
         for i in range(numberofPage):
-            firebase_id_query = "SELECT fire_base_uid FROM ZylaWebsite.notifications LIMIT " \
-                                 + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
+            firebase_id_query = "select distinct(fire_base_uid) from ZylaWebsite.notifications where " \
+                                "fire_base_uid is not null LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
             cursor.execute(firebase_id_query)
             firebase_id_list = []
 
