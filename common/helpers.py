@@ -73,6 +73,22 @@ def getStatusString(status):
     return switcher.get(status, "Invalid Status")
 
 
+def get_az_status(status):
+    res = ""
+    if status == 0:
+        res = "No"
+        return res
+    elif status == 1:
+        res = "Yes"
+        return res
+    elif status == 2:
+        res = "Rejected"
+        return res
+    else:
+        res = status
+        return res
+
+
 def getLead(lead):
     result = ""
     if lead == "AZ":
@@ -100,6 +116,29 @@ def send_event_request(user_id, event, phone_no, countrycode, Lead):
         payload = {
             "userId": str(user_id),
             "event": eventString,
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString,
+            "traits": traits
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_zylawhatsapp_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
+
+def send_event_az_status_request(user_id, event, phone_no, countrycode):
+    try:
+        countrycodeString = "+" + str(countrycode)
+        endpoint = "user"
+        traits = {
+            "azVerificationStatus": get_az_status(event)
+        }
+        payload = {
+            "userId": str(user_id),
             "phoneNumber": str(phone_no),
             "countryCode": countrycodeString,
             "traits": traits
@@ -214,10 +253,15 @@ def get_medicine_details(patient_id):
                         med['eveningFrequency'] = 0
 
                     if med["ongoing"]:
-                        if med['morningFrequency'] != 0 or med['afternoonFrequency'] != 0 \
+                        if med['morningFrequency'] != 0 or med[
+                            'afternoonFrequency'] != 0 \
                                 or med['eveningFrequency'] != 0:
-                            medcine_msg = med['medicineCode']['label'] + "  ( " + str(med['morningFrequency']) + \
-                                          "-" + str(med['afternoonFrequency']) + "-" + str(med['eveningFrequency']) \
+                            medcine_msg = med['medicineCode'][
+                                              'label'] + "  ( " + str(
+                                med['morningFrequency']) + \
+                                          "-" + str(
+                                med['afternoonFrequency']) + "-" + str(
+                                med['eveningFrequency']) \
                                           + " )"
                             ret_value.append(medcine_msg)
 
@@ -390,10 +434,10 @@ def process_custom_message(user_id_list, message):
 
 
 def process_custom_message_user_id(uid, message, append_msg):
-
     query_endpoint = message
     query_status, query_data = make_http_request(conn_id="http_query_url",
-                                                 endpoint=query_endpoint, method="GET")
+                                                 endpoint=query_endpoint,
+                                                 method="GET")
 
     dyn_message = query_data["content"]["message"]["metadata"]["body"]
     log.info(dyn_message)
