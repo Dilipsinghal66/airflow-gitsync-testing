@@ -15,8 +15,11 @@ def broadcast_active_medicine():
     connection = engine.get_conn()
     cursor = connection.cursor()
 
-    sql_query = str(Variable.get("broadcast_active_medicine_sql_query", 'select id from zylaapi.patient_profile '
-                                                                        'where id = 69730'))
+    sql_query = str(Variable.get("broadcast_active_medicine_sql_query", 'SELECT id from zylaapi.patient_profile '
+                                                                        'where status = 4 and id in (select patient_id '
+                                                                        'from zylaapi.patient_status_audit where to_'
+                                                                        'status = 4 and '
+                                                                        'created_at < NOW() - INTERVAL 14 DAY)'))
     cursor.execute(sql_query)
 
     patient_id_list = []
