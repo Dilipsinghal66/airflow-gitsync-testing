@@ -70,7 +70,7 @@ def getStatusString(status):
         19: "WA_OTPgenerated",
         20: "WA_OnTrial14day"
     }
-    return switcher.get(status, "Invalid Status")
+    return switcher.get(status, str(status))
 
 
 def get_az_status(status):
