@@ -17,13 +17,14 @@ def broadcast_user_az_verified():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("SELECT p.patient_id,p.status,q.phoneno,q.countrycode "
+        cursor.execute("SELECT p.patient_id,p.status,p.comment,q.phoneno,"
+                       "q.countrycode "
                        "FROM zylaapi.prescription_verification as p INNER "
                        "JOIN zylaapi.patient_profile as q where p.patient_id "
                        "= q.id;")
 
         for row in cursor.fetchall():
-            send_event_az_status_request(row[0], row[1], row[2], row[3])
+            send_event_az_status_request(row[0], row[1], row[2], row[3], row[4])
 
     except Exception as e:
         print("Error Exception raised")
