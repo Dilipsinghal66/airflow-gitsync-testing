@@ -58,13 +58,12 @@ def broadcast_active_nps():
 
     phone_numbers = spreadsheet_data['Your phone number, please :)'].tolist()
     phone_numbers_str = ", ".join(phone_numbers)
+    query = 'select id from zylaapi.patient_profile where status = 4 AND new_chat=1 AND phoneno not in (' + \
+        phone_numbers_str + ')'
+
     print(phone_numbers)
+    print(query)
 
-    # sql_query = str(Variable.get("broadcast_active_nps_sql_query",
-    #                              '''
-
-    #                             '''))
-
-    # message = str(Variable.get("broadcast_active_nps_msg", ''))
-    # action = "dynamic_message"
-    # process_dynamic_task_sql(sql_query, message, action)
+    message = str(Variable.get("broadcast_active_nps_msg", ''))
+    action = "dynamic_message"
+    process_dynamic_task_sql(query, message, action)
