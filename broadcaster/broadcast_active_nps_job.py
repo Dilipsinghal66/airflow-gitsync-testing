@@ -61,8 +61,9 @@ def broadcast_active_nps():
     query = 'select id from zylaapi.patient_profile where status = 4 AND new_chat=1 AND phoneno not in (' + \
         phone_numbers_str + ')'
 
-    sql_query = str(Variable.get("broadcast_active_nps_sql_query", query))
+    print(phone_numbers)
+    print(query)
 
     message = str(Variable.get("broadcast_active_nps_msg", ''))
     action = "dynamic_message"
-    process_dynamic_task_sql(sql_query, message, action)
+    process_dynamic_task_sql(query, message, action)
