@@ -8,6 +8,13 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 log = LoggingMixin().log
 
 
+def clean_numbers(x):
+    x = x.replace(" ", "")
+    if x[0:1] == '0':
+        x = x[1:]
+    return x
+
+
 def broadcast_active_nps():
 
     process_broadcast_active = int(Variable.get("process_broadcast_nps_active",
@@ -46,7 +53,12 @@ def broadcast_active_nps():
             log.error(e, exc_info=True)
             raise e
 
-    print(spreadsheet_data)
+    spreadsheet_data['Your phone number, please :)'] = spreadsheet_data['Your phone number, please :)'].apply(
+        clean_numbers)
+
+    phone_numbers = spreadsheet_data['Your phone number, please :)'].tolist()
+    phone_numbers_str = ", ".join(phone_numbers)
+    print(phone_numbers)
 
     # sql_query = str(Variable.get("broadcast_active_nps_sql_query",
     #                              '''
