@@ -73,12 +73,15 @@ def getStatusString(status):
     return switcher.get(status, "Invalid Status")
 
 
-def get_az_status(status):
+def get_az_status(status, comment):
     res = ""
     if status == 0:
         res = "No"
         return res
     elif status == 1:
+        res = "Yes"
+        return res
+    elif status == 2 and comment == 1:
         res = "Yes"
         return res
     elif status == 2:
@@ -130,12 +133,13 @@ def send_event_request(user_id, event, phone_no, countrycode, Lead):
         raise ValueError(str(e))
 
 
-def send_event_az_status_request(user_id, event, phone_no, countrycode):
+def send_event_az_status_request(user_id, status, comment, phone_no,
+                                 countrycode):
     try:
         countrycodeString = "+" + str(countrycode)
         endpoint = "user"
         traits = {
-            "azVerificationStatus": get_az_status(event)
+            "azVerificationStatus": get_az_status(status, comment)
         }
         payload = {
             "userId": str(user_id),
