@@ -14,7 +14,7 @@ def clean_numbers(x):
         if x[0:1] == '0':
             x = x[1:]
     except Exception as e:
-        log.error(e)
+        return ""
     return x
 
 
