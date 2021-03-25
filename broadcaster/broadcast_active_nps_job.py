@@ -9,9 +9,12 @@ log = LoggingMixin().log
 
 
 def clean_numbers(x):
-    x = x.replace(" ", "")
-    if x[0:1] == '0':
-        x = x[1:]
+    try:
+        x = x.replace(" ", "")
+        if x[0:1] == '0':
+            x = x[1:]
+    except Exception as e:
+        log.error(e)
     return x
 
 
