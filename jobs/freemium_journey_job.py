@@ -109,8 +109,16 @@ def freemium_journey():
             pa_ans = get_pa_details(key)
             message = send_message_response(pa_ans, value)
             log.info("patient ID    " + key + "    day    " + value + "   message   " + message)
+            sql_query = "SELECT p.id from zylaapi.auth p INNER JOIN zylaapi.patient_profile q where q.phoneno " \
+                        "= p.phoneno and q.countrycode = p.countrycode and p.who = 'patient' and q.id = " + str(key)
+            cursor.execute(sql_query)
+            user_id = 0
+            for row in cursor.fetchall():
+                user_id = row[0]
             user_id_list = []
-            user_id_list.append(key)
-            #process_custom_message(user_id_list, value)
+            if user_id != 0:
+                user_id_list.append(user_id)
+                log.info(user_id_list)
+                #process_custom_message(user_id_list, value)
         except Exception as e:
             log.error(e)
