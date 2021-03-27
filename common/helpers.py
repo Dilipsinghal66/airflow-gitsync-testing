@@ -274,6 +274,22 @@ def get_medicine_details(patient_id):
     return ret_value
 
 
+def get_pa_details(patient_id):
+    ret_value = ""
+    try:
+        endpoint = str(patient_id) + "/all"
+
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_pa_service_url",
+                endpoint=endpoint, method="GET")
+            if body:
+                ret_value = body
+    except Exception as e:
+        log.error("Exception occuured for patient id " + str(patient_id))
+    return ret_value
+
+
 def process_dynamic_task_sql_no_az(sql_query, message, action):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
