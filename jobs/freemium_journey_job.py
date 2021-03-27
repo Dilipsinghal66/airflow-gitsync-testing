@@ -45,7 +45,6 @@ rules = {"days": [
 def response_func(pa_ans, id):
     ret_value = ""
     for res in pa_ans["questions"]:
-        print(res)
         if int(res["id"]) == int(id):
             ret_value = res
             break
@@ -54,13 +53,10 @@ def response_func(pa_ans, id):
 
 def get_answer(res, ans_id):
     ret_value = ""
-    print(ans_id)
     for ans in res["fields"]:
         if int(ans["id"]) == int(ans_id):
             ret_value = ans
             break
-    print("answer")
-    print(ret_value)
     return ret_value["text"]
 
 
