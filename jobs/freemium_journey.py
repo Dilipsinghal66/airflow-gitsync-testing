@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from jobs.freemium_journey_job import freemium_journey
 
-freemium_journey_cron = str(Variable.get("freemium_journey_cron", '0 45 21 * *'))
+freemium_journey_cron = str(Variable.get("freemium_journey_cron", '45 21 * * *'))
 
 freemium_journey_dag = DAG(
     dag_id="freemium_journey",
