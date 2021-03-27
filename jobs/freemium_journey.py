@@ -10,7 +10,7 @@ from jobs.freemium_journey_job import freemium_journey
 freemium_journey_cron = str(Variable.get("freemium_journey_cron", '0 45 21 * *'))
 
 freemium_journey_dag = DAG(
-    dag_id="freemium_journey_message",
+    dag_id="freemium_journey",
     default_args=default_args,
     schedule_interval=freemium_journey_cron,
     catchup=False,
