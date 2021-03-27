@@ -114,6 +114,6 @@ def freemium_journey():
             if user_id != 0:
                 user_id_list.append(user_id)
                 log.info(user_id_list)
-                #process_custom_message(user_id_list, value)
+                process_custom_message(user_id_list, str(value))
         except Exception as e:
             log.error(e)
