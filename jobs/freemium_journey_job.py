@@ -62,7 +62,7 @@ def get_answer(res, ans_id):
 
 def send_message_response(pa_ans, day):
     rule = rules["days"][day - 1]
-
+    log.info("send_message_response")
     if "question" in rule:
         question = rule["question"]
         question = response_func(pa_ans, question)
@@ -77,7 +77,6 @@ def send_message_response(pa_ans, day):
             ret_value = rule["No"]
     else:
         ret_value = rule["Default"]
-
     return ret_value
 
 
@@ -104,7 +103,7 @@ def freemium_journey():
         try:
             pa_ans = get_pa_details(key)
             message = send_message_response(pa_ans, value)
-            log.info("patient ID    " + key + "    day    " + value + "   message   " + message)
+            log.info("patient ID    " + str(key) + "    day    " + str(value) + "   message   " + str(message))
             sql_query = "SELECT p.id from zylaapi.auth p INNER JOIN zylaapi.patient_profile q where q.phoneno " \
                         "= p.phoneno and q.countrycode = p.countrycode and p.who = 'patient' and q.id = " + str(key)
             cursor.execute(sql_query)
