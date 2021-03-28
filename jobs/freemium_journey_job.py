@@ -59,6 +59,13 @@ def get_answer(res, ans_id):
             break
     return ret_value["text"]
 
+def get_answer_tag(res, ans_id):
+    ret_value = ""
+    for ans in res["fields"]:
+        if ans["tag"] == ans_id:
+            ret_value = ans
+            break
+    return ret_value["text"]
 
 def send_message_response(pa_ans, day):
     rule = rules["days"][day - 1]
@@ -66,12 +73,21 @@ def send_message_response(pa_ans, day):
     if "question" in rule:
         question = rule["question"]
         question = response_func(pa_ans, question)
+        answer = ""
         if question["id"] == 1:
             answer = get_answer(question, question["answer"])
         if question["id"] == 2:
             answer = get_answer(question, question["answer"][1])
+        if question["id"] == 7:
+            answer = get_answer_tag(question, question["answer"])
+        if question["id"] == 23:
+            answer = get_answer_tag(question, question["answer"])
+        if question["id"] == 24:
+            answer = get_answer_tag(question, question["answer"])
 
-        if rule["answer"].lower() == answer.lower():
+        if answer == "":
+            ret_value = rule["Default"]
+        elif rule["answer"].lower() == answer.lower():
             ret_value = rule["Default"]
         else:
             ret_value = rule["No"]
