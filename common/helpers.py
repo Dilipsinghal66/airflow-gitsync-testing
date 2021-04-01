@@ -181,28 +181,13 @@ def send_user_os_detail_request(user_id, phone_no, os,
         raise ValueError(str(e))
 
 
-def get_userid_by_pid(pid):
-    try:
-        endpoint = str(pid)
-        log.info(endpoint)
-        if enable_message:
-            status, body = make_http_request(
-                conn_id="http_user_patientid_url",
-                endpoint=endpoint, method="GET")
-            log.info(status)
-            if body:
-                return body['userId']
-    except Exception as e:
-        raise ValueError(str(e))
-
-
 def get_user_os_detail(user_id):
     try:
         endpoint = str(user_id)+"/latest"
         log.info(endpoint)
         if enable_message:
             status, body = make_http_request(
-                conn_id="http_user_os_detail_url",
+                conn_id="http_device_url",
                 endpoint=endpoint, method="GET")
             log.info(status)
             if body:

@@ -1,7 +1,6 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import get_user_os_detail
-from common.helpers import get_userid_by_pid
 from common.helpers import send_user_os_detail_request
 
 
@@ -23,8 +22,15 @@ def broadcast_user_device_detail():
                        "From zylaapi.patient_profile;")
 
         for row in cursor.fetchall():
-            uid = get_userid_by_pid(row[0])
-            os = get_user_os_detail(uid)
+            sql_query = "SELECT p.id from zylaapi.auth p INNER JOIN " \
+                        "zylaapi.patient_profile q where q.phoneno " \
+                        "= p.phoneno and q.countrycode = p.countrycode and " \
+                        "p.who = 'patient' and q.id = " + row[0]
+            cursor.execute(sql_query)
+            user_id = 0
+            for row in cursor.fetchall():
+                user_id = row[0]
+            os = get_user_os_detail(user_id)
             send_user_os_detail_request(row[0], row[1], os, row[2])
 
     except Exception as e:
