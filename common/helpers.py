@@ -198,7 +198,7 @@ def get_userid_by_pid(pid):
 
 def get_user_os_detail(user_id):
     try:
-        endpoint = "user"
+        endpoint = str(user_id)+"/latest"
         log.info(endpoint)
         if enable_message:
             status, body = make_http_request(
