@@ -18,20 +18,15 @@ def broadcast_user_device_detail():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("SELECT p.patient_id,p.phoneno,p.countrycode "
-                       "From zylaapi.patient_profile;")
+        cursor.execute("SELECT p.id,q.id,q.countrycode , q.phoneno from "
+                       "zylaapi.auth p INNER JOIN zylaapi.patient_profile q "
+                       "where q.phoneno = p.phoneno and q.countrycode = "
+                       "p.countrycode and p.who = 'patient';")
 
         for row in cursor.fetchall():
-            sql_query = "SELECT p.id from zylaapi.auth p INNER JOIN " \
-                        "zylaapi.patient_profile q where q.phoneno " \
-                        "= p.phoneno and q.countrycode = p.countrycode and " \
-                        "p.who = 'patient' and q.id = " + row[0]
-            cursor.execute(sql_query)
-            user_id = 0
-            for row in cursor.fetchall():
-                user_id = row[0]
-            os = get_user_os_detail(user_id)
-            send_user_os_detail_request(row[0], row[1], os, row[2])
+
+            os = get_user_os_detail(row[0])
+            send_user_os_detail_request(row[1], row[3], os, row[2])
 
     except Exception as e:
         print("Error Exception raised")
