@@ -157,6 +157,46 @@ def send_event_az_status_request(user_id, status, comment, phone_no,
         raise ValueError(str(e))
 
 
+def send_user_os_detail_request(user_id, phone_no, os,
+                                countrycode):
+    try:
+        countrycodeString = "+" + str(countrycode)
+        endpoint = "user"
+        traits = {
+            "OS": os
+        }
+        payload = {
+            "userId": str(user_id),
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString,
+            "traits": traits
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_zylawhatsapp_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
+
+def get_user_os_detail(user_id):
+    try:
+        endpoint = str(user_id)+"/latest"
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_device_url",
+                endpoint=endpoint, method="GET")
+            log.info(status)
+            if body:
+                return body['device']
+
+    except Exception as e:
+        raise ValueError(str(e))
+
+
 def send_event_request_event_name(user_id, eventString, phone_no, countrycode):
     try:
         countrycodeString = "+" + str(countrycode)
