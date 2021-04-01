@@ -183,13 +183,15 @@ def send_user_os_detail_request(user_id, phone_no, os,
 
 def get_user_os_detail(user_id):
     try:
-        endpoint = str(user_id)+"/latest"
+        endpoint = str(user_id) + "/latest"
         log.info(endpoint)
         if enable_message:
             status, body = make_http_request(
                 conn_id="http_device_url",
                 endpoint=endpoint, method="GET")
             log.info(status)
+            if status != 200:
+                return "unknown"
             if body:
                 return body['device']
 
