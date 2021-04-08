@@ -1,6 +1,6 @@
 from airflow.models import Variable
 
-from common.helpers import process_dynamic_task_sql
+from common.helpers import process_custom_message_sql
 
 
 def broadcast_active_without_doccode():
@@ -11,10 +11,9 @@ def broadcast_active_without_doccode():
         return
 
     sql_query = str(Variable.get("broadcast_active_sql_query",
-                                 'select id from '
-                                 'zylaapi.patient_profile '
-                                 'where status = 4 AND new_chat=1 and referred_by in (0, 138602, 20)'))
+                                 'select id from zylaapi.auth where phoneno in (select phoneno from '
+                                 'zylaapi.patient_profile where status = 4 AND new_chat=1 and referred_by '
+                                 'in (0, 138602, 20)) and who = \'patient\''))
 
     message = str(Variable.get("broadcast_active_without_doccode_msg", ''))
-    action = "dynamic_message"
-    process_dynamic_task_sql(sql_query, message, action)
+    process_custom_message_sql(sql_query, message)
