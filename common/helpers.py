@@ -397,13 +397,21 @@ def process_custom_message_sql(sql_query, message):
             user_id_list.append(user_id)
 
     log.info(user_id_list)
-    query_endpoint = message
-    query_status, query_data = make_http_request(conn_id="http_query_url",
-                                                 endpoint=query_endpoint,
-                                                 method="GET")
+    not_story = True
+    dyn_message = ""
 
-    dyn_message = query_data["content"]["message"]["metadata"]["body"]
-    log.info(dyn_message)
+    if str(message).find("stories") != -1:
+        not_story = False
+
+    if not_story:
+        query_endpoint = message
+        query_status, query_data = make_http_request(conn_id="http_query_url",
+                                                     endpoint=query_endpoint,
+                                                     method="GET")
+
+        dyn_message = query_data["content"]["message"]["metadata"]["body"]
+        log.info(dyn_message)
+
     payload_dynamic = {
         "action": "dynamic_message",
         "message": dyn_message,
@@ -427,18 +435,22 @@ def process_custom_message_sql(sql_query, message):
                     if int(ver[1]) >= 1 and int(ver[2]) >= 6:
                         send_chat_message(user_id=uid, payload=payload_custom)
                     else:
-                        send_chat_message(user_id=uid, payload=payload_dynamic)
+                        if not_story:
+                            send_chat_message(user_id=uid, payload=payload_dynamic)
                 else:
-                    send_chat_message(user_id=uid, payload=payload_dynamic)
+                    if not_story:
+                        send_chat_message(user_id=uid, payload=payload_dynamic)
             else:
                 ver = str(data["appVersion"]).split(".")
                 if len(ver) == 3:
                     if int(ver[2]) >= 5:
                         send_chat_message(user_id=uid, payload=payload_custom)
                     else:
-                        send_chat_message(user_id=uid, payload=payload_dynamic)
+                        if not_story:
+                            send_chat_message(user_id=uid, payload=payload_dynamic)
                 else:
-                    send_chat_message(user_id=uid, payload=payload_dynamic)
+                    if not_story:
+                        send_chat_message(user_id=uid, payload=payload_dynamic)
         except:
             log.error("User not found " + str(uid))
 
