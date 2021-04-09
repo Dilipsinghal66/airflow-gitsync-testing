@@ -400,7 +400,7 @@ def process_custom_message_sql(sql_query, message):
     not_story = True
     dyn_message = ""
 
-    if str(message).find("stories") != -1:
+    if str(message).find("story") != -1:
         not_story = False
 
     if not_story:
