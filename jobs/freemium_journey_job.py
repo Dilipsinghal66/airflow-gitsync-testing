@@ -10,7 +10,7 @@ rules = {"days": [
     {"day": 1, "question": 1, "answer": "Diabetes" , "Default": 6771041317325500416, "No": 6771038651551707136},
     {"day": 2, "Default": 6771045771680542720},
     {"day": 3, "question": 1, "answer": "Blood pressure" , "Default": 6771042703534583808, "No": 6771043383425617920},
-    {"day": 4, "Default": 6771044794772615168},
+    {"day": 4, "Default": 6779666888106569728},
     {"day": 5, "question": 7, "answer": "High uric acid", "Default": 6771049551725719552, "No": 6771048371847135232},
     {"day": 6, "Default": 6771049959506202624},
     {"day": 7, "question": 1, "answer": "Kidney health", "Default": 6771053924802088960, "No": 6771053519570857984},
