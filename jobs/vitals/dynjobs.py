@@ -82,7 +82,6 @@ def send_dyn_func():
                         "All DYN Ids are sent We need to reset this patient Id " + str(  # noqa E303
                             key))
             connection.commit()
-            engine.close()
     except Exception as e:
         print("Error Exception raised")
         print(e)
