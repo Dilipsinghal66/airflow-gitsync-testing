@@ -30,7 +30,7 @@ def send_dyn_func():
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         # print(numberofPage)
-        engine1.close()
+        connection1.close()
         for i in range(numberofPage):
             engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
             # print("got db connection from environment")
