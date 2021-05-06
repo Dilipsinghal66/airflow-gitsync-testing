@@ -63,15 +63,14 @@ def get_common_name(icds):
         # print("got the connection no looking for cursor")
         cursor = connection.cursor()
         # print("got the cursor")
-        cc =list()
         icd_string=""
         for x in icds:
             icd_string += "'"+x+"'"+","
         icd_string=icd_string[:-1]
         cursor.execute("SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + icd_string+ ")")
         data=cursor.fetchall()
-        for i in range(len(data)) :
-            # data=list(row)
+        cc = [None]*len(data)
+        for i in range(len(data)):
             print(data[i])
             if data[i][1] is None:
                 cc[i]=data[i][0]
