@@ -223,12 +223,14 @@ def send_chat_message_patient_id(patient_id=None, payload=None):
     try:
         endpoint = "users/patients/" + str(
             round(patient_id)) + "/message"
+        print(endpoint)
         log.info(endpoint)
         if enable_message:
             status, body = make_http_request(
                 conn_id="http_chat_service_url",
                 endpoint=endpoint, method="POST", payload=payload)
             log.info(status)
+            print(status)
     except Exception as e:
         raise ValueError(str(e))
 
