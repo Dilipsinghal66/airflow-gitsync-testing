@@ -32,6 +32,7 @@ def broadcast_cc_algo():
                     "action": "dynamic_message",
                     "message": msg
                 }
+                print(payload_dynamic)
                 send_chat_message_patient_id(row[0],payload_dynamic)
     except Exception as e:
         print("Error Exception raised")
@@ -89,4 +90,5 @@ def form_msg(salutation,surname,cc):
     msg = "Dear "+salut+" "+surname+" - The doctors would like to know how you are doing on the below health issues, please let me know which are better and which are same as before:"
     for c in cc:
             msg +="<br>"+"&#x25cf;"+" "+c
+    print(msg)
     return msg
