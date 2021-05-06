@@ -74,10 +74,13 @@ def get_common_name(icds):
         print(query)
         for row in cursor.fetchall():
             print(row)
-            if not row[1]:
-                cc.append(row[0])
+            data =[]
+            data= row.split(",")
+            print(data)
+            if not data[1]:
+                cc.append(data[0])
             else:
-                cc.append(row[1])
+                cc.append(data[1])
         return cc
     except Exception as e:
         print("Error Exception raised")
