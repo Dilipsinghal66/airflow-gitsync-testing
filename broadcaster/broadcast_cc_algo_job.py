@@ -57,7 +57,7 @@ def latest_cc(patient_id ):
 
 def get_common_name(icds):
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+        engine = get_data_from_db(db_type="mysql", conn_id="mysql_datatable")
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
