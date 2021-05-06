@@ -70,6 +70,8 @@ def get_common_name(icds):
         icd_string=icd_string[:-1]
         print(icd_string)
         cursor.execute("SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + icd_string+ ")")
+        query="SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + icd_string+ ")"
+        print(query)
         for row in cursor.fetchall():
             if not row[1]:
                 cc.append(row[0])
