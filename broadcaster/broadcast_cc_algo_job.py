@@ -68,19 +68,17 @@ def get_common_name(icds):
         for x in icds:
             icd_string += "'"+x+"'"+","
         icd_string=icd_string[:-1]
-        print(icd_string)
         cursor.execute("SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + icd_string+ ")")
-        query="SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + icd_string+ ")"
-        print(query)
         for row in cursor.fetchall():
             print(row)
-            data =[]
-            data= row.split(",")
-            print(data)
-            if not data[1]:
-                cc.append(data[0])
+            print(row[0])
+            print(row.common_terms)
+            print(row[1])
+            print(row[2])
+            if not row[1]:
+                cc.append(row[0])
             else:
-                cc.append(data[1])
+                cc.append(row[1])
         return cc
     except Exception as e:
         print("Error Exception raised")
