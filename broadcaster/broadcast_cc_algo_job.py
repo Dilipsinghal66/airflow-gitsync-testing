@@ -64,6 +64,8 @@ def get_common_name(icds):
         cursor = connection.cursor()
         # print("got the cursor")
         cc =[]
+        query="SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + ','.join(str(x) for x in icds) + ")"
+        print(query)
         cursor.execute("SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + ','.join(str(x) for x in icds) + ")")
         for row in cursor.fetchall():
             if not row[1]:
