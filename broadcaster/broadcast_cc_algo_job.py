@@ -48,8 +48,8 @@ def latest_cc(patient_id ):
                 icds.append(q['complaint'])
         return icds
     except Exception as e:
-        log.info("Error Exception raised")
-        log.info(e)
+        print("Error Exception raised")
+        print(e)
 
 
 def get_common_name(icds):
