@@ -47,7 +47,7 @@ def latest_cc(patient_id ):
         icds =[]
         print(results)
         for q in results[0]['chiefComplaints']:
-            if q['ongoing']==true:
+            if q['ongoing']:
                 icds.append(q['complaint'])
         return icds
     except Exception as e:
