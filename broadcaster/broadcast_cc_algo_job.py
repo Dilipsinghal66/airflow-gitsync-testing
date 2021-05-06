@@ -68,14 +68,12 @@ def get_common_name(icds):
             icd_string += "'"+x+"'"+","
         icd_string=icd_string[:-1]
         cursor.execute("SELECT disease_chief_complaint,common_terms,icd_code FROM datatable.icds where icd_code IN  (" + icd_string+ ")")
-        data=cursor.fetchall()
-        cc = [None]*len(data)
-        for i in range(len(data)):
-            print(data[i])
-            if data[i][1] is None:
-                cc[i]=data[i][0]
+        cc = []
+        for row in cursor.fetchall():
+            if row[1] is None:
+                cc.append(row[0])
             else:
-                cc[i]=data[i][1]
+                cc.append(row[1])
         return cc
     except Exception as e:
         print("Error Exception raised")
@@ -90,5 +88,5 @@ def form_msg(salutation,surname,cc):
 
     msg = "Dear "+salut+" "+surname+" - The doctors would like to know how you are doing on the below health issues, please let me know which are better and which are same as before:"
     for c in cc:
-        msg.append("<br>"+"&#x25cf;"+" "+c)
+            msg +="<br>"+"&#x25cf;"+" "+c
     return msg
