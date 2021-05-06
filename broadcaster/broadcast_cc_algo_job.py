@@ -43,10 +43,10 @@ def latest_cc(patient_id ):
         collection = mongo_conn.get_database(
             "tracking").get_collection("cc_tracking")
 
-        results = collection.find_one({"patientId": patient_id},{"_id":0,"chiefComplaints.ongoing":1,"chiefComplaints.complaint":1}).sort("dateCreated",-1).limit(1)
+        results = collection.find({"patientId": patient_id},{"_id":0,"chiefComplaints.ongoing":1,"chiefComplaints.complaint":1}).sort("dateCreated",-1).limit(1)
         icds =[]
         print(results)
-        for q in results['chiefComplaints']:
+        for q in results[0]['chiefComplaints']:
             if q['ongoing']==true:
                 icds.append(q['complaint'])
         return icds
