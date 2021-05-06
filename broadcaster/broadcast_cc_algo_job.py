@@ -1,7 +1,9 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import send_chat_message_patient_id
-
+from airflow.contrib.hooks.mongo_hook import MongoHook
+from pymongo.collection import Collection
+from pymongo.cursor import Cursor
 
 def broadcast_cc_algo():
     process_broadcast_cc_algo = int(
