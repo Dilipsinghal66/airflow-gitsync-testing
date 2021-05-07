@@ -19,7 +19,7 @@ def broadcast_cc_algo():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where id in (1652, 69730,48990, 67282)")
+        cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where id in (1774. 71519, 1652, 69730, 92161)")
 
         for row in cursor.fetchall():
             icds=latest_cc(row[0])
@@ -82,9 +82,9 @@ def get_common_name(icds):
 def form_msg(salutation,surname,cc):
     salut = ''
     if salutation==1:
-        salut="Mr"
-    elif salutation==2:
         salut="Ms"
+    elif salutation==2:
+        salut="Mr"
 
     msg = "Dear "+salut+" "+surname+" - The doctors would like to know how you are doing on the below health issues, please let me know which are better and which are same as before:"
     for c in cc:
