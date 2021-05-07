@@ -88,5 +88,5 @@ def form_msg(salutation,surname,cc):
 
     msg = "Dear "+salut+" "+surname+" - The doctors would like to know how you are doing on the below health issues, please let me know which are better and which are same as before:"
     for c in cc:
-            msg +="<br>"+"&#x25cf;"+" "+c
+            msg +="<br>"+"•"+" "+c
     return msg
