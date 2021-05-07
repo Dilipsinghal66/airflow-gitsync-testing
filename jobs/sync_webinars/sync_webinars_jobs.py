@@ -11,27 +11,27 @@ from common.pyjson import PyJSON
 log = LoggingMixin().log
 
 
-def schema_validation(validator_obj, spreadsheet_row):
-    """
-    Validation of record to be inserted in database
-    :param validator_obj: Validator object
-    :param spreadsheet_row: A record from the spreadsheet
-    :return: bool
-    """
-    log.debug("Record: " + str(spreadsheet_row))
-    record = {'row': spreadsheet_row}
+# def schema_validation(validator_obj, spreadsheet_row):
+#     """
+#     Validation of record to be inserted in database
+#     :param validator_obj: Validator object
+#     :param spreadsheet_row: A record from the spreadsheet
+#     :return: bool
+#     """
+#     log.debug("Record: " + str(spreadsheet_row))
+#     record = {'row': spreadsheet_row}
 
-    validation_result = validator_obj.validate(record)
+#     validation_result = validator_obj.validate(record)
 
-    if not validation_result:
-        log.warning(validator_obj.errors)
-        list_of_errors = validator_obj.errors.get('row')[0]
-        list_of_keys = list_of_errors.keys()
+#     if not validation_result:
+#         log.warning(validator_obj.errors)
+#         list_of_errors = validator_obj.errors.get('row')[0]
+#         list_of_keys = list_of_errors.keys()
 
-        for param in list_of_keys:
-            spreadsheet_row[param] = list_of_errors.get(param)[0]
+#         for param in list_of_keys:
+#             spreadsheet_row[param] = list_of_errors.get(param)[0]
 
-    return validation_result, spreadsheet_row
+#     return validation_result, spreadsheet_row
 
 
 def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
@@ -56,69 +56,62 @@ def dump_data_in_db(table_name, spreadsheet_data, engine, schema,
     failed_doctor_codes_list = []
 
     schema = schema.to_dict()
-    validator_obj = Validator(schema)
+    # validator_obj = Validator(schema)
     spreadsheet_list = spreadsheet_data.values.tolist()
-
     for row in range(len(spreadsheet_list)):
+        row_list.append(spreadsheet_list[row])
 
-        validation_result, spreadsheet_list[row] = schema_validation(
-            validator_obj=validator_obj,
-            spreadsheet_row=spreadsheet_list[row])
+    # for row in range(len(spreadsheet_list)):
 
-        if validation_result:
+    #     validation_result, spreadsheet_list[row] = schema_validation(
+    #         validator_obj=validator_obj,
+    #         spreadsheet_row=spreadsheet_list[row])
 
-            log.debug("Validation successful for record " + str(row))
-            if len(spreadsheet_list[row]) == len(target_fields):
-                row_list.append(spreadsheet_list[row])
+    #     if validation_result:
 
-        else:
-            warning_message = "Validation failed for record " + str(row)
-            log.warning(warning_message)
-            failed_doctor_codes_list.append(spreadsheet_list[row])
+    #         log.debug("Validation successful for record " + str(row))
+    #         if len(spreadsheet_list[row]) == len(target_fields):
+    #             row_list.append(spreadsheet_list[row])
+
+    #     else:
+    #         warning_message = "Validation failed for record " + str(row)
+    #         log.warning(warning_message)
+    #         failed_doctor_codes_list.append(spreadsheet_list[row])
 
     try:
-        log.debug("Fields being replaced are as follows: ")
-        log.debug(target_fields)
-        log.debug("Number of fields: " + str(len(target_fields)))
-        log.debug("Number of records: " + str(len(row_list)))
+        # log.debug("Fields being replaced are as follows: ")
+        # log.debug(target_fields)
+        # log.debug("Number of fields: " + str(len(target_fields)))
+        # log.debug("Number of records: " + str(len(row_list)))
 
-        if row_list:
+        # if row_list:
 
-            if defaults.print_valid_rows:
-                for i in range(len(row_list)):
-                    row_data_str = row_list[i]
-                    log.info(str(i) + " " + str(row_data_str))
+        #     if defaults.print_valid_rows:
+        #         for i in range(len(row_list)):
+        #             row_data_str = row_list[i]
+        #             log.info(str(i) + " " + str(row_data_str))
 
-            log.debug("Number of fields in a record: " + str(len(row_list[0])))
+        #     log.debug("Number of fields in a record: " + str(len(row_list[0])))
 
-            for i in range(len(row_list)):
-                for j in range(len(row_list[i])):
-                    if type(row_list[i][j]) == 'str':
-                        row_list[i][j] = row_list[i][j].encode('latin-1')
+        #     for i in range(len(row_list)):
+        #         for j in range(len(row_list[i])):
+        #             if type(row_list[i][j]) == 'str':
+        #                 row_list[i][j] = row_list[i][j].encode('latin-1')
 
-            if defaults.print_valid_rows:
-                for i in range(len(row_list)):
-                    row_data_str = row_list[i]
-                    log.debug(str(i) + " " + str(row_data_str))
-
-            engine.upsert_rows(table=table_name,
-                               rows=row_list,
-                               target_fields=target_fields,
-                               commit_every=1,
-                               unique_fields=unique_fields
-                               )
-            log.info("Data successfully updated in mysql database")
-
-            if failed_doctor_codes_list:
-                failed_doctor_codes_list = pd.DataFrame(
-                    data=failed_doctor_codes_list,
-                    columns=spreadsheet_data.columns)
-
-                return failed_doctor_codes_list
-
-        else:
-            warning_message = "No data updated in mysql database"
-            log.warning(warning_message)
+        #     if defaults.print_valid_rows:
+        #         for i in range(len(row_list)):
+        #             row_data_str = row_list[i]
+        #             log.debug(str(i) + " " + str(row_data_str))
+        print("Row List", row_list)
+        print("Target Fields", target_fields)
+        print("Unique Fields", unique_fields)
+        engine.upsert_rows(table=table_name,
+                           rows=row_list,
+                           target_fields=target_fields,
+                           commit_every=1,
+                           unique_fields=unique_fields
+                           )
+        log.info("Data successfully updated in mysql database")
 
     except Exception as e:
         warning_message = "Failed to update data in mysql database"
