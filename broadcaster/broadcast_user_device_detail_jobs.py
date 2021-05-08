@@ -24,7 +24,6 @@ def broadcast_user_device_detail():
                        "p.countrycode and p.who = 'patient';")
 
         for row in cursor.fetchall():
-
             os = get_user_os_detail(row[0])
             send_user_os_detail_request(row[1], row[3], os, row[2])
 
