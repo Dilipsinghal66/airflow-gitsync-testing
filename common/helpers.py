@@ -182,7 +182,6 @@ def send_user_os_detail_request(user_id, phone_no, os,
 
 
 def get_user_os_detail(user_id):
-    try:
         endpoint = str(user_id) + "/latest"
         log.info(endpoint)
         if enable_message:
@@ -194,10 +193,6 @@ def get_user_os_detail(user_id):
                 return "unknown"
             if body:
                 return body['device']
-
-    except Exception as e:
-        raise ValueError(str(e))
-
 
 def send_event_request_event_name(user_id, eventString, phone_no, countrycode):
     try:
