@@ -132,7 +132,7 @@ def send_vital_reminder_func():
                 #except Exception as e:
                 #    print("Error Exception raised")
                 #    print(e)
-            elif key in custom_patient_id_dict:
+            if key in custom_patient_id_dict:
                 message_to_send = pre_message + custom_patient_id_dict[key]
                 action = "vitals_reminder_6_am"
                 log.info("patient_id " + str(key))
