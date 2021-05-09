@@ -124,7 +124,7 @@ def send_vital_reminder_func():
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
                 #try:
-                #    patient_id_message_send(key, param_grp_id_dict[value], action)
+                #    patient_id_message_send(key, message_to_send, action)
                 #except Exception as e:
                 #    print("Error Exception raised")
                 #    print(e)
@@ -134,7 +134,7 @@ def send_vital_reminder_func():
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
                 #try:
-                #    patient_id_message_send(key, param_grp_id_dict[value], action)
+                #    patient_id_message_send(key, message_to_send, action)
                 #except Exception as e:
                 #    print("Error Exception raised")
                 #    print(e)
