@@ -113,7 +113,7 @@ def send_vital_reminder_func():
 
             custom_patient_id_dict[patient_id] = message
 
-        log.info("Got custom patient dict")
+        log.info("Got custom patient dict" + str(custom_patient_id_dict))
 
         pre_message = str(Variable.get("vital_reminder_message", "Recommended vitals to test today: \n"))
         for key, value in patient_id_dict.items():
