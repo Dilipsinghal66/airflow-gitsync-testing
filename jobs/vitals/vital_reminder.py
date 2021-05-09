@@ -89,7 +89,7 @@ def send_vital_reminder_func():
         sql_query = 'SELECT distinct patient_id FROM vitals.vital_readings where for_date = ' + str(d1)
         cursor.execute(sql_query)
         custom_patient_id_list = []
-        custom_patient_id_dict = []
+        custom_patient_id_dict = {}
         for row in cursor.fetchall():
             custom_patient_id_list.append(row[0])
 
