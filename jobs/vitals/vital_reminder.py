@@ -118,9 +118,10 @@ def send_vital_reminder_func():
         pre_message = str(Variable.get("vital_reminder_message", "Recommended vitals to test today: \n"))
         for key, value in patient_id_dict.items():
 
+            log.info("patient id " + str(key))
             if value in param_grp_id_dict:
                 if key in custom_patient_id_dict:
-                    message_to_send = pre_message + param_grp_id_dict[value] + custom_patient_id_dict[patient_id]
+                    message_to_send = pre_message + param_grp_id_dict[value] + custom_patient_id_dict[key]
                 else:
                     message_to_send = pre_message + param_grp_id_dict[value]
                 action = "vitals_reminder_6_am"
@@ -132,7 +133,7 @@ def send_vital_reminder_func():
                 #    print("Error Exception raised")
                 #    print(e)
             elif key in custom_patient_id_dict:
-                message_to_send = pre_message + custom_patient_id_dict[patient_id]
+                message_to_send = pre_message + custom_patient_id_dict[key]
                 action = "vitals_reminder_6_am"
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
