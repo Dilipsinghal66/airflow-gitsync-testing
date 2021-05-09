@@ -84,6 +84,7 @@ def send_vital_reminder_func():
 
                 param_grp_id_dict[param_grp_id] = message
 
+        log.info("Got param_grp_id_dict")
 
         sql_query = 'SELECT distinct patient_id FROM vitals.vital_readings where for_date = ' + str(d1)
         cursor.execute(sql_query)
@@ -111,6 +112,8 @@ def send_vital_reminder_func():
                         message = message + name + "\n"
 
             custom_patient_id_dict[patient_id] = message
+
+        log.info("Got custom patient dict")
 
         pre_message = str(Variable.get("vital_reminder_message", "Recommended vitals to test today: \n"))
         for key, value in patient_id_dict.items():
