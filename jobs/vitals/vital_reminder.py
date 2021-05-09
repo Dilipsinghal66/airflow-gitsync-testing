@@ -49,7 +49,7 @@ def send_vital_reminder_func():
         if day == 7:
             day = 0
 
-        log.info("Day is  " + day)
+        log.info("Day is  " + str(day))
 
         sql_query = 'select distinct param_group_rule_id from zylaapi.patient_profile'
         cursor.execute(sql_query)
