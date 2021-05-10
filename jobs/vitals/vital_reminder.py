@@ -28,7 +28,7 @@ def send_vital_reminder_func():
         patient_id_dict = {}
         for row in cursor.fetchall():
             patient_id_list.append(row[0])
-            patient_id_dict[str(row[0])] = str(row[1])
+            patient_id_dict[row[0]] = row[1]
 
         sql_query = 'SELECT week FROM vitals.week_switches where param_group_rule_id = 1'
         cursor.execute(sql_query)
@@ -116,17 +116,6 @@ def send_vital_reminder_func():
         log.info("Got custom patient dict" + str(custom_patient_id_dict))
 
         pre_message = str(Variable.get("vital_reminder_message", "Recommended vitals to test today: \n"))
-
-        for key, value in custom_patient_id_dict.items():
-            message_to_send = pre_message + custom_patient_id_dict[key]
-            action = "vitals_reminder_6_am"
-            log.info("patient_id " + str(key))
-            log.info("Message " + message_to_send)
-            try:
-                patient_id_message_send(key, message_to_send, action)
-            except Exception as e:
-                print("Error Exception raised")
-                print(e)
 
         for key, value in patient_id_dict.items():
 
