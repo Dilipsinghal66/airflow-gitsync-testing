@@ -125,24 +125,24 @@ def send_vital_reminder_func():
                     message_to_send = pre_message + param_grp_id_dict[value] + custom_patient_id_dict[key]
                 else:
                     message_to_send = pre_message + param_grp_id_dict[value]
-                #action = "vitals_reminder_6_am"
+                action = "vitals_reminder_6_am"
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
-                #try:
-                #    patient_id_message_send(key, message_to_send, action)
-                #except Exception as e:
-                #    print("Error Exception raised")
-                #    print(e)
+                try:
+                    patient_id_message_send(key, message_to_send, action)
+                except Exception as e:
+                    print("Error Exception raised")
+                    print(e)
             if key in custom_patient_id_dict:
                 message_to_send = pre_message + custom_patient_id_dict[key]
-                #action = "vitals_reminder_6_am"
+                action = "vitals_reminder_6_am"
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
-                #try:
-                #    patient_id_message_send(key, message_to_send, action)
-                #except Exception as e:
-                #    print("Error Exception raised")
-                #    print(e)
+                try:
+                    patient_id_message_send(key, message_to_send, action)
+                except Exception as e:
+                    print("Error Exception raised")
+                    print(e)
 
     except Exception as e:
         print("Error Exception raised")
