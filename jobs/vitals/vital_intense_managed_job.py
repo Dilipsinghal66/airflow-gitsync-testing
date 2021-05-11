@@ -45,12 +45,12 @@ def vital_intense_managed():
                 patient_id_list_for_intense.append(patient_id)
 
         sql_query = 'select zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
-                    '(' ','.join(str(x) for x in patient_id_list_for_managed) + ')'
+                    '(' + ','.join(str(x) for x in patient_id_list_for_managed) + ')'
         #cursor.execute(sql_query)
         log.info("Update query" + sql_query)
 
         sql_query = 'select zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
-                    '(' ','.join(str(x) for x in patient_id_list_for_intense) + ')'
+                    '(' + ','.join(str(x) for x in patient_id_list_for_intense) + ')'
         #cursor.execute(sql_query)
         log.info("Update query" + sql_query)
 
