@@ -28,7 +28,7 @@ def vital_intense_managed():
         for row in cursor.fetchall():
             if row[2] > 5:
                 avg = row[1]//row[2]
-                log.info("Avg is  " + avg)
+                log.info("Avg is  " + str(avg))
                 if 70 <= avg <= 140:
                     patient_id_list_for_managed.append(row[0])
 
