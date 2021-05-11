@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from jobs.vitals.vital_intense_managed_job import vital_intense_managed
 
-vital_intense_managed_cron = str(Variable.get("vital_intense_managed_cron", '0 04 * * *'))
+vital_intense_managed_cron = str(Variable.get("vital_intense_managed_cron", '0 23 * * *'))
 
 vital_intense_managed_dag = DAG(
     dag_id="vital_intense_managed",
