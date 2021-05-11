@@ -50,13 +50,13 @@ def vital_intense_managed():
                 patient_id_list_for_managed_switch.append(patient_id)
 
         if patient_id_list_for_managed:
-            sql_query = 'select zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
+            sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
                         '(' + ','.join(str(x) for x in patient_id_list_for_managed_switch) + ')'
             cursor.execute(sql_query)
             log.info("Update query" + sql_query)
 
         if patient_id_list_for_intense:
-            sql_query = 'select zylaapi.patient_profile set param_group_rule_id = 1 where id in ' \
+            sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 1 where id in ' \
                         '(' + ','.join(str(x) for x in patient_id_list_for_intense) + ')'
             cursor.execute(sql_query)
             log.info("Update query" + sql_query)
