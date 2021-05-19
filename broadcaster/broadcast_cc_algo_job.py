@@ -71,6 +71,9 @@ def get_common_name(icds):
         cc = []
         for row in cursor.fetchall():
             if row[1] is None:
+                x = row[0].replace(", unspecified", "")
+                y = x.replace(" unspecified", "")
+                z = y.replace("unspecified ", "")
                 cc.append(row[0])
             else:
                 cc.append(row[1])
@@ -88,5 +91,5 @@ def form_msg(salutation,surname,cc):
 
     msg = "Dear "+salut+" "+surname+" - The doctors would like to know how you are doing on the below health issues, please let me know which are better and which are same as before: "
     for c in cc:
-            msg +="<br>"+"⬤"+" "+c+" "
+        msg +="<br>"+"⬤"+" "+c+" "
     return msg
