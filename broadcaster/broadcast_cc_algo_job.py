@@ -32,7 +32,11 @@ def broadcast_cc_algo():
                     "action": "dynamic_message",
                     "message": msg
                 }
-                send_chat_message_patient_id(row[0],payload_dynamic)
+                try:
+                    send_chat_message_patient_id(row[0],payload_dynamic)
+                except Exception as e:
+                    print(e)
+                    print("Patient row[0] might not be on new chat")
     except Exception as e:
         print("Error Exception raised")
         print(e)
