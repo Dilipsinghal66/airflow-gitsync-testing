@@ -74,7 +74,7 @@ def get_common_name(icds):
                 x = row[0].replace(", unspecified", "")
                 y = x.replace(" unspecified", "")
                 z = y.replace("unspecified ", "")
-                cc.append(row[0])
+                cc.append(z)
             else:
                 cc.append(row[1])
         return cc
