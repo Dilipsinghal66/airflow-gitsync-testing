@@ -33,7 +33,7 @@ def vital_intense_managed():
         for patient_id in patient_id_distinct:
             sql_query = 'SELECT value FROM vitals.vital_readings where created_at >= NOW() - INTERVAL 21 DAY  ' \
                         'and param_id in (5, 25, 27, 58, 66, 67) and TRIM(value) is not null  and ' \
-                        'TRIM(value) <> \'\' and patient_id = 58315 order by created_at desc LIMIT 5'
+                        'TRIM(value) <> \'\' and patient_id = ' + str(patient_id) + ' order by created_at desc LIMIT 5'
             no_0f_rows = cursor.execute(sql_query)
             if no_0f_rows == 5:
                 sum = 0
