@@ -62,8 +62,8 @@ def vital_intense_managed():
             if patient_id not in patient_id_list_on_managed:
                 patient_id_list_for_managed_switch.append(patient_id)
 
-        log.info("patient_id_list_for_managed " + patient_id_list_for_managed)
-        log.info("patient_id_list_for_managed " + patient_id_list_for_intense)
+        log.info("patient_id_list_for_managed " + str(patient_id_list_for_managed))
+        log.info("patient_id_list_for_managed " + str(patient_id_list_for_intense))
         """
         if patient_id_list_for_managed:
             sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
