@@ -35,10 +35,11 @@ def vital_intense_managed():
                         'and param_id in (5, 25, 27, 58, 66, 67) and TRIM(value) is not null  and ' \
                         'TRIM(value) <> \'\' and patient_id = ' + str(patient_id) + ' order by created_at desc LIMIT 5'
             no_0f_rows = cursor.execute(sql_query)
+            log.info("no_0f_rows is  " + str(no_0f_rows))
             if no_0f_rows == 5:
                 sum = 0
                 for row in cursor.fetchall():
-                    sum = sum + row[0]
+                    sum = sum + int(row[0])
                 avg = sum//5
                 log.info("Avg is  " + str(avg))
                 if 70 <= avg <= 140:
