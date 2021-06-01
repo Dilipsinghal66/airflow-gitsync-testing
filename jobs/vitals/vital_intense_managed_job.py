@@ -39,7 +39,7 @@ def vital_intense_managed():
             if no_0f_rows == 5:
                 sum = 0
                 for row in cursor.fetchall():
-                    sum = sum + int(row[0])
+                    sum = sum + int(float(row[0]))
                 avg = sum//5
                 log.info("Avg is  " + str(avg))
                 if 70 <= avg <= 140:
