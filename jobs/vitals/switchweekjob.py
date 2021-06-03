@@ -11,46 +11,18 @@ log = LoggingMixin().log
 
 defVitalGroups = Variable.get("default_vital_groups", deserialize_json=True)
 
-def switch_week_func(**kwargs):
+def switch_week_func(id,week):
     try:
-        disable_vital_create = int(Variable.get("disable_vital_create", '0'))
-        if not disable_vital_create:
-            date = datetime.datetime.today()
-            timedelta = datetime.timedelta(hours=5, minutes=30)
-            todayDate = date + timedelta
-
-            vital_switch_flag = str(Variable.get("vital_switch_flag", ''))
-
-            if not vital_switch_flag:
-                vital_switch_flag = 'X,' + str(todayDate)
-                log.info("Didn't get return value so today's date")
-
-            log.info("vital_switch_flag = " + vital_switch_flag)
-            switchArr = vital_switch_flag.split(",")
-            switch = switchArr[0]
-            dateTimeStr = switchArr[1]
-            dateTimeObj = datetime.datetime.strptime(dateTimeStr,
-                                                     '%Y-%m-%d %H:%M:%S.%f')
-
-            weekday = todayDate.weekday()
-            switchDaysDiff = (todayDate - dateTimeObj).days
-
-            log.info("switch days diff " + str(switchDaysDiff))
-            if weekday == 5 and switchDaysDiff >= 4:
-                if switch == 'A':
-                    switch = 'B'
-                elif switch == 'B':
-                    switch = 'C'
-                elif switch == 'C':
-                    switch = 'D'
-                elif switch == 'D':
-                    switch = 'A'
-                else:
-                    switch = 'A'
-                vital_switch_flag = str(switch) + ',' + str(todayDate)
-                log.info("switch the recommendation" + vital_switch_flag)
-            log.info("After Switch" + switch)
-            Variable.set(key="vital_switch_flag", value=vital_switch_flag)
+            if week == 'A':
+                switch = 'B'
+            elif week == 'B':
+                switch = 'C'
+            elif week == 'C':
+                switch = 'D'
+            elif week == 'D':
+                switch = 'A'
+            else:
+                switch = 'A'
             # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
             # print("starting create vitals job")
             engine = get_data_from_db(db_type="mysql",
@@ -60,10 +32,28 @@ def switch_week_func(**kwargs):
             # print("got the connection no looking for cursor")
             cursor = connection.cursor()
             # print("got the cursor")
-            updateweeksqlquery = "UPDATE vital.week_switches set week= '" + switch + "' where id=1"
+            updateweeksqlquery = "UPDATE vital.week_switches set week= '" + switch + "' where id="+ id
             cursor.execute(updateweeksqlquery)
             connection.commit()
     except Exception as e:
         log.error(e)
         raise e
+
+def week_switch():
+    try:
+        engine = get_data_from_db(db_type="mysql", conn_id="vital_db")
+        # print("got db connection from environment")
+        connection = engine.get_conn()
+        # print("got the connection no looking for cursor")
+        cursor = connection.cursor()
+        # print("got the cursor")
+
+        cursor.execute("SELECT id,week FROM vital.week_switches")
+
+        for row in cursor.fetchall():
+            switch_week_func(row[0],row[1])
+
+    except Exception as e:
+        print("Error Exception raised")
+        print(e)
 

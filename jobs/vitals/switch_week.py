@@ -5,9 +5,9 @@ from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
 from config import local_tz, default_args
-from jobs.vitals.switchweekjob import switch_week_func
+from jobs.vitals.switchweekjob import get_week_switch
 
-create_vital_interval = str(Variable.get("create_vital_interval", '0 * * * *'))
+create_vital_interval = str(Variable.get("create_vital_interval", '0 0 * * SUN'))
 
 switch_week_dag = DAG(
     dag_id="switch_week_dag",
@@ -22,7 +22,7 @@ switch_week_dag = DAG(
 switch_week_task = PythonOperator(
     task_id="switch_week",
     task_concurrency=1,
-    python_callable=switch_week_func,
+    python_callable=week_switch,
     dag=switch_week_dag,
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True,
