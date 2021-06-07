@@ -40,6 +40,10 @@ def switch_week_func(id,week):
         raise e
 
 def week_switch():
+    process_broadcast_remind_webinar = int(
+        Variable.get("process_broadcast_remind_webinar", '0'))
+    if process_broadcast_remind_webinar == 1:
+        return
     try:
         engine = get_data_from_db(db_type="mysql", conn_id="vital_db")
         # print("got db connection from environment")
