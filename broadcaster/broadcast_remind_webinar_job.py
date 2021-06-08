@@ -10,7 +10,7 @@ def broadcast_remind_webinar():
         return
 
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="webinar")
+        engine = get_data_from_db(db_type="mysql", conn_id="webinar_prod")
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
@@ -28,7 +28,7 @@ def broadcast_remind_webinar():
 
 def send_msg_by_webinar_id(webinar_id):
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
+        engine = get_data_from_db(db_type="mysql", conn_id="webinar_prod")
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
