@@ -1,6 +1,7 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import send_event_request
+from common.helpers import send_user_primary_therapy_request
 
 
 def broadcast_newuser_whatsapp():
@@ -25,7 +26,16 @@ def broadcast_newuser_whatsapp():
 
         for row in cursor.fetchall():
             send_event_request(row[0], row[1], row[3], row[4], row[5])
-
+            if row[1]==11:
+                try:
+                    query_endpoint = "/" + str(row[0]) + "/primary"
+                    query_status, query_data = make_http_request(conn_id="http_pa_url",
+                                                                 endpoint=query_endpoint, method="GET")
+                    log.info("Primary therapy" + query_data["answer"] + "  patient Id   " + str(row[0]))
+                    send_user_primary_therapy_request(row[0],row[3],query_data["answer"],row[4])
+                except:
+                    send_user_primary_therapy_request(row[0],row[3],'0',row[4])
+                    log.info("error for patient Id " + str(row[0]))
     except Exception as e:
         print("Error Exception raised")
         print(e)

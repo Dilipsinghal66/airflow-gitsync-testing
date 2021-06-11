@@ -180,6 +180,29 @@ def send_user_os_detail_request(user_id, phone_no, os,
     except Exception as e:
         raise ValueError(str(e))
 
+def send_user_primary_therapy_request(user_id, phone_no, therapy,
+                                countrycode):
+    try:
+        countrycodeString = "+" + str(countrycode)
+        endpoint = "user"
+        traits = {
+            "primaryTherapy": therapy
+        }
+        payload = {
+            "userId": str(user_id),
+            "phoneNumber": str(phone_no),
+            "countryCode": countrycodeString,
+            "traits": traits
+        }
+        log.info(endpoint)
+        if enable_message:
+            status, body = make_http_request(
+                conn_id="http_zylawhatsapp_service_url",
+                endpoint=endpoint, method="POST", payload=payload)
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
 
 def get_user_os_detail(user_id):
     try:
