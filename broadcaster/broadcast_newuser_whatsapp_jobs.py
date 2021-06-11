@@ -35,7 +35,7 @@ def broadcast_newuser_whatsapp():
                     send_user_primary_therapy_request(row[0],row[3],query_data["answer"],row[4])
                 except:
                     send_user_primary_therapy_request(row[0],row[3],'0',row[4])
-                    log.error("error for patient Id " + str(row[0]))
+                    log.info("error for patient Id " + str(row[0]))
     except Exception as e:
         print("Error Exception raised")
         print(e)
