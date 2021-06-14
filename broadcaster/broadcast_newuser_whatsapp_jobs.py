@@ -30,6 +30,7 @@ def broadcast_newuser_whatsapp():
 
         for row in cursor.fetchall():
             send_event_request(row[0], row[1], row[3], row[4], row[5])
+            log.info(row[1])
             if row[1]==11:
                 try:
                     query_endpoint = "/" + str(row[0]) + "/primary"
