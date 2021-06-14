@@ -20,8 +20,9 @@ def get_patient_ids():
         log.info("Checkpoint 1")
         results = collection.find({"planid": 59})
         patientIds = []
+        log.info("Checkpoint 1.5")
         for q in results:
-            patientIds.append(q['patientId'])
+            patientIds.append(q['patientid'])
 
         log.info("Checkpoint 2")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
