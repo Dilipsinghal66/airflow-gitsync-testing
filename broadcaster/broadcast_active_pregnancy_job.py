@@ -22,7 +22,6 @@ def get_patient_ids():
         for q in results:
             patientIds.append(q['patientId'])
 
-        log.info(patientIds)
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
