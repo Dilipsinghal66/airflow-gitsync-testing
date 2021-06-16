@@ -17,14 +17,12 @@ def get_patient_ids():
         collection = mongo_conn.get_database(
             "plan-service").get_collection("plan_assignments")
         #plan_ids = [59]
-        log.info("Checkpoint 1")
+
         results = collection.find({"planid": 59})
         patientIds = []
-        log.info("Checkpoint 1.5")
+
         for q in results:
             patientIds.append(q['patientid'])
-
-        log.info("Checkpoint 2")
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
@@ -55,7 +53,7 @@ def broadcast_active_pregnancy():
     for patient_id in patientIds:
         if message:
             try:
-                #patient_id_message_send(patient_id, message, "dynamic_message")
+                patient_id_message_send(patient_id, message, "dynamic_message")
                 log.info(str(patient_id))
             except Exception as e:
                 log.info("Error Exception raised")
