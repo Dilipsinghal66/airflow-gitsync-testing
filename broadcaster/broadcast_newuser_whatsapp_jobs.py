@@ -22,7 +22,7 @@ def broadcast_newuser_whatsapp():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("Select id,status,created_at,countrycode,"
+        cursor.execute("Select id,status,created_at,phoneno,countrycode,"
                        "client_code from "
                        "zylaapi.patient_profile where status != 4 and "
                        "TIMESTAMPDIFF(minute,updated_at,NOW()) between 15 and "
