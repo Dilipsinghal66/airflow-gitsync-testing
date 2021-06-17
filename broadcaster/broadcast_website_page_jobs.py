@@ -34,7 +34,7 @@ def broadcast_website_page():
         page_id = str(Variable.get("broadcast_website_page_id", ''))
 
         for i in range(numberofPage):
-            firebase_id_query = "select distinct(fire_base_uid), zn.uuid, landing_page_id from (select distinct(fire_base_uid), uuid from ZylaWebsite.notifications) zn left join ZylaWebsite.user_landing_page_details lp on  zn.uuid = lp.uuid where fire_base_uid != '' and landing_page_id=" + page_id + " and"\
+            firebase_id_query = "select distinct(fire_base_uid), zn.uuid, landing_page_id from (select distinct(fire_base_uid), uuid from ZylaWebsite.notifications) zn left join ZylaWebsite.user_landing_page_details lp on  zn.uuid = lp.uuid where fire_base_uid != '' and landing_page_id=" + page_id + " and "\
                                 "fire_base_uid is not null LIMIT " + \
                 str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
             cursor.execute(firebase_id_query)
