@@ -51,7 +51,7 @@ def send_dyn_func():
 
             for key, value in patientIdDict.items():
                 informationCardSqlQuery = "select id from " \
-                                          "zylaapi.information_cards where " \
+                                          "dyn_cards.dyn_cards where " \
                                           "status = 4 and id > " + \
                                           str(value) + " order by id LIMIT 1"
                 # print(informationCardSqlQuery)

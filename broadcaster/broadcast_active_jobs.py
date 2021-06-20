@@ -10,7 +10,8 @@ def broadcast_active():
     if process_broadcast_active == 1:
         return
 
-    sql_query = str(Variable.get("broadcast_active_sql_query", 'select id from zylaapi.auth where phoneno in (select '
+    sql_query = str(Variable.get("broadcast_active_sql_query", 'select id from zylaapi.auth where who = \'patient\' '
+                                                               'and phoneno in (select '
                                                                'phoneno from zylaapi.patient_profile where status = 4 '
                                                                'AND new_chat = 1)'))
 

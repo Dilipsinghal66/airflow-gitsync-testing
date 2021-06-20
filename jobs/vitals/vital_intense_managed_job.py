@@ -19,18 +19,29 @@ def vital_intense_managed():
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
-        sql_query = 'SELECT patient_id, sum(value), count(*) FROM vitals.vital_readings where created_at >= ' \
-                    'NOW() - INTERVAL 21 DAY and param_id in (5, 25, 27, 58, 66, 67) group by patient_id'
+
+        sql_query = 'SELECT DISTINCT  patient_id FROM vitals.vital_readings where created_at >= ' \
+                    'NOW() - INTERVAL 21 DAY and param_id in (5, 25, 27, 58, 66, 67)'
         cursor.execute(sql_query)
+        patient_id_distinct = []
+
+        for row in cursor.fetchall():
+            patient_id_distinct.append(row[0])
 
         patient_id_list_for_managed = []
 
-        for row in cursor.fetchall():
-            if row[2] > 5:
-                avg = row[1]//row[2]
-                log.info("Avg is  " + str(avg))
+        for patient_id in patient_id_distinct:
+            sql_query = 'SELECT value FROM vitals.vital_readings where created_at >= NOW() - INTERVAL 21 DAY  ' \
+                        'and param_id in (5, 25, 27, 58, 66, 67) and TRIM(value) is not null  and ' \
+                        'TRIM(value) <> \'\' and patient_id = ' + str(patient_id) + ' order by created_at desc LIMIT 5'
+            no_0f_rows = cursor.execute(sql_query)
+            if no_0f_rows == 5:
+                sum = 0
+                for row in cursor.fetchall():
+                    sum = sum + int(float(row[0]))
+                avg = sum//5
                 if 70 <= avg <= 140:
-                    patient_id_list_for_managed.append(row[0])
+                    patient_id_list_for_managed.append(patient_id)
 
         sql_query = 'select id from zylaapi.patient_profile where param_group_rule_id = 2'
         cursor.execute(sql_query)
@@ -48,6 +59,9 @@ def vital_intense_managed():
         for patient_id in patient_id_list_for_managed:
             if patient_id not in patient_id_list_on_managed:
                 patient_id_list_for_managed_switch.append(patient_id)
+
+        log.info("patient_id_list_for_managed " + str(patient_id_list_for_managed))
+        log.info("patient_id_list_for_managed " + str(patient_id_list_for_intense))
 
         if patient_id_list_for_managed:
             sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
@@ -83,7 +97,6 @@ def vital_intense_managed():
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
-
     except Exception as e:
         print("Error Exception raised")
         print(e)
