@@ -70,7 +70,7 @@ def get_pregnancy_week(pid,icds):
                 if q['diagnosis']==i['icd']:
                     week=i['week']
                     log.info(week)
-                    d=dateutil.parser.isoparse(body['dateCreated'])
+                    d=dateutil.parser.isoparse(body[0]['dateCreated'])
                     log.info(d)
                     days = abs(datetime.datetime.now().date()-d.date()).days
                     log.info(days)
