@@ -29,6 +29,7 @@ def vital_intense_managed():
             patient_id_distinct.append(row[0])
 
         patient_id_list_for_managed = []
+        patient_id_list_dont_change = []
 
         for patient_id in patient_id_distinct:
             sql_query = 'SELECT value FROM vitals.vital_readings where created_at >= NOW() - INTERVAL 21 DAY  ' \
@@ -42,6 +43,8 @@ def vital_intense_managed():
                 avg = sum//5
                 if 70 <= avg <= 140:
                     patient_id_list_for_managed.append(patient_id)
+            else:
+                patient_id_list_dont_change(patient_id)
 
         sql_query = 'select id from zylaapi.patient_profile where param_group_rule_id = 2'
         cursor.execute(sql_query)
@@ -52,7 +55,7 @@ def vital_intense_managed():
 
         patient_id_list_for_intense = []
         for patient_id in patient_id_list_on_managed:
-            if patient_id not in patient_id_list_for_managed:
+            if patient_id not in patient_id_list_for_managed or patient_id not in patient_id_list_dont_change:
                 patient_id_list_for_intense.append(patient_id)
 
         patient_id_list_for_managed_switch = []
