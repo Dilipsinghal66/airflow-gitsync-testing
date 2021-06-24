@@ -5,7 +5,7 @@ from common.helpers import fcm_message_send
 
 log = LoggingMixin().log
 
-PAGE_SIZE = 5000
+PAGE_SIZE = 900
 
 def broadcast_website():
     process_broadcast_website = int(
