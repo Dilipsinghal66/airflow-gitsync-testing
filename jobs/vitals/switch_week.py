@@ -18,13 +18,12 @@ switch_week_dag = DAG(
                         microsecond=0, tzinfo=local_tz),
     dagrun_timeout=timedelta(minutes=1),
 )
-
 switch_week_task = PythonOperator(
-    task_id="switch_week",
+task_id="switch_week",
     task_concurrency=1,
     python_callable=week_switch,
     dag=switch_week_dag,
+    op_kwargs={},
     pool="scheduled_jobs_pool",
-    retry_exponential_backoff=True,
-    provide_context=True
+    retry_exponential_backoff=True
 )
