@@ -59,7 +59,7 @@ def get_pregnancy_week(pid,icds):
         log.info(type(pid))
         pid_str = str(pid)
         log.info(type(pid_str))
-        endpoint = "/dh/" + pid_str + "/latest"
+        endpoint = "/" + pid_str + "/latest"
         log.info(endpoint)
         status, body = make_http_request(
             conn_id="http_tracking_url",
