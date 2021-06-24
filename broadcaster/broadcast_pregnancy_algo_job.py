@@ -66,8 +66,6 @@ def get_pregnancy_week(pid,icds):
         log.info(status)
         for q in body['diagnosisHistory']:
             for i in icds:
-                log.info(i['icd'])
-                log.info(q['diagnosis'])
                 if q['diagnosis']==i['icd']:
                     week=i['week']
                     log.info(week)
