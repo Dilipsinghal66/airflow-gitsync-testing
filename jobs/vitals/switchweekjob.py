@@ -5,11 +5,9 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 
 from common.db_functions import get_data_from_db
 
-PAGE_SIZE = 1000
 
 log = LoggingMixin().log
 
-defVitalGroups = Variable.get("default_vital_groups", deserialize_json=True)
 
 def switch_week_func(id,week):
     try:
