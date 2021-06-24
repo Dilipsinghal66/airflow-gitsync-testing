@@ -59,20 +59,20 @@ def get_pregnancy_icds(connection):
 
 def get_pregnancy_week(pid,icds):
     try:
-        query_endpoint = "/"+ str(pid) + "/latest"
+        query_endpoint = "/"+ str(pid) + "?pageNo=1&pageSize=1"
         log.info(query_endpoint)
         status, body = make_http_request(
             conn_id="http_tracking_url",
             endpoint=query_endpoint, method="GET")
         log.info(status)
-        for q in body['diagnosisHistory']:
+        for q in body[0]['diagnosisHistory']:
             for i in icds:
                 if q['diagnosis']==i['icd']:
                     week=i['week']
                     log.info(week)
                     d=dateutil.parser.isoparse(body['dateCreated'])
                     log.info(d)
-                    days = abs(datetime.datetime.now().date()-d).days
+                    days = abs(datetime.datetime.now().date()-d.date()).days
                     log.info(days)
                     final_week=week+(days/7)
                     log.info(final_week)
