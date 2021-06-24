@@ -66,14 +66,12 @@ def get_pregnancy_week(pid,icds):
         log.info(status)
         for q in body['diagnosisHistory']:
             for i in icds:
-                log.info(i['icd'])
-                log.info(q['diagnosis'])
                 if q['diagnosis']==i['icd']:
                     week=i['week']
                     log.info(week)
                     d=dateutil.parser.isoparse(body['dateCreated'])
                     log.info(d)
-                    days = abs(date.today()-d).days
+                    days = abs(datetime.now().date()-d).days
                     log.info(days)
                     final_week=week+(days/7)
                     log.info(final_week)
