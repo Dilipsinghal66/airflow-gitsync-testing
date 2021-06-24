@@ -42,11 +42,9 @@ def get_pregnancy_icds(connection):
         cursor = connection.cursor()
 
         cursor.execute("SELECT * FROM assessment.pregnancy_icds")
-        icds={}
         result=[]
         for row in cursor.fetchall():
-            icds['icd']=row[0]
-            icds['week']=row[1]
+            icds = {'icd': row[0], 'week': row[1]}
             result.append(icds)
         log.info(result)
         return result
