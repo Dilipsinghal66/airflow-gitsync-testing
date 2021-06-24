@@ -3,6 +3,7 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import send_chat_message_patient_id
 from datetime import date
+from common.http_functions import make_http_request
 from airflow.utils.log.logging_mixin import LoggingMixin
 import dateutil.parser
 
