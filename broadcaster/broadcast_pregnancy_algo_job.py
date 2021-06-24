@@ -48,6 +48,7 @@ def get_pregnancy_icds(connection):
             icds['icd']=row[0]
             icds['week']=row[1]
             result.append(icds)
+        log.info(result)
         return result
     except Exception as e:
         print("Error Exception raised")
