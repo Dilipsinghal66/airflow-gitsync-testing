@@ -72,7 +72,7 @@ def get_pregnancy_week(pid,icds):
                     log.info(week)
                     d=dateutil.parser.isoparse(body['dateCreated'])
                     log.info(d)
-                    days = abs(datetime.datetime.now().date()-d).days
+                    days = abs(datetime.datetime.now().date()-d.date()).days
                     log.info(days)
                     final_week=week+(days/7)
                     log.info(final_week)
