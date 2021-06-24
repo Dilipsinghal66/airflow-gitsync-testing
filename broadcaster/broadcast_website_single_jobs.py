@@ -15,7 +15,7 @@ def broadcast_website_single():
     try:
         message = str(Variable.get("broadcast_website_single_msg", ''))
         title = str(Variable.get("broadcast_website_single_title", ''))
-        firebase_id = str(Variable.get("broadcast_website_single_id"), '')
+        firebase_id = str(Variable.get("broadcast_website_single_id", ''))
 
         firebase_id_list = []
         firebase_id_list.append(firebase_id)
