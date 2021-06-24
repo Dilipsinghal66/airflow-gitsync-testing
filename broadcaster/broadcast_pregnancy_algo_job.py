@@ -3,8 +3,10 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import send_chat_message_patient_id
 from datetime import date
+from airflow.utils.log.logging_mixin import LoggingMixin
 import dateutil.parser
 
+log = LoggingMixin().log
 
 
 def broadcast_send_pregnancy_card():
