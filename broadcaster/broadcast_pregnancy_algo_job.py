@@ -14,7 +14,7 @@ def broadcast_send_pregnancy_card():
         return
 
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="webinar_prod")
+        engine = get_data_from_db(db_type="mysql", conn_id="assesment_prod")
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
