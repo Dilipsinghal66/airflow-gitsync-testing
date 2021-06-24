@@ -28,8 +28,11 @@ def broadcast_send_pregnancy_card():
         cursor.execute("SELECT user_id FROM assessment.multi_therapy_answers where question_id=1 and answer='9'")
 
         for row in cursor.fetchall():
-            week=get_pregnancy_week(row[0],icd_week_mapping)
-            log.info(week)
+            try:
+                week=get_pregnancy_week(row[0],icd_week_mapping)
+                log.info(week)
+            except Exception as e:
+                print(e)
             # if week!=0:
                 # get_week_msg(connection,week)
 
@@ -77,7 +80,9 @@ def get_pregnancy_week(pid,icds):
                     return final_week
         return 0
     except Exception as e:
+        log.info(e)
         log.info("unable to get dh for pid "+pid)
+        return 0
 
 # def get_week_msg(conn,week):
 #     try:
