@@ -32,7 +32,7 @@ def week_switch():
     if switch_week_flag == 1:
         return
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="vital_db")
+        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
@@ -41,10 +41,9 @@ def week_switch():
 
         cursor.execute("SELECT id, week FROM vital.week_switches")
 
-        switch = 'A'
         for row in cursor.fetchall():
             switch = switch_week_func(row[1])
-            updateweeksqlquery = "UPDATE vitals.week_switches set week= '" + str(switch) + "' where id = " + str(row[0])
+            updateweeksqlquery = "UPDATE vitals.week_switches set week = '" + str(switch) + "' where id = " + str(row[0])
             cursor.execute(updateweeksqlquery)
 
 
