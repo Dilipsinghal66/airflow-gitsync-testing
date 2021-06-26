@@ -9,51 +9,44 @@ from common.db_functions import get_data_from_db
 log = LoggingMixin().log
 
 
-def switch_week_func(id,week):
-    try:
-            if week == 'A':
-                switch = 'B'
-            elif week == 'B':
-                switch = 'C'
-            elif week == 'C':
-                switch = 'D'
-            elif week == 'D':
-                switch = 'A'
-            else:
-                switch = 'A'
-            # engine = create_engine('mysql+pymysql://user:user@123@localhost/zylaapi')  # noqa E303
-            # print("starting create vitals job")
-            engine = get_data_from_db(db_type="mysql",
-                                      conn_id="vital_db")
-            # print("got db connection from environment")
-            connection = engine.get_conn()
-            # print("got the connection no looking for cursor")
-            cursor = connection.cursor()
-            # print("got the cursor")
-            updateweeksqlquery = "UPDATE vital.week_switches set week= '" + switch + "' where id="+ id
-            cursor.execute(updateweeksqlquery)
-            connection.commit()
-    except Exception as e:
-        log.error(e)
-        raise e
+def switch_week_func(week):
+
+    if week == 'A':
+        switch = 'B'
+    elif week == 'B':
+        switch = 'C'
+    elif week == 'C':
+        switch = 'D'
+    elif week == 'D':
+        switch = 'A'
+    else:
+        switch = 'A'
+
+    return switch
+
 
 def week_switch():
-    process_broadcast_remind_webinar = int(
-        Variable.get("process_broadcast_remind_webinar", '0'))
-    if process_broadcast_remind_webinar == 1:
+    switch_week_flag = int(
+        Variable.get("switch_week_flag", '0'))
+    if switch_week_flag == 1:
         return
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="vital_db")
+        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("SELECT id,week FROM vital.week_switches")
+        cursor.execute("SELECT id, week FROM vital.week_switches")
 
         for row in cursor.fetchall():
-            switch_week_func(row[0],row[1])
+            switch = switch_week_func(row[1])
+            updateweeksqlquery = "UPDATE vitals.week_switches set week = '" + str(switch) + "' where id = " + str(row[0])
+            cursor.execute(updateweeksqlquery)
+
+
+        connection.commit()
 
     except Exception as e:
         print("Error Exception raised")
