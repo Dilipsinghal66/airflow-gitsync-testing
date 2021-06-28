@@ -45,10 +45,9 @@ def week_switch():
             switch = switch_week_func(row[1])
             updateweeksqlquery = "UPDATE vitals.week_switches set week = '" + str(switch) + "' where id = " + str(row[0])
             log.info(updateweeksqlquery)
-            #cursor.execute(updateweeksqlquery)
+            cursor.execute(updateweeksqlquery)
 
-
-        #connection.commit()
+        connection.commit()
 
     except Exception as e:
         print("Error Exception raised")
