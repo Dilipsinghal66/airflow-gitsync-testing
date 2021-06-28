@@ -58,7 +58,7 @@ def send_msg(patient_id,msg_id):
             print("Patient "+str(patient_id)+" might not be on new chat")
     except Exception as e:
         print(e)
-        print("Patient "+patient_id+" might not be on new chat")
+        print("Patient "+str(patient_id)+" might not be on new chat")
 
 def get_week_msg(connection,week):
     try:
