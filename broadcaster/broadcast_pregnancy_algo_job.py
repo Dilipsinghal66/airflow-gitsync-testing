@@ -25,12 +25,13 @@ def broadcast_send_pregnancy_card():
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
+        msg_id=get_week_msg(connection,process_broadcast_pregnancy_card_week_count)
+
         cursor = connection.cursor()
         # print("got the cursor")
 
         cursor.execute("SELECT user_id FROM assessment.multi_therapy_answers where question_id=1 and answer='9'")
 
-        msg_id=get_week_msg(connection,process_broadcast_pregnancy_card_week_count)
         for row in cursor.fetchall():
             try:
                 log.info(row[0])
