@@ -65,6 +65,7 @@ def get_week_msg(connection,week):
         log.info(type(week))
         cursor.execute("SELECT msg_id FROM assessment.therapy_msg_mapping where week = "+week)
         for row in cursor.fetchall():
+            log.info("msg id "+row[0])
             return row[0]
 
     except Exception as e:
