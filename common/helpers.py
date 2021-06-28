@@ -180,8 +180,9 @@ def send_user_os_detail_request(user_id, phone_no, os,
     except Exception as e:
         raise ValueError(str(e))
 
+
 def send_user_primary_therapy_request(user_id, phone_no, therapy,
-                                countrycode):
+                                      countrycode):
     try:
         countrycodeString = "+" + str(countrycode)
         endpoint = "user"
@@ -326,12 +327,12 @@ def get_medicine_details(patient_id):
                             'afternoonFrequency'] != 0 \
                                 or med['eveningFrequency'] != 0:
                             medcine_msg = med['medicineCode'][
-                                              'label'] + "  ( " + str(
+                                'label'] + "  ( " + str(
                                 med['morningFrequency']) + \
-                                          "-" + str(
+                                "-" + str(
                                 med['afternoonFrequency']) + "-" + str(
                                 med['eveningFrequency']) \
-                                          + " )"
+                                + " )"
                             ret_value.append(medcine_msg)
 
     except Exception as e:
@@ -459,7 +460,8 @@ def process_custom_message_sql(sql_query, message):
                         send_chat_message(user_id=uid, payload=payload_custom)
                     else:
                         if not_story:
-                            send_chat_message(user_id=uid, payload=payload_dynamic)
+                            send_chat_message(
+                                user_id=uid, payload=payload_dynamic)
                 else:
                     if not_story:
                         send_chat_message(user_id=uid, payload=payload_dynamic)
@@ -470,7 +472,8 @@ def process_custom_message_sql(sql_query, message):
                         send_chat_message(user_id=uid, payload=payload_custom)
                     else:
                         if not_story:
-                            send_chat_message(user_id=uid, payload=payload_dynamic)
+                            send_chat_message(
+                                user_id=uid, payload=payload_dynamic)
                 else:
                     if not_story:
                         send_chat_message(user_id=uid, payload=payload_dynamic)
@@ -722,7 +725,7 @@ def fcm_message_send(registration_ids, message, title):
             "title": title,
             "body": message,
             "sound": "default",
-            "click_action": "https://zyla.in/full-body-test-health-checkup"
+            "click_action": "https://zyla.in/full-body-test-health-checkup?utm_source=Website_25/06_2&utm2=Website"
         }
 
     }
