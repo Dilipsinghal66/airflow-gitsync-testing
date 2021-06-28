@@ -38,7 +38,7 @@ def week_switch():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("SELECT id, week FROM vital.week_switches")
+        cursor.execute("SELECT id, week FROM vitals.week_switches")
 
         for row in cursor.fetchall():
             switch = switch_week_func(row[1])
