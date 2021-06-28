@@ -16,8 +16,11 @@ def broadcast_send_pregnancy_card():
         Variable.get("process_broadcast_send_pregnancy_card", '0'))
     if process_broadcast_send_pregnancy_card == 1:
         return
+    process_broadcast_pregnancy_card_week_count = int(
+        Variable.get("process_broadcast_pregnancy_card_week_count", '0'))
 
     try:
+        log.info(process_broadcast_pregnancy_card_week_count)
         engine = get_data_from_db(db_type="mysql", conn_id="assesment_prod")
         # print("got db connection from environment")
         connection = engine.get_conn()
@@ -28,71 +31,42 @@ def broadcast_send_pregnancy_card():
 
         cursor.execute("SELECT user_id FROM assessment.multi_therapy_answers where question_id=1 and answer='9'")
 
+        msg_id=get_week_msg(connection,process_broadcast_pregnancy_card_week_count)
         for row in cursor.fetchall():
             try:
-                week=get_pregnancy_week(row[0],icd_week_mapping)
+                send_msg(row[0], msg_id)
                 log.info(week)
             except Exception as e:
                 print(e)
-            # if week!=0:
-                # get_week_msg(connection,week)
-
+        next_week = (process_broadcast_pregnancy_card_week_count+1)%43
+        log.info(next_week)
+        Variable.set("process_broadcast_pregnancy_card_week_count", next_week)
     except Exception as e:
         print("Error Exception raised")
         print(e)
 
-def get_pregnancy_icds(connection):
+def send_msg(patient_id,msg_id):
+    try:
+        payload_dynamic = {
+            "action": "custom_message",
+            "message": msg_id
+        }
+        try:
+            log.info("msg sent to"+patient_id +" "+msg_id)
+        except Exception as e:
+            print(e)
+            print("Patient "+patient_id+" might not be on new chat")
+    except Exception as e:
+        print(e)
+        print("Patient "+patient_id+" might not be on new chat")
+
+def get_week_msg(connection,week):
     try:
         cursor = connection.cursor()
-
-        cursor.execute("SELECT * FROM assessment.pregnancy_icds")
-        result=[]
+        cursor.execute("SELECT msg_id FROM assessment.therapy_msg_mapping where week = "+week)
         for row in cursor.fetchall():
-            icds = {'icd': row[0], 'week': row[1]}
-            result.append(icds)
-        log.info(result)
-        return result
+            return row[0]
+
     except Exception as e:
         print("Error Exception raised")
         print(e)
-
-
-def get_pregnancy_week(pid,icds):
-    try:
-        query_endpoint = "/"+ str(pid) + "?pageNo=1&pageSize=1"
-        log.info(query_endpoint)
-        status, body = make_http_request(
-            conn_id="http_tracking_url",
-            endpoint=query_endpoint, method="GET")
-        log.info(status)
-        for q in body[0]['diagnosisHistory']:
-            for i in icds:
-                if q['diagnosis']==i['icd']:
-                    week=i['week']
-                    log.info(week)
-                    d=dateutil.parser.isoparse(body[0]['dateCreated'])
-                    log.info(d)
-                    days = abs(datetime.datetime.now().date()-d.date()).days
-                    log.info(days)
-                    final_week=week+(days/7)
-                    log.info(final_week)
-                    return final_week
-        return 0
-    except Exception as e:
-        log.info(e)
-        log.info("unable to get dh for pid "+pid)
-        return 0
-
-# def get_week_msg(conn,week):
-#     try:
-#         # cursor = connection.cursor()
-#         #
-#         # cursor.execute("SELECT * FROM assessment.therapy_msg_mapping where week = "+week)
-#         # icds={}
-#         # result=[]
-#         # for row in cursor.fetchall():
-#
-#
-#     except Exception as e:
-#         print("Error Exception raised")
-#         print(e)
