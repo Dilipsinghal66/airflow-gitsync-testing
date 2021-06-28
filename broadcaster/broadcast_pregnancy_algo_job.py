@@ -25,7 +25,6 @@ def broadcast_send_pregnancy_card():
         # print("got db connection from environment")
         connection = engine.get_conn()
         # print("got the connection no looking for cursor")
-        icd_week_mapping=get_pregnancy_icds(connection)
         cursor = connection.cursor()
         # print("got the cursor")
 
