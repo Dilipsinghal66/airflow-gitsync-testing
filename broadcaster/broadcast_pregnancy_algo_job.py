@@ -54,7 +54,7 @@ def send_msg(patient_id,msg_id):
         # }
         log.info(type(patient_id))
         log.info(type(msg_id))
-        log.info("msg sent to"+str(patient_id) +" "+msg_id)
+        log.info("msg sent to"+str(patient_id) +" "+str(msg_id))
     except Exception as e:
         print(e)
         print("Patient "+str(patient_id)+" might not be on new chat")
