@@ -45,8 +45,7 @@ def get_patient_ids():
 def broadcast_active_pregnancy():
     user_id_list = get_patient_ids()
     print(user_id_list)
-    process_broadcast_active = int(Variable.get("process_broadcast_active_pregnancy",
-                                                '1'))
+    process_broadcast_active = int(Variable.get("process_broadcast_active_pregnancy", '0'))
     if process_broadcast_active == 1:
         return
 
