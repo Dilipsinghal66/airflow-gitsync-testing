@@ -514,7 +514,7 @@ def process_custom_message(user_id_list, message):
             if str(data["device"]).lower() == "android":
                 ver = str(data["appVersion"]).split(".")
                 if len(ver) == 3:
-                    if int(ver[1]) >= 1 and int(ver[2]) >= 6:
+                    if (ver[0] == "v2" and int(ver[1]) >= 1 and int(ver[2]) >= 6) or (ver[0] == "v3"):
                         send_chat_message(user_id=uid, payload=payload_custom)
                     else:
                         send_chat_message(user_id=uid, payload=payload_dynamic)
