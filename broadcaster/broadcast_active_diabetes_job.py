@@ -25,9 +25,9 @@ def get_user_ids():
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
-        filter_active_patient_query = "select id from zylaapi.auth where phoneno in (select phoneno from " \
-                                      "patient_profile where status=4 and new_chat=1 and id in " \
-                                      "(" + ','.join(str(x) for x in patientIds) + "))"
+        filter_active_patient_query = "select id from zylaapi.auth where who = \'patient\' and " \
+                                      "phoneno in (select phoneno from patient_profile where status=4 and new_chat=1 " \
+                                      "and id in (" + ','.join(str(x) for x in patientIds) + "))"
 
         cursor.execute(filter_active_patient_query)
         activePatientIds = []
