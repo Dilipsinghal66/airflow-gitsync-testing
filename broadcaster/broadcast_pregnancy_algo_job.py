@@ -54,7 +54,7 @@ def send_msg(patient_id,msg_id):
         # }
         log.info(type(patient_id))
         log.info(type(msg_id))
-        log.info("msg sent to"+str(patient_id) +" "+msg_id)
+        log.info("msg sent to"+str(patient_id) +" "+str(msg_id))
     except Exception as e:
         print(e)
         print("Patient "+str(patient_id)+" might not be on new chat")
@@ -64,9 +64,11 @@ def get_week_msg(connection,week):
         cursor = connection.cursor()
         log.info(week)
         log.info(type(week))
-        cursor.execute("SELECT msg_id FROM assessment.therapy_msg_mapping where week = "+week)
+        log.info("SELECT msg_id FROM assessment.therapy_msg_mapping where week = "+str(week))
+        log.info(week)
+        cursor.execute("SELECT msg_id FROM assessment.therapy_msg_mapping where week = "+str(week))
         for row in cursor.fetchall():
-            log.info("msg id "+row[0])
+            log.info("msg id "+str(row[0]))
             return row[0]
 
     except Exception as e:
