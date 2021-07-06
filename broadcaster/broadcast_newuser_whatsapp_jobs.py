@@ -32,16 +32,19 @@ def broadcast_newuser_whatsapp():
             send_event_request(row[0], row[1], row[3], row[4], row[5])
             log.info(row[1])
             log.info(row[0])
-            if row[1]==11:
+            if row[1] == 11:
                 try:
                     query_endpoint = "/" + str(row[0]) + "/primary"
                     query_status, query_data = make_http_request(conn_id="http_pa_url",
                                                                  endpoint=query_endpoint, method="GET")
                     log.info(query_status)
-                    log.info("Primary therapy" + query_data["answer"] + "  patient Id   " + str(row[0]))
-                    send_user_primary_therapy_request(row[0],row[3],query_data["answer"],row[4])
+                    log.info(
+                        "Primary therapy" + query_data["answer"] + "  patient Id   " + str(row[0]))
+                    send_user_primary_therapy_request(
+                        row[0], row[3], query_data["answer"], row[4])
                 except:
-                    send_user_primary_therapy_request(row[0],row[3],'0',row[4])
+                    send_user_primary_therapy_request(
+                        row[0], row[3], '0', row[4])
                     log.info("error for patient Id " + str(row[0]))
     except Exception as e:
         print("Error Exception raised")
