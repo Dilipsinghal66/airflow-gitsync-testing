@@ -11,7 +11,8 @@ def broadcast_single_offer():
         return
 
     try:
-        send_notification(user_id=4010, title='Test', description='test offer')
+        send_notification(user_id=43567, title='Test',
+                          description='test offer')
 
     except Exception as e:
         print("Error Exception raised")
