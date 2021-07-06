@@ -47,6 +47,16 @@ def send_chat_message(user_id=None, payload=None):
         raise ValueError(str(e))
 
 
+def send_notification(user_id=None, title="", description="", action="offers"):
+    try:
+        if user_id:
+            status, body = make_http_request(conn_id="http_notification", endpoint=str(
+                user_id), payload={"title": title, "description": description, action: action})
+            log.info(status)
+    except Exception as e:
+        raise ValueError(str(e))
+
+
 def getStatusString(status):
     switcher = {
         1: "Pending",
