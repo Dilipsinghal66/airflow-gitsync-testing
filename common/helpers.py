@@ -735,7 +735,7 @@ def fcm_message_send(registration_ids, message, title):
             "title": title,
             "body": message,
             "sound": "default",
-            "click_action": "https://zyla.in/full-body-test-health-checkup?utm_source=Website_25/06_2&utm2=Website"
+            "click_action": "https://bit.ly/3jQKcjz"
         }
 
     }
