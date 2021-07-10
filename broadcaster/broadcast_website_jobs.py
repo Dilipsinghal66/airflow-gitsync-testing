@@ -7,6 +7,7 @@ log = LoggingMixin().log
 
 PAGE_SIZE = 900
 
+
 def broadcast_website():
     process_broadcast_website = int(
         Variable.get("process_broadcast_website", '0'))
@@ -30,10 +31,12 @@ def broadcast_website():
 
         message = str(Variable.get("broadcast_website_msg", ''))
         title = str(Variable.get("broadcast_website_title", ''))
+        click_action = str(Variable.get("broadcast_website_click_action", ''))
 
         for i in range(numberofPage):
             firebase_id_query = "select distinct(fire_base_uid) from ZylaWebsite.notifications where " \
-                                "fire_base_uid <> '' LIMIT " + str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
+                                "fire_base_uid <> '' LIMIT " + \
+                str(i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
             cursor.execute(firebase_id_query)
             firebase_id_list = []
 
@@ -42,7 +45,7 @@ def broadcast_website():
 
             print(firebase_id_list)
 
-            fcm_message_send(firebase_id_list, message, title)
+            fcm_message_send(firebase_id_list, message, title, click_action)
 
     except Exception as e:
         print("Error Exception raised")

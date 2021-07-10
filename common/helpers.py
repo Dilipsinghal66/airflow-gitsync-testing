@@ -721,7 +721,7 @@ def process_health_plan_not_created(patient_list):
     return patient_list
 
 
-def fcm_message_send(registration_ids, message, title):
+def fcm_message_send(registration_ids, message, title, click_action="https://zyla.in/"):
     payload = {
         "registration_ids": registration_ids,
         "data": {
@@ -735,7 +735,7 @@ def fcm_message_send(registration_ids, message, title):
             "title": title,
             "body": message,
             "sound": "default",
-            "click_action": "https://bit.ly/3jQKcjz"
+            "click_action": click_action
         }
 
     }
