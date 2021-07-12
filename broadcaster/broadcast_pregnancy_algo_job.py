@@ -28,11 +28,9 @@ def broadcast_send_pregnancy_card():
         msg_id=get_week_msg(connection,process_broadcast_pregnancy_card_week_count)
 
         cursor = connection.cursor()
-        # print("got the cursor")
 
         cursor.execute("SELECT user_id FROM assessment.multi_therapy_answers where question_id=1 and answer='9'")
-        dummy_pids=[1774,48990, 67282, 69730, 69735, 71519, 73713, 73861, 74348, 74350, 92205, 92211, 92225, 92307, 92308, 92356, 92359, 92380, 92394]
-        for row in dummy_pids:
+        for row in cursor.fetchall():
             try:
                 log.info(row)
                 log.info(msg_id)
