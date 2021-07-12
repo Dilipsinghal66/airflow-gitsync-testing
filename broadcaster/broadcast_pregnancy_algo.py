@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from broadcaster.broadcast_pregnancy_algo_job import broadcast_send_pregnancy_card
 
-broadcast_pregnancy_algo_cron = str(Variable.get("broadcast_pregnancy_algo_job", '@once'))
+broadcast_pregnancy_algo_cron = str(Variable.get("broadcast_pregnancy_algo_job", '00 18 * * WED,SAT'))
 
 broadcast_pregnancy_algo_dag = DAG(
     dag_id="broadcast_pregnancy_algo",
