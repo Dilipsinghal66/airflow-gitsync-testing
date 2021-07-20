@@ -27,7 +27,7 @@ def get_patient_ids():
         connection = engine.get_conn()
         cursor = connection.cursor()
         filter_active_patient_query = "select id from zylaapi.auth where who = \'patient\' and phoneno in " \
-                                      "(select phoneno from zylaapi.patient_profile where not in (6, 8) and " \
+                                      "(select phoneno from zylaapi.patient_profile where status not in (6, 8) and " \
                                       "new_chat = 1 and id in (" + ','.join(str(x) for x in patientIds) + "))"
 
         log.info("Checkpoint 3")
