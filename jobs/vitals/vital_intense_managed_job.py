@@ -31,6 +31,7 @@ def vital_intense_managed():
         patient_id_list_for_managed = []
         patient_id_list_dont_change = []
 
+        log.info("check point 1 ")
         for patient_id in patient_id_distinct:
             sql_query = 'SELECT value FROM vitals.vital_readings where created_at >= NOW() - INTERVAL 21 DAY  ' \
                         'and param_id in (5, 25, 27, 58, 66, 67) and TRIM(value) is not null  and ' \
@@ -49,6 +50,7 @@ def vital_intense_managed():
         sql_query = 'select id from zylaapi.patient_profile where param_group_rule_id = 2'
         cursor.execute(sql_query)
 
+        log.info("check point 2 ")
         patient_id_list_on_managed = []
         for row in cursor.fetchall():
             patient_id_list_on_managed.append(row[0])
@@ -63,10 +65,10 @@ def vital_intense_managed():
             if patient_id not in patient_id_list_on_managed:
                 patient_id_list_for_managed_switch.append(patient_id)
 
-        log.info("check point 1 ")
+        log.info("check point 3 ")
         log.info("patient_id_list_for_managed " + str(patient_id_list_for_managed))
         log.info("patient_id_list_for_managed " + str(patient_id_list_for_intense))
-        log.info("check point 2 ")
+        log.info("check point 4 ")
         if patient_id_list_for_managed:
             sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
                         '(' + ','.join(str(x) for x in patient_id_list_for_managed_switch) + ')'
