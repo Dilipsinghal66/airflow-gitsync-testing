@@ -33,6 +33,7 @@ def vital_intense_managed():
 
         log.info("check point 1 ")
         for patient_id in patient_id_distinct:
+            log.info("check point 1 - 2 ")
             sql_query = 'SELECT value FROM vitals.vital_readings where created_at >= NOW() - INTERVAL 21 DAY  ' \
                         'and param_id in (5, 25, 27, 58, 66, 67) and TRIM(value) is not null  and ' \
                         'TRIM(value) <> \'\' and patient_id = ' + str(patient_id) + ' order by created_at desc LIMIT 5'
