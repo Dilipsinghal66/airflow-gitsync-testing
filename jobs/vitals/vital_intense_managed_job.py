@@ -44,6 +44,7 @@ def vital_intense_managed():
                 avg = sum//5
                 if 70 <= avg <= 140:
                     patient_id_list_for_managed.append(patient_id)
+                    patient_id_list_dont_change.append(patient_id)
             else:
                 patient_id_list_dont_change.append(patient_id)
 
@@ -57,7 +58,7 @@ def vital_intense_managed():
 
         patient_id_list_for_intense = []
         for patient_id in patient_id_list_on_managed:
-            if patient_id not in patient_id_list_for_managed or patient_id not in patient_id_list_dont_change:
+            if patient_id not in patient_id_list_dont_change:
                 patient_id_list_for_intense.append(patient_id)
 
         patient_id_list_for_managed_switch = []
@@ -67,28 +68,28 @@ def vital_intense_managed():
 
         log.info("check point 3 ")
         log.info("patient_id_list_for_managed " + str(patient_id_list_for_managed))
-        log.info("patient_id_list_for_managed " + str(patient_id_list_for_intense))
+        log.info("patient_id_list_for_intense " + str(patient_id_list_for_intense))
         log.info("check point 4 ")
         if patient_id_list_for_managed:
             sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 2 where id in ' \
                         '(' + ','.join(str(x) for x in patient_id_list_for_managed_switch) + ')'
-            cursor.execute(sql_query)
+            #cursor.execute(sql_query)
             log.info("Update query" + sql_query)
 
         if patient_id_list_for_intense:
             sql_query = 'update zylaapi.patient_profile set param_group_rule_id = 1 where id in ' \
                         '(' + ','.join(str(x) for x in patient_id_list_for_intense) + ')'
-            cursor.execute(sql_query)
+            #cursor.execute(sql_query)
             log.info("Update query" + sql_query)
 
-        connection.commit()
+        #connection.commit()
 
         for patient_id in patient_id_list_for_managed_switch:
             message = 'Congratulations, glad to see that your vitals are keeping under good control. ' \
                       'Hence we will be recommending lesser sugar readings for next few days so that ' \
                       'you have to prick less!'
             try:
-                patient_id_message_send(patient_id, message, "dynamic_message")
+                #patient_id_message_send(patient_id, message, "dynamic_message")
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")
@@ -98,7 +99,7 @@ def vital_intense_managed():
             message = 'Care team has noticed that your average blood sugars are slightly on the higher side, ' \
                       'so we will be requesting more frequent sugar testing next few days!'
             try:
-                patient_id_message_send(patient_id, message, "dynamic_message")
+                #patient_id_message_send(patient_id, message, "dynamic_message")
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")
