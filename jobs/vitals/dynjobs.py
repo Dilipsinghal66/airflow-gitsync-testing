@@ -50,10 +50,20 @@ def send_dyn_func():
             print(patientIdDict)
 
             for key, value in patientIdDict.items():
-                informationCardSqlQuery = "select id from " \
-                                          "dyn_cards.dyn_cards where " \
-                                          "status = 4 and id > " + \
-                                          str(value) + " order by id LIMIT 1"
+                primaryTherayQuery = "select answer from " \
+                                     "assessment.multi_therapy_answers where user_id = " + \
+                                     str(key) + " and question_id = 1"
+                paresponse_rows = cursor.execute(primaryTherayQuery)
+                paresponse = 6
+                if paresponse_rows != 0:
+                    paresponse = cursor.fetchone()[0]
+
+                informationCardSqlQuery = "select d.id from " \
+                                          "dyn_cards.dyn_cards d left join dyn_cards.dyn_primary_therapy_tags dt " \
+                                          "on d.id = dt.dyn_card_id where " \
+                                          "d.status = 4 and d.id > " + \
+                                          str(value) + " and dt.primary_therapy_id in (6," + \
+                                          str(paresponse) + ") order by d.id LIMIT 1"
                 # print(informationCardSqlQuery)
                 number_of_rows = cursor.execute(informationCardSqlQuery)
                 # print(number_of_rows)
