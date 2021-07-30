@@ -1,5 +1,5 @@
 from datetime import datetime
-from jobs.lab_whatsapp_reminder import initializer
+from jobs.lab_whatsapp_reminder.labWhatsappJob import initializer
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from config import default_args, local_tz
