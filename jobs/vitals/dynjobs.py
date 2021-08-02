@@ -36,23 +36,28 @@ def send_dyn_func():
             # print("got db connection from environment")
             connection = engine.get_conn()
             cursor = connection.cursor()
-            patientIdSqlQuerry = "select id, countDidYouKnow from " \
-                                 "zylaapi.patient_profile where " \
-                                 "new_chat = 1 LIMIT " + str(i * PAGE_SIZE) + \
+            patientIdSqlQuerry = "select pp.id, pp.countDidYouKnow, pp.phoneno, pp.countrycode, auth.id as userId from " \
+                                 "zylaapi.patient_profile pp left join zylaapi.auth auth on " \
+                                 " pp.phoneno = auth.phoneno and pp.countrycode = auth.countrycode where " \
+                                 " auth.who = 'patient' and " \
+                                 " pp.new_chat = 1 LIMIT " + str(i * PAGE_SIZE) + \
                                  ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
             patientIdList = []
             patientIdDict = {}
+            patientUserIdDict = {}
             for row in cursor.fetchall():
                 patientIdList.append(row[0])
                 patientIdDict[str(row[0])] = str(row[1])
+                patientUserIdDict[str(row[0])] = str(row[3])
 
             print(patientIdDict)
 
             for key, value in patientIdDict.items():
+
                 primaryTherayQuery = "select answer from " \
                                      "assessment.multi_therapy_answers where user_id = " + \
-                                     str(key) + " and question_id = 1"
+                                     str(patientUserIdDict.get(key)) + " and question_id = 1"
                 paresponse_rows = cursor.execute(primaryTherayQuery)
                 paresponse = 6
                 if paresponse_rows != 0:
