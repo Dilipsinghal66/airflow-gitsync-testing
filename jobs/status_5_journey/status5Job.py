@@ -77,6 +77,7 @@ def validateEmail(email):
 
 def sendMail(email, name, template_id):
     if(validateEmail(email)):
+        sg = SendGridAPIClient(Variable.get('SENDGRID_API_KEY'))
         data = {
             "from":{
                 "email":"no-reply@zylahealth.com",
@@ -102,6 +103,8 @@ def sendMail(email, name, template_id):
                 ]
             }
         }
+        response = sg.client.mail.send.post(request_body=data)
+        log.info("Sending to ", email, response.status_code)
     else:
         log.error("Email got debounced ", email)
 
