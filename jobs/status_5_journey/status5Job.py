@@ -50,7 +50,7 @@ def getPatientStatus():
         patients = []
         
         for row in cursor.fetchall():
-            if row[5] != 0:
+            if row[5] != '0':
                 log.info(row)
                 patients.append(row)
 
