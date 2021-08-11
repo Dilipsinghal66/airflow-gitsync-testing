@@ -3,6 +3,7 @@ from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from common.http_functions import make_http_request
 
 
 log = LoggingMixin().log
