@@ -81,7 +81,7 @@ def sendMail(email, name, template_id):
         sg = SendGridAPIClient(Variable.get('SENDGRID_API_KEY'))
         data = {
             "from":{
-                "email":"no-reply@zylahealth.com",
+                "email":"care@zyla.in",
                 "name" : "Zyla Health"
             },
             "personalizations":[
