@@ -105,12 +105,12 @@ def sendMail(email, name, template_id):
             }
         }
         response = sg.client.mail.send.post(request_body=data)
-        log.info("Sending to ", email, response.status_code)
     else:
         log.error("Email got debounced ", email)
 
 def initializer(**kwargs):
     patients = getPatientStatus()
     log.info(patients)
-    sendMail("pranjal@zyla.in", "Pranjal", template_ids[patients[0][5]])
+    for p in patients:
+        sendMail(p[3],p[4], p[5])
     

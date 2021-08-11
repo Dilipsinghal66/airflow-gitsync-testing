@@ -13,7 +13,7 @@ status_5_dag = DAG(
     dag_id="status_5_dag",
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    schedule_interval="30 8 * * *",
+    schedule_interval="00 20 * * *",
     catchup=False
 )
 
