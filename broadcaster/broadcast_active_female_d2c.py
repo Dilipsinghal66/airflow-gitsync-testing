@@ -1,5 +1,5 @@
 from datetime import datetime
-from broadcaster.broadcast_active_female_d2c_job import broadcast_active_female__d2c
+from broadcaster.broadcast_active_female_d2c_job import broadcast_active_female_d2c
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from config import default_args, local_tz
