@@ -23,4 +23,4 @@ def broadcast_active_female_d2c():
                                  "new_chat = 1)"))
 
     message = str(Variable.get("broadcast_active_female_d2c_msg", ''))
-    #process_custom_message_sql(sql_query, message)
+    process_custom_message_sql(sql_query, message)
