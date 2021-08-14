@@ -104,7 +104,12 @@ def sendMail(email, name, template_id):
                 ]
             }
         }
-        response = sg.client.mail.send.post(request_body=data)
+        try:
+            response = sg.client.mail.send.post(request_body=data)
+        except Exception as e:
+            log.info("Couldn't send the mail")
+            log.info(e)
+            
     else:
         log.error("Email got debounced ", email)
 
