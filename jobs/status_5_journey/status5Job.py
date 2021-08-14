@@ -104,7 +104,12 @@ def sendMail(email, name, template_id):
                 ]
             }
         }
-        response = sg.client.mail.send.post(request_body=data)
+        try:
+            response = sg.client.mail.send.post(request_body=data)
+        except Exception as e:
+            log.info("Couldn't send the mail")
+            log.info(e)
+            
     else:
         log.error("Email got debounced ", email)
 
@@ -112,5 +117,5 @@ def initializer(**kwargs):
     patients = getPatientStatus()
     log.info(patients)
     for p in patients:
-        sendMail(p[3],p[4], p[5])
+        sendMail(p[3],p[4], template_ids[p[5]])
     
