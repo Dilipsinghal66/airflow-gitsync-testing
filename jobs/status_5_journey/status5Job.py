@@ -112,5 +112,5 @@ def initializer(**kwargs):
     patients = getPatientStatus()
     log.info(patients)
     for p in patients:
-        sendMail(p[3],p[4], p[5])
+        sendMail(p[3],p[4], template_ids[p[5]])
     
