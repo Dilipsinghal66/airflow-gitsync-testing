@@ -13,19 +13,29 @@ log = LoggingMixin().log
 
 def get_patient_ids():
     try:
-        mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
-        collection = mongo_conn.get_database(
-            "plan-service").get_collection("plan_assignments")
+        #mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
+        #collection = mongo_conn.get_database(
+        #    "plan-service").get_collection("plan_assignments")
         #plan_ids = [59]
 
-        results = collection.find({"planid": 59})
-        patientIds = []
+        #results = collection.find({"planid": 59})
+        #patientIds = []
 
-        for q in results:
-            patientIds.append(q['patientid'])
+        #for q in results:
+        #    patientIds.append(q['patientid'])
+
+
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
+
+        filter_preg_patient_id = "select user_id from assessment.multi_therapy_answers where " \
+                                 "question_id = 1 and answer = 9"
+        cursor.execute(filter_preg_patient_id)
+        patientIds = []
+        for row in cursor.fetchall():
+            patientIds.append(row[0])
+
         filter_active_patient_query = "select id from zylaapi.auth where who = \'patient\' and phoneno in " \
                                       "(select phoneno from patient_profile where status=4 and new_chat=1 " \
                                       "and id not in (" + ','.join(str(x) for x in patientIds) + "))"
