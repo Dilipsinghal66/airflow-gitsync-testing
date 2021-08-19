@@ -92,7 +92,7 @@ def sendMail(email, emailVars):
     else:
         log.error("Email got debounced ", email)
 
-def initializer():
+def initializer(**kwargs):
     registrants = getRegistrants()
     if registrants != -1:
         log.info(registrant_df)
