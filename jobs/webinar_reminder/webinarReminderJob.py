@@ -26,7 +26,7 @@ def getRegistrants():
                                                         endpoint=query_endpoint, method="GET")
         if query_status == 200:
             for w in query_data:
-                zoom_ids.append(w)
+                zoom_ids.append(w['zoom_id'])
     except:
         log.error("Couldn't fetch the webinars from strapi")
     
