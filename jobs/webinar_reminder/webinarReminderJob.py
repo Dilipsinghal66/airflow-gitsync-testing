@@ -16,7 +16,7 @@ log = LoggingMixin().log
 
 def getRegistrants():
     now = datetime.now()
-    now = now + timedelta(days=7)
+    now = now + timedelta(days=6)
     fr = now + timedelta(days=1)
     to = now + timedelta(days=2)
     zoom_ids = []
