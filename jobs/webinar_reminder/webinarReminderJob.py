@@ -16,7 +16,7 @@ log = LoggingMixin().log
 
 def getRegistrants():
     now = datetime.now()
-    now = now + timedelta(days=6)
+    now = now + timedelta(days=3)
     fr = now + timedelta(days=1)
     to = now + timedelta(days=2)
     zoom_ids = []
@@ -34,7 +34,7 @@ def getRegistrants():
         payload = {"page_size" : 300}
         query_endpoint = zoom_ids[0] + "/registrants?page_size=300"
         query_status, query_data = make_http_request(conn_id="http_zoom_api", endpoint=query_endpoint, method="GET")
-
+        print(query_data)
         rdf = pd.DataFrame(query_data['registrants'])
         registrant_df = pd.DataFrame([rdf])
         iterations = math.ceil(query_data['total_records']/300)
@@ -43,7 +43,7 @@ def getRegistrants():
         for i in range(iterations-1):
             new_query_endpoint =  query_endpoint + "&next_page_token=" + next_token
             query_status, query_data = make_http_request(conn_id="http_zoom_api", endpoint=new_query_endpoint, method="GET")
-
+            print(query_data)
             rdf = pd.DataFrame(query_data['registrants'])
             registrant_df = pd.DataFrame([registrant_df, rdf])
             next_token = query_data['next_page_token']
