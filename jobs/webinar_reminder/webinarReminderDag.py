@@ -13,7 +13,7 @@ webinar_reminder_dag = DAG(
     dag_id="webinar_reminder_dag",
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    schedule_interval="00 19 * * *",
+    schedule_interval="00 12 * * *",
     catchup=False
 )
 
@@ -32,7 +32,7 @@ webinar_reminder_dag_one_day_before = DAG(
     dag_id="webinar_reminder_dag_one_day_before",
     start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    schedule_interval="00 12 * * *",
+    schedule_interval="00 19 * * *",
     catchup=False
 )
 
