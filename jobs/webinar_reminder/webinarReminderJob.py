@@ -19,13 +19,12 @@ log = LoggingMixin().log
 
 def getRegistrants(rType):
     now = datetime.now()
-    now = now + timedelta(days=2)
     if rType == 1:
-        fr = now + timedelta(days=1)
-        to = now + timedelta(days=2)
-    else:
         fr = now + timedelta(days=0)
         to = now + timedelta(days=1)
+    else:
+        fr = now + timedelta(days=1)
+        to = now + timedelta(days=2)
     zoom_ids = []
     webinar = ""
     try:
@@ -107,14 +106,14 @@ def initializer(**kwargs):
         datestr = datetime.now().strftime("%b %d, %Y") + " at 7 PM"
         timeStr = "7 PM today"
     else:
-        ds = datetime.now() = timedelta(days=1)
+        ds = datetime.now() + timedelta(days=1)
         datestr = ds.strftime("%b %d, %Y") + " at 7 PM"
         timeStr = "7 PM tomorrow"
 
-    registrants,webinar = getRegistrants()
+    registrants,webinar = getRegistrants(rType)
     if webinar != -1:
         log.info(registrants)
-        #sendMail("noreply@mail.zyla.in", "pranjal@zyla.in", {"time": "7 PM tomorrow", "topic": webinar['title'],"firstName": "Pranjal", "date_time":datestr,"join_url": "https://zyla.in"})
         for i, row in registrants.iterrows():
             ob = {"time": timeStr, "topic": webinar['title'],"firstName": row['first_name'], "date_time":datestr,"join_url": row['join_url']}
             print(ob)
+            sendMail("noreply@mail.zyla.in", row['email'], ob)
