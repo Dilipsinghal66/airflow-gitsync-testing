@@ -14,12 +14,20 @@ import math
 
 log = LoggingMixin().log
 
-def getRegistrants():
+# Type 1 — Today
+# Type 2 — Tomorrow
+
+def getRegistrants(rType):
     now = datetime.now()
-    now = now + timedelta(days=3)
-    fr = now + timedelta(days=1)
-    to = now + timedelta(days=2)
+    now = now + timedelta(days=2)
+    if rType == 1:
+        fr = now + timedelta(days=1)
+        to = now + timedelta(days=2)
+    else:
+        fr = now + timedelta(days=0)
+        to = now + timedelta(days=1)
     zoom_ids = []
+    webinar = ""
     try:
         query_endpoint = "webinars?starting_gt=" + fr.strftime("%Y-%m-%d") + "&starting_lt=" + to.strftime("%Y-%m-%d")
         query_status, query_data = make_http_request(conn_id="http_strapi",
@@ -27,16 +35,17 @@ def getRegistrants():
         if query_status == 200:
             for w in query_data:
                 zoom_ids.append(w['zoom_id'])
+            if len(query_data) > 0:
+                webinar = query_data[0]
     except:
         log.error("Couldn't fetch the webinars from strapi")
     
     if len(zoom_ids) > 0:
-        payload = {"page_size" : 300}
         query_endpoint = zoom_ids[0] + "/registrants?page_size=300"
         query_status, query_data = make_http_request(conn_id="http_zoom_api", endpoint=query_endpoint, method="GET")
-        print(query_data)
+        print(query_status)
         rdf = pd.DataFrame(query_data['registrants'])
-        registrant_df = pd.DataFrame([rdf])
+        registrant_df = pd.DataFrame(rdf)
         iterations = math.ceil(query_data['total_records']/300)
         next_token = query_data['next_page_token']
 
@@ -45,31 +54,31 @@ def getRegistrants():
             query_status, query_data = make_http_request(conn_id="http_zoom_api", endpoint=new_query_endpoint, method="GET")
             print(query_data)
             rdf = pd.DataFrame(query_data['registrants'])
-            registrant_df = pd.DataFrame([registrant_df, rdf])
+            registrant_df = pd.concat([registrant_df, rdf])
             next_token = query_data['next_page_token']
         
-        return registrant_df
+        return registrant_df, webinar
     
     else:
         log.info("No webinars")
-        return -1
+        return -1,-1
 
         
 
 
-def sendMail(email, emailVars):
-    if(validateEmail(email)):
+def sendMail(emailFrom,emailTo, emailVars):
+    if(validateEmail(emailTo)):
         sg = SendGridAPIClient(Variable.get('SENDGRID_API_KEY'))
         data = {
             "from":{
-                "email":"care@zyla.in",
+                "email": emailFrom,
                 "name" : "Zyla Health"
             },
             "personalizations":[
                 {
                     "to":[
                         {
-                        "email":email
+                        "email":emailTo
                         }
                     ],
                     "dynamic_template_data": emailVars
@@ -90,9 +99,22 @@ def sendMail(email, emailVars):
             log.info(e)
             
     else:
-        log.error("Email got debounced ", email)
+        log.error("Email got debounced ", emailTo)
 
 def initializer(**kwargs):
-    registrants = getRegistrants()
-    if registrants != -1:
-        log.info(registrant_df)
+    rType = kwargs['rType']
+    if rType == 1:
+        datestr = datetime.now().strftime("%b %d, %Y") + " at 7 PM"
+        timeStr = "7 PM today"
+    else:
+        ds = datetime.now() = timedelta(days=1)
+        datestr = ds.strftime("%b %d, %Y") + " at 7 PM"
+        timeStr = "7 PM tomorrow"
+
+    registrants,webinar = getRegistrants()
+    if webinar != -1:
+        log.info(registrants)
+        #sendMail("noreply@mail.zyla.in", "pranjal@zyla.in", {"time": "7 PM tomorrow", "topic": webinar['title'],"firstName": "Pranjal", "date_time":datestr,"join_url": "https://zyla.in"})
+        for i, row in registrants.iterrows():
+            ob = {"time": timeStr, "topic": webinar['title'],"firstName": row['first_name'], "date_time":datestr,"join_url": row['join_url']}
+            print(ob)
