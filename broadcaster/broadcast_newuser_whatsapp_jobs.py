@@ -26,7 +26,7 @@ def broadcast_newuser_whatsapp():
                        "client_code from "
                        "zylaapi.patient_profile where status != 4 and "
                        "TIMESTAMPDIFF(minute,updated_at,NOW()) between 15 and "
-                       "30 and datediff(created_at,NOW()) =0")
+                       "30 and datediff(created_at,NOW()) =0 and client_code!='NV'")
 
         for row in cursor.fetchall():
             send_event_request(row[0], row[1], row[3], row[4], row[5])
