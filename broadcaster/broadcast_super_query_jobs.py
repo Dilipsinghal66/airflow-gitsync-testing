@@ -16,6 +16,6 @@ def broadcast_super_query():
                                  '(\'DC\', \'MG\', \'PY\') AND new_chat = 1 and id in (select user_id from '
                                  'assessment.multi_therapy_answers where answer= 1 and question_id = 1))'))
 
-    message = str(Variable.get("broadcast_active_msg", ''))
-    #process_custom_message_sql(sql_query, message)
+    message = str(Variable.get("broadcast_super_query_msg", ''))
+    process_custom_message_sql(sql_query, message)
 

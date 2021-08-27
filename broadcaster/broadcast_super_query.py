@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from broadcaster.broadcast_super_query_jobs import broadcast_super_query
 
-broadcast_super_query_cron = str(Variable.get("broadcast_super_query_cron", '@yearly'))
+broadcast_super_query_cron = str(Variable.get("broadcast_super_query_cron", '@once'))
 
 broadcast_super_query_dag = DAG(
     dag_id="broadcast_super_query",
