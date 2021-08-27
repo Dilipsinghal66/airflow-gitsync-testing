@@ -20,7 +20,7 @@ broadcast_super_query_dag = DAG(
 )
 
 broadcast_super_query_task = PythonOperator(
-    task_id="broadcast_active",
+    task_id="broadcast_super_query",
     task_concurrency=1,
     python_callable=broadcast_super_query,
     dag=broadcast_super_query_dag,
