@@ -12,7 +12,7 @@ def broadcast_super_query():
 
     sql_query = str(Variable.get("broadcast_super_query_sql_query",
                                  'select id from zylaapi.auth where who = \'patient\' and phoneno in (select phoneno '
-                                 'from zylaapi.patient_profile where status = 4 AND client_code in '
+                                 'from zylaapi.patient_profile where (status = 11 OR status = 5) AND client_code in '
                                  '(\'DC\', \'MG\', \'PY\') AND new_chat = 1 and id in (select user_id from '
                                  'assessment.multi_therapy_answers where answer= 1 and question_id = 1))'))
 
