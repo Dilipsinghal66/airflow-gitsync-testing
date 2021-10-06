@@ -129,5 +129,8 @@ def interaktJob():
                 status, body = make_http_request(
                     conn_id="interakt_user",
                     endpoint="", method="POST", payload=ob)
+                print("Creating interkat for ", ob)
+                print(status)
 
+        print("Interakt users created")
             
