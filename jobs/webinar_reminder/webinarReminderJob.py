@@ -117,3 +117,20 @@ def initializer(**kwargs):
             ob = {"time": timeStr, "topic": webinar['title'],"firstName": row['first_name'], "date_time":datestr,"join_url": row['join_url']}
             print(ob)
             sendMail("noreply@mail.zyla.in", row['email'], ob)
+
+
+def interaktJob():
+    registrants,webinar = getRegistrants(1)
+    if webinar != -1:
+        log.info(registrants)
+        for i, row in registrants.iterrows():
+            if row['phone'] != "":
+                ob = {"phoneNumber": ph, "countryCode": "+91", "traits": { "name": row['first_name'], "email": row['email'], "Join_url":  row['join_url'].replace("https://us06web.zoom.us/",""), "Tags": "webinar_" + webinar['zoom_id']}}
+                status, body = make_http_request(
+                    conn_id="interakt_user",
+                    endpoint="", method="POST", payload=ob)
+                print("Creating interkat for ", ob)
+                print(status)
+
+        print("Interakt users created")
+            
