@@ -119,7 +119,7 @@ def initializer(**kwargs):
             sendMail("noreply@mail.zyla.in", row['email'], ob)
 
 
-def interaktJob():
+def interaktJob(**kwargs):
     registrants,webinar = getRegistrants(1)
     if webinar != -1:
         log.info(registrants)
