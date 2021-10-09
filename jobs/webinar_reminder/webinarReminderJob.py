@@ -125,7 +125,7 @@ def interaktJob(**kwargs):
         log.info(registrants)
         for i, row in registrants.iterrows():
             if row['phone'] != "":
-                ob = {"phoneNumber": ph, "countryCode": "+91", "traits": { "name": row['first_name'], "email": row['email'], "Join_url":  row['join_url'].replace("https://us06web.zoom.us/",""), "Tags": "webinar_" + webinar['zoom_id']}}
+                ob = {"phoneNumber": row['phone'], "countryCode": "+91", "traits": { "name": row['first_name'], "email": row['email'], "Join_url":  row['join_url'].replace("https://us06web.zoom.us/",""), "Tags": "webinar_" + webinar['zoom_id']}}
                 status, body = make_http_request(
                     conn_id="interakt_user",
                     endpoint="", method="POST", payload=ob)
