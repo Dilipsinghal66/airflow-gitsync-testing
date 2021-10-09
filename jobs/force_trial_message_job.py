@@ -47,8 +47,8 @@ def force_trial_message():
                 print(e)
     for patient_id in patient_id_nv_list:
         message = "A warm welcome by Zyla - Your personal healthcare expert. As a part of the wellness benefits " \
-                  "extended by Varthana, you are entitled to a <strong>Personal Health Analysis Call</strong>. " \
-                  "It is a 20-30 mins call with Zyla’s Medical Team. To initiate your health assessment, " \
+                  "extended by Varthana, you are entitled to a <strong>Personal Health Analysis Call</strong>. It is " \
+                  "a 20-30 mins call with Zyla’s Medical Team. To initiate your health assessment, " \
                   "please share a suitable time in the chat and our team will schedule the call."
         if message:
             try:
@@ -58,9 +58,9 @@ def force_trial_message():
                 print(e)
     for patient_id in patient_id_cd_list:
         message = "To book your full body checkup- please click here and submit required details " \
-                  "<a href=\"https://zyla-healthcheckup.youcanbook.me\" target=\"" \
-                  "_blank\">https://zyla-healthcheckup.youcanbook.me</a>\nIn case of any queries, pls ask here. " \
-                  "Always there to help."
+                  "<a href=\"https://zyla-healthcheckup.youcanbook.me\" " \
+                  "target=\"_blank\">https://zyla-healthcheckup.youcanbook.me</a>\nIn case of any queries, pls " \
+                  "ask here. Always there to help."
         if message:
             try:
                 patient_id_message_send(patient_id, message, "start_trial")
@@ -68,12 +68,11 @@ def force_trial_message():
                 print("Error Exception raised")
                 print(e)
     for patient_id in patient_id_hv_list:
-        message = "As a part of wellness benefits extended by hyperverge, you are entitled to -\na) <b>Personal" \
-                  " Health Analysis Call</b> It is a 20-30 mins call with Zyla Medical Team\nb) <b>Annual Health " \
+        message = "As a part of wellness benefits extended by hyperverge, you are entitled to -\na) <b>Personal " \
+                  "Health Analysis Call</b> It is a 20-30 mins call with Zyla Medical Team\nb) <b>Annual Health " \
                   "Check-Up</b> A full body check-up of 61 vitals to keep track of your health organs followed by a " \
-                  "Report Analysis call.\nPlease click here and share required details - " \
-                  "<a href=\"https://zyla-healthcheckup.youcanbook.me\" target=\"" \
-                  "_blank\">https://zyla-healthcheckup.youcanbook.me</a>"
+                  "Report Analysis call.\nPlease click here and share required details " \
+                  "- <a href=\"https://zyla.tiny.us/HRA\" target=\"_blank\">https://zyla.tiny.us/HRA</a>"
         if message:
             try:
                 patient_id_message_send(patient_id, message, "start_trial")
@@ -81,12 +80,11 @@ def force_trial_message():
                 print("Error Exception raised")
                 print(e)
     for patient_id in patient_id_gp_list:
-        message = "As a part of wellness benefits extended by getpowerplay, you are entitled to -\na) <b>Personal " \
-                  "Health Analysis Call</b> It is a 20-30 mins call with Zyla Medical Team\nb) " \
-                  "<b>Annual Health Check-Up</b> A full body check-up of 61 vitals to keep track of your " \
-                  "health organs followed by a Report Analysis call.\nPlease click here and share required " \
-                  "details - <a href=\"https://zyla-healthcheckup.youcanbook.me\" target=\"_" \
-                  "blank\">https://zyla-healthcheckup.youcanbook.me</a>"
+        message = "As a part of wellness benefits extended by getpowerplay, you are entitled to -\na) " \
+                  "<b>Personal Health Analysis Call</b> It is a 20-30 mins call with Zyla Medical Team\nb) " \
+                  "<b>Annual Health Check-Up</b> A full body check-up of 61 vitals to keep track of your health organs " \
+                  "followed by a Report Analysis call.\nPlease click here and share required details " \
+                  "- <a href=\"https://zyla.tiny.us/HRA\" target=\"_blank\">https://zyla.tiny.us/HRA</a>"
         if message:
             try:
                 patient_id_message_send(patient_id, message, "start_trial")
