@@ -22,12 +22,15 @@ def broadcast_active_nps():
 
     process_broadcast_active = int(Variable.get("process_broadcast_nps_active",
                                                 '0'))
+
+    sheet_id = Variable.get("nps_sheet_id","1xqhfM9iUexNYl3uHdiqTFA7hrtVPQwLEjAcrJ-OtDyA" )
+    
     if process_broadcast_active == 1:
         return
 
     try:
         sheet_hook = GSheetsHook(
-            spreadsheet_id="14aFTBETnr_5o2Uo2I3w1pa8HURfLLgS-d932-nB5390",
+            spreadsheet_id=sheet_id,
             gcp_conn_id="gcp_sheet",
             api_version="v4"
         )
