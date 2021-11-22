@@ -1,6 +1,6 @@
 from airflow.models import Variable
 from common.db_functions import get_data_from_db
-from common.helpers import send_event_request_event_name
+from common.helpers import process_custom_message_sql
 
 
 def broadcast_doctor_patients():
@@ -23,10 +23,8 @@ def broadcast_doctor_patients():
                     "zylaapi.patient_profile where referred_by = (select id from zylaapi.doc_profile " \
                     "where code = \'" + doc_code.strip() + "\'))"
 
-        cursor.execute(sql_query)
-
-        for row in cursor.fetchall():
-            send_event_request_event_name(row[0], "W-Day", row[3], row[4])
+        message = str(Variable.get("broadcast_doctor_patients_msg", ''))
+        process_custom_message_sql(sql_query, message)
 
     except Exception as e:
         print("Error Exception raised")
