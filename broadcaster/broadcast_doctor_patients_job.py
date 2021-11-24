@@ -12,15 +12,7 @@ def broadcast_doctor_patients():
         return
 
     try:
-        engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
-        # print("got db connection from environment")
-        connection = engine.get_conn()
-        # print("got the connection no looking for cursor")
-        cursor = connection.cursor()
-        # print("got the cursor")
-
-        doc_code = int(
-            Variable.get("broadcast_doctor_patients_doccode", 'AB'))
+        doc_code = str(Variable.get("broadcast_doctor_patients_doccode", 'AB'))
         sql_query = "select id from zylaapi.auth where who = \'patient\' and phoneno in (select phoneno from " \
                     "zylaapi.patient_profile where referred_by = (select id from zylaapi.doc_profile " \
                     "where code = \'" + doc_code.strip() + "\'))"
