@@ -8,7 +8,7 @@ log = LoggingMixin().log
 def broadcast_doctor_patients():
     process_broadcast_doctor_patients = int(
         Variable.get("process_broadcast_doctor_patients", '0'))
-    if process_broadcast_doctor_patients == 0:
+    if process_broadcast_doctor_patients == 1:
         return
 
     try:
