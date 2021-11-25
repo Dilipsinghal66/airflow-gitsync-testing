@@ -65,3 +65,21 @@ webinar_reminder_interakt_task = PythonOperator(
     retry_exponential_backoff=True,
     provide_context=True
 )
+
+webinar_reminder_evening_interakt_dag = DAG(
+    dag_id="webinar_reminder_evening_interakt_dag",
+    start_date=datetime(year=2020, month=2, day=3, hour=9, minute=0, second=0,
+                        microsecond=0, tzinfo=local_tz),
+    schedule_interval="15 18 * * *",
+    catchup=False
+)
+
+webinar_reminder_evening_interakt_task = PythonOperator(
+    task_id="webinar_reminder_evening_interakt_dag",
+    task_concurrency=1,
+    python_callable=interaktJob,
+    dag=webinar_reminder_evening_interakt_dag,
+    pool="scheduled_jobs_pool",
+    retry_exponential_backoff=True,
+    provide_context=True
+)
