@@ -19,7 +19,7 @@ def broadcast_cc_algo():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where status = 4")
+        cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where status = 4 or status = 5")
 
         for row in cursor.fetchall():
             icds=latest_cc(row[0])
