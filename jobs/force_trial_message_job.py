@@ -16,9 +16,8 @@ def force_trial_message():
     connection = engine.get_conn()
     cursor = connection.cursor()
     sql_query = str(Variable.get("force_trial_message_sql_query", "select id, client_code from zylaapi.patient_profile "
-                                                                  "where created_at BETWEEN NOW() - INTERVAL 2 HOUR "
-                                                                  "AND NOW() - INTERVAL 1 HOUR "
-                                                                  "and status not in (4, 11)"))
+                                                                  "where created_at <= NOW() - INTERVAL 1 HOUR and "
+                                                                  "status not in (4, 11)"))
     cursor.execute(sql_query)
     patient_id_list = []
     patient_id_nv_list = []
