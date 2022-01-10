@@ -17,10 +17,10 @@ def force_trial_message():
     cursor = connection.cursor()
     sql_query = str(Variable.get("force_trial_message_sql_query", "select id, client_code from zylaapi.patient_profile "
                                                                   "where created_at <= NOW() - INTERVAL 1 HOUR and "
-                                                                  "status not in (4, 11)"))
+                                                                  "status in (6, 8, 9)"))
     cursor.execute(sql_query)
     patient_id_list = []
-    patient_id_nv_list = []
+    patient_id_nv_list = [] 
     patient_id_cd_list = []
     patient_id_hv_list = []
     patient_id_gp_list = []
