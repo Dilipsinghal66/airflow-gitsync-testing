@@ -466,7 +466,7 @@ def process_custom_message_sql(sql_query, message):
             if str(data["device"]).lower() == "android":
                 ver = str(data["appVersion"]).split(".")
                 if len(ver) == 3:
-                    if (ver[0] == "v2" and int(ver[1]) >= 1 and int(ver[2]) >= 6) or (ver[0] == "v3"):
+                    if (ver[0] == "v2" and int(ver[1]) >= 1 and int(ver[2]) >= 6) or (ver[0] == "v3") or (ver[0] == "v4"):
                         send_chat_message(user_id=uid, payload=payload_custom)
                     else:
                         if not_story:
