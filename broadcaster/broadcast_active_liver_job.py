@@ -9,7 +9,7 @@ log = LoggingMixin().log
 
 def broadcast_active_liver():
 
-    process_broadcast_active_liver = int(Variable.get("process_broadcast_active_liver", '1'))
+    process_broadcast_active_liver = int(Variable.get("process_broadcast_active_liver", '0'))
     if process_broadcast_active_liver == 1:
         return
 
@@ -26,4 +26,4 @@ def broadcast_active_liver():
     log.info(filter_active_patient_query)
 
     message = str(Variable.get("broadcast_active_liver_msg", ''))
-    #process_custom_message_sql(filter_active_patient_query, message)
+    process_custom_message_sql(filter_active_patient_query, message)
