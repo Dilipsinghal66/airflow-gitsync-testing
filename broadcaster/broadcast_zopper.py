@@ -5,7 +5,7 @@ from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 
 from config import local_tz, default_args
-from broadcaster.broadcast_zooper_job import broadcast_zooper
+from broadcaster.broadcast_zopper_job import broadcast_zooper
 
 broadcast_zooper_cron = str(Variable.get(
     "broadcast_zooper_cron", '@once'))
