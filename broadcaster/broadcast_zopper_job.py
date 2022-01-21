@@ -17,4 +17,4 @@ def broadcast_zooper():
     log.info(filter_active_patient_query)
 
     message = str(Variable.get("broadcast_zooper_msg", ''))
-    #process_custom_message_sql(filter_active_patient_query, message)
+    process_custom_message_sql(filter_active_patient_query, message)
