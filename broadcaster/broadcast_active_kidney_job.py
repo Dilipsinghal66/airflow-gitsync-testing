@@ -7,16 +7,16 @@ from common.helpers import process_custom_message_sql
 log = LoggingMixin().log
 
 
-def broadcast_active_liver():
+def broadcast_active_kidney():
 
-    process_broadcast_active_liver = int(Variable.get("process_broadcast_active_liver", '0'))
-    if process_broadcast_active_liver == 1:
+    process_broadcast_active_kidney = int(Variable.get("process_broadcast_active_kidney", '0'))
+    if process_broadcast_active_kidney == 1:
         return
 
     mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
     collection = mongo_conn.get_database("plan-service").get_collection("plan_assignments")
 
-    results = collection.find({'planid': 71})
+    results = collection.find({'planid': 54})
     patientIds = []
     for q in results:
         patientIds.append(q['patientid'])
@@ -25,5 +25,5 @@ def broadcast_active_liver():
         str(x) for x in patientIds) + ")"
     log.info(filter_active_patient_query)
 
-    message = str(Variable.get("broadcast_active_liver_msg", ''))
-    process_custom_message_sql(filter_active_patient_query, message)
+    message = str(Variable.get("broadcast_active_kidney_msg", ''))
+    #process_custom_message_sql(filter_active_patient_query, message)
