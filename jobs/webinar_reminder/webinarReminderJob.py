@@ -120,7 +120,7 @@ def initializer(**kwargs):
 
 
 def interaktJob(**kwargs):
-    registrants,webinar = getRegistrants()
+    registrants,webinar = getRegistrants(2)
     if webinar != -1:
         log.info(registrants)
         for i, row in registrants.iterrows():
