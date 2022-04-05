@@ -50,4 +50,8 @@ def broadcast_pa_preg():
         return
 
     message = str(Variable.get("broadcast_pa_preg_msg", ""))
-    process_custom_message(user_id_list, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_pa_preg " + date_string
+
+    process_custom_message(user_id_list, message, group_id)

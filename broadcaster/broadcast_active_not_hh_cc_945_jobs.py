@@ -1,7 +1,7 @@
 from airflow.models import Variable
 
 from common.helpers import process_custom_message_sql
-
+from datetime import datetime
 
 def broadcast_active_not_hh_cc_945():
 
@@ -19,4 +19,8 @@ def broadcast_active_not_hh_cc_945():
                                                                          'is NULL or dp.code like \'AZ%\');'))
 
     message = str(Variable.get("broadcast_active_not_hh_cc_945_msg", ''))
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_not_hh_cc_945 " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)

@@ -420,7 +420,7 @@ def process_dynamic_task_sql(sql_query, message, action):
             log.error("User not found " + str(pid))
 
 
-def process_custom_message_sql(sql_query, message):
+def process_custom_message_sql(sql_query, message, group_id):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
     log.info(sql_query)
@@ -449,12 +449,15 @@ def process_custom_message_sql(sql_query, message):
     payload_dynamic = {
         "action": "dynamic_message",
         "message": dyn_message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     payload_custom = {
         "action": "custom_message",
         "message": message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
+
     }
     for uid in user_id_list:
         try:
@@ -495,7 +498,7 @@ def process_custom_message_sql(sql_query, message):
 #                          message_replace_data, message, action)
 
 
-def process_custom_message(user_id_list, message):
+def process_custom_message(user_id_list, message, group_id):
     log.info(user_id_list)
     query_endpoint = message
     query_status, query_data = make_http_request(conn_id="http_query_url",
@@ -507,12 +510,14 @@ def process_custom_message(user_id_list, message):
     payload_dynamic = {
         "action": "dynamic_message",
         "message": dyn_message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     payload_custom = {
         "action": "custom_message",
         "message": message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     for uid in user_id_list:
         try:
@@ -543,7 +548,7 @@ def process_custom_message(user_id_list, message):
             log.error("User not found " + str(uid))
 
 
-def process_custom_message_user_id(uid, message, append_msg):
+def process_custom_message_user_id(uid, message, append_msg, group_id):
     query_endpoint = message
     query_status, query_data = make_http_request(conn_id="http_query_url",
                                                  endpoint=query_endpoint,
@@ -555,13 +560,15 @@ def process_custom_message_user_id(uid, message, append_msg):
     payload_dynamic = {
         "action": "dynamic_message",
         "message": dyn_message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     payload_custom = {
         "action": "custom_message",
         "message": message,
         "body": dyn_message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     try:
         endpoint = str(uid) + "/latest"
@@ -591,7 +598,7 @@ def process_custom_message_user_id(uid, message, append_msg):
         log.error("User not found " + str(uid))
 
 
-def process_custom_message_sql_patient(message, patient_phonenos):
+def process_custom_message_sql_patient(message, patient_phonenos, group_id):
     engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
     connection = engine.get_conn()
     cursor = connection.cursor()
@@ -617,12 +624,14 @@ def process_custom_message_sql_patient(message, patient_phonenos):
     payload_dynamic = {
         "action": "dynamic_message",
         "message": dyn_message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     payload_custom = {
         "action": "custom_message",
         "message": message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     for uid in user_id_list:
         try:
@@ -670,13 +679,14 @@ def patient_user_id_conv_msg(patient_id_list,
 
 
 def process_dynamic_message(_filter, projection,
-                            message_replace_data, message, action):
+                            message_replace_data, message, action, group_id):
     user_data = get_data_from_db(conn_id="mongo_user_db", collection="user",
                                  filter=_filter, projection=projection)
     payload = {
         "action": action,
         "message": "",
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     for user in user_data:
         user_id = user.get("userId")
@@ -744,11 +754,12 @@ def fcm_message_send(registration_ids, message, title, click_action="https://zyl
                       payload=payload)
 
 
-def patient_id_message_send(patient_id, message, action):
+def patient_id_message_send(patient_id, message, action, group_id):
     payload = {
         "action": action,
         "message": message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
 
     send_chat_message_patient_id(patient_id=patient_id, payload=payload)

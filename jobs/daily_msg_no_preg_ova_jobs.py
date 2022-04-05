@@ -44,4 +44,8 @@ def daily_msg_no_preg_ova():
                                  "in (" + ','.join(str(x) for x in patientIds) + ")" + ")"))
     message = str(Variable.get("daily_message_msg", ""))
     log.info(sql_query)
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "daily_msg_no_preg_ova " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)

@@ -1,7 +1,7 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.contrib.hooks.mongo_hook import MongoHook
-
+from datetime import datetime
 from common.helpers import process_custom_message_sql
 
 log = LoggingMixin().log
@@ -17,4 +17,8 @@ def broadcast_zooper():
     log.info(filter_active_patient_query)
 
     message = str(Variable.get("broadcast_zooper_msg", ''))
-    process_custom_message_sql(filter_active_patient_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_zooper " + date_string
+
+    process_custom_message_sql(filter_active_patient_query, message, group_id)

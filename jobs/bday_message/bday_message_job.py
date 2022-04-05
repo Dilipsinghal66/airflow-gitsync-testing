@@ -27,6 +27,10 @@ def bday_message():
     '''))
     cursor.execute(sql_query)
     patient_id_list = []
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "bday_message " + date_string
+
     for row in cursor.fetchall():
         for _id in row:
             patient_id_list.append(_id)
@@ -35,7 +39,7 @@ def bday_message():
         message = str(Variable.get("bday_message_msg", ""))
         if message:
             try:
-                patient_id_message_send(patient_id, message, "custom_message")
+                patient_id_message_send(patient_id, message, "custom_message", group_id)
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")

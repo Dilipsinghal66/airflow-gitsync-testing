@@ -3,6 +3,7 @@ from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.http_functions import make_http_request
 from common.helpers import process_custom_message_sql_patient
+from datetime import datetime
 
 log = LoggingMixin().log
 
@@ -31,6 +32,10 @@ def broadcast_ova():
         patientIdDict[str(row[0])] = str(row[1])
 
     patient_phoneno = []
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_ova " + date_string
+
     for key, value in patientIdDict.items():
         try:
             query_endpoint = "/" + str(key) + "/primary"
@@ -43,4 +48,4 @@ def broadcast_ova():
         except:
             log.error("error for patient Id " + str(key))
 
-    process_custom_message_sql_patient(message, patient_phoneno)
+    process_custom_message_sql_patient(message, patient_phoneno, group_id)

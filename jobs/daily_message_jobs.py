@@ -23,4 +23,10 @@ def daily_message():
                                  "where to_status = 4 and "
                                  "updated_on > DATE_ADD(curdate(), INTERVAL -7 DAY)))"))
     message = str(Variable.get("daily_message_msg", ""))
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "daily_message " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)
+
+

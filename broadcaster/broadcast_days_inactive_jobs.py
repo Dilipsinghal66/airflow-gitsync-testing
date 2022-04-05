@@ -50,5 +50,9 @@ def broadcast_days_inactive():
     }
     message_replace_data = {}
     action = "dynamic_message"
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_days_inactive " + date_string
+
     process_dynamic_message(_filter, projection,
-                            message_replace_data, message, action)
+                            message_replace_data, message, action, group_id)

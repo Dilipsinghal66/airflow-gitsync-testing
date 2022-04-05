@@ -1,4 +1,5 @@
 from airflow.models import Variable
+import datetime
 
 from common.helpers import process_custom_message_sql
 
@@ -16,4 +17,8 @@ def one_week_trial():
                                                              ' and who = \'patient\''))
 
     message = str(Variable.get("one_week_trial_msg", ''))
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "freemium_journey " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)

@@ -3,6 +3,8 @@ from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import process_custom_message_user_id, get_medicine_details
 
+from datetime import datetime
+
 log = LoggingMixin().log
 
 def broadcast_active_medicine():
@@ -30,6 +32,9 @@ def broadcast_active_medicine():
 
     message = str(Variable.get("broadcast_active_medicine_msg", ''))
 
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_medicine " + date_string
+
     for patient_id in patient_id_list:
         med_list = get_medicine_details(patient_id)
         log.info(med_list)
@@ -53,7 +58,7 @@ def broadcast_active_medicine():
                         user_id = row[0]
                     log.info("sending for user id " + str(user_id))
                     if user_id != 0:
-                        process_custom_message_user_id(user_id, message, msg_str)
+                        process_custom_message_user_id(user_id, message, msg_str, group_id)
                 except Exception as e:
                     print("Error Exception raised")
                     print(e)

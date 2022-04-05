@@ -70,8 +70,12 @@ def broadcast_active_reporting_patients():
     action = "dynamic_message"
 
     try:
+
+        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "broadcast_active_reporting_patients " + date_string
+
         process_dynamic_message(_filter, projection,
-                                message_replace_data, message, action)
+                                message_replace_data, message, action, group_id)
     except Exception as e:
         warning_message = "Query on mongodb unsuccessful"
         log.warning(warning_message)

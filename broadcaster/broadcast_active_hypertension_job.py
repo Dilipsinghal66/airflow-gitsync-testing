@@ -48,11 +48,14 @@ def broadcast_active_hypertension():
     if process_broadcast_active == 1:
         return
 
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_hypertension " + date_string
+
     message = str(Variable.get("broadcast_active_hypertension_msg", ""))
     for patient_id in patientIds:
         if message:
             try:
-                patient_id_message_send(patient_id, message, "dynamic_message")
+                patient_id_message_send(patient_id, message, "dynamic_message", group_id)
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")

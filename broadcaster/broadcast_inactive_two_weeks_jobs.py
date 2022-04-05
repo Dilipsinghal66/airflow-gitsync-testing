@@ -1,7 +1,7 @@
 from airflow.models import Variable
 
 from common.helpers import process_custom_message_sql
-
+from datetime import datetime
 
 def broadcast_inactive_two_weeks():
 
@@ -19,5 +19,10 @@ def broadcast_inactive_two_weeks():
                                                                                         "referred_by = 0)"))
 
     message = str(Variable.get("broadcast_inactive_two_weeks_msg", ''))
-    process_custom_message_sql(sql_query, message)
+
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_inactive_two_weeks " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)
 

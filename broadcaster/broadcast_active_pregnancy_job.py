@@ -50,4 +50,8 @@ def broadcast_active_pregnancy():
         return
 
     message = str(Variable.get("broadcast_active_pregnancy_msg", ""))
-    process_custom_message(user_id_list, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_pregnancy " + date_string
+
+    process_custom_message(user_id_list, message, group_id)

@@ -1,4 +1,5 @@
 from airflow.models import Variable
+from datetime import datetime
 
 from common.helpers import process_custom_message_sql
 
@@ -15,4 +16,8 @@ def broadcast_pending_renewal():
                                  "from zylaapi.patient_profile where referred_by = 0 and status = 5 AND new_chat = 1)"))
 
     message = str(Variable.get("broadcast_pending_renewal_msg", ''))
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_pending_renewal " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)
