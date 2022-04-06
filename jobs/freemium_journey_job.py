@@ -3,7 +3,7 @@ from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import get_pa_details
 from common.helpers import process_custom_message
-import datetime
+from datetime import datetime
 
 log = LoggingMixin().log
 
