@@ -1,5 +1,5 @@
 from airflow.models import Variable
-import datetime
+from datetime import datetime
 
 from common.helpers import process_custom_message_sql
 

@@ -2,7 +2,7 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import process_custom_message_sql
-import datetime
+from datetime import datetime
 
 log = LoggingMixin().log
 
