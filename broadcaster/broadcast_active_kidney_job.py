@@ -3,6 +3,7 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.contrib.hooks.mongo_hook import MongoHook
 
 from common.helpers import process_custom_message_sql
+from datetime import datetime
 
 log = LoggingMixin().log
 
@@ -25,5 +26,8 @@ def broadcast_active_kidney():
         str(x) for x in patientIds) + ")"
     log.info(filter_active_patient_query)
 
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_kidney " + date_string
+
     message = str(Variable.get("broadcast_active_kidney_msg", ''))
-    process_custom_message_sql(filter_active_patient_query, message)
+    process_custom_message_sql(filter_active_patient_query, message, group_id)

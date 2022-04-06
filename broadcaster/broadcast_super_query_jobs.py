@@ -1,4 +1,5 @@
 from airflow.models import Variable
+from datetime import datetime
 
 from common.helpers import process_custom_message_sql
 
@@ -17,5 +18,9 @@ def broadcast_super_query():
                                  'and question_id = 1))'))
 
     message = str(Variable.get("broadcast_super_query_msg", ''))
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_super_query " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)
 

@@ -2,6 +2,7 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import patient_id_message_send
+import datetime
 
 log = LoggingMixin().log
 
@@ -24,6 +25,10 @@ def force_trial_message():
     patient_id_cd_list = []
     patient_id_hv_list = []
     patient_id_gp_list = []
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "force_trial_message " + date_string
+
     for row in cursor.fetchall():
         if row[1] == "NV":
             patient_id_nv_list.append(row[0])
@@ -40,7 +45,7 @@ def force_trial_message():
         message = str(Variable.get("force_trial_message_msg", ""))
         if message:
             try:
-                patient_id_message_send(patient_id, message, "start_trial")
+                patient_id_message_send(patient_id, message, "start_trial", group_id)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
@@ -51,7 +56,7 @@ def force_trial_message():
                   "please share a suitable time in the chat and our team will schedule the call."
         if message:
             try:
-                patient_id_message_send(patient_id, message, "start_trial")
+                patient_id_message_send(patient_id, message, "start_trial", group_id)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
@@ -62,7 +67,7 @@ def force_trial_message():
                   "ask here. Always there to help."
         if message:
             try:
-                patient_id_message_send(patient_id, message, "start_trial")
+                patient_id_message_send(patient_id, message, "start_trial", group_id)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
@@ -74,7 +79,7 @@ def force_trial_message():
                   "- <a href=\"https://zyla.tiny.us/HRA\" target=\"_blank\">https://zyla.tiny.us/HRA</a>"
         if message:
             try:
-                patient_id_message_send(patient_id, message, "start_trial")
+                patient_id_message_send(patient_id, message, "start_trial", group_id)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)
@@ -86,7 +91,7 @@ def force_trial_message():
                   "- <a href=\"https://zyla.tiny.us/HRA\" target=\"_blank\">https://zyla.tiny.us/HRA</a>"
         if message:
             try:
-                patient_id_message_send(patient_id, message, "start_trial")
+                patient_id_message_send(patient_id, message, "start_trial", group_id)
             except Exception as e:
                 print("Error Exception raised")
                 print(e)

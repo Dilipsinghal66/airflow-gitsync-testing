@@ -1,8 +1,10 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import process_dynamic_task_sql
+from datetime import datetime
 
 log = LoggingMixin().log
+
 
 """
 All paid female patients on bridge (status = 4)
@@ -28,7 +30,10 @@ def broadcast_active_fm():
         action = "dynamic_message"
         message = str(Variable.get("broadcast_active_female_msg", ''))
 
-        process_dynamic_task_sql(sql_query_female, message, action)
+        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "broadcast_active_fm " + date_string
+
+        process_dynamic_task_sql(sql_query_female, message, action, group_id)
 
     except Exception as e:
         warning_message = "Query on mysql database unsuccessful"

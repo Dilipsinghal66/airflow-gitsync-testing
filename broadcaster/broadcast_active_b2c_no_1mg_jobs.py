@@ -1,7 +1,7 @@
 from airflow.models import Variable
 
 from common.helpers import process_dynamic_task_sql
-
+from datetime import datetime
 
 def broadcast_active_b2c_no_1mg():
 
@@ -17,4 +17,8 @@ def broadcast_active_b2c_no_1mg():
 
     message = str(Variable.get("broadcast_active_b2c_no_1mg_msg", ''))
     action = "dynamic_message"
-    process_dynamic_task_sql(sql_query, message, action)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_b2c_no_1mg " + date_string
+
+    process_dynamic_task_sql(sql_query, message, action, group_id)

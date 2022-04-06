@@ -4,6 +4,7 @@ from common.helpers import send_event_request
 from common.helpers import send_user_primary_therapy_request
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.http_functions import make_http_request
+from datetime import datetime
 
 log = LoggingMixin().log
 

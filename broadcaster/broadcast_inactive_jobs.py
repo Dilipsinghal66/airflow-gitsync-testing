@@ -1,7 +1,7 @@
 from airflow.models import Variable
 
 from common.helpers import process_custom_message_sql
-
+from datetime import datetime
 
 def broadcast_inactive():
 
@@ -15,5 +15,9 @@ def broadcast_inactive():
                                                                       "where status in (11, 12, 5, 9) and new_chat=1)"))
 
     message = str(Variable.get("broadcast_inactive_msg", ''))
-    process_custom_message_sql(sql_query, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_inactive " + date_string
+
+    process_custom_message_sql(sql_query, message, group_id)
 

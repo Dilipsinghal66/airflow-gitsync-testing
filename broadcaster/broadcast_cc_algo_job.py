@@ -4,6 +4,7 @@ from common.helpers import send_chat_message_patient_id
 from airflow.contrib.hooks.mongo_hook import MongoHook
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
+from datetime import datetime
 
 def broadcast_cc_algo():
     process_broadcast_cc_algo = int(
@@ -21,6 +22,9 @@ def broadcast_cc_algo():
 
         cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where status = 4 or status = 5")
 
+        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "broadcast_cc_algo " + date_string
+
         for row in cursor.fetchall():
             icds=latest_cc(row[0])
             if not icds:
@@ -30,7 +34,8 @@ def broadcast_cc_algo():
                 msg=form_msg(row[1],row[2],cc)
                 payload_dynamic = {
                     "action": "dynamic_message",
-                    "message": msg
+                    "message": msg,
+                    "groupId": group_id
                 }
                 try:
                     send_chat_message_patient_id(row[0],payload_dynamic)

@@ -4,7 +4,7 @@ from airflow.contrib.hooks.mongo_hook import MongoHook
 
 from common.db_functions import get_data_from_db
 from common.helpers import process_custom_message
-
+from datetime import datetime
 
 
 log = LoggingMixin().log
@@ -49,4 +49,8 @@ def broadcast_active_diabetes():
         return
 
     message = str(Variable.get("broadcast_active_diabetes_msg", ""))
-    process_custom_message(user_id_list, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_diabetes " + date_string
+
+    process_custom_message(user_id_list, message, group_id)

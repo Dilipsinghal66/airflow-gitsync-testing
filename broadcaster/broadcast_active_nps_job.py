@@ -4,6 +4,7 @@ from common.custom_hooks.google_sheets_hook import GSheetsHook
 import pandas as pd
 from common.helpers import process_dynamic_task_sql
 from airflow.utils.log.logging_mixin import LoggingMixin
+from datetime import datetime
 
 log = LoggingMixin().log
 
@@ -72,4 +73,8 @@ def broadcast_active_nps():
 
     message = str(Variable.get("broadcast_active_nps_msg", ''))
     action = "dynamic_message"
-    process_dynamic_task_sql(query, message, action)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_nps " + date_string
+
+    process_dynamic_task_sql(query, message, action, group_id)

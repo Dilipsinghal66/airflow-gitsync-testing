@@ -3,6 +3,7 @@ from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import get_pa_details
 from common.helpers import process_custom_message
+import datetime
 
 log = LoggingMixin().log
 
@@ -111,6 +112,10 @@ def freemium_journey():
                                                               ">= NOW() - INTERVAL 31 DAY and status = 11"))
     cursor.execute(sql_query)
     patient_id_dict = {}
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "freemium_journey " + date_string
+
     for row in cursor.fetchall():
         patient_id_dict[row[0]] = row[1]
 
@@ -130,6 +135,6 @@ def freemium_journey():
             if user_id != 0:
                 user_id_list.append(user_id)
                 log.info(user_id_list)
-                process_custom_message(user_id_list, str(message))
+                process_custom_message(user_id_list, str(message), group_id)
         except Exception as e:
             log.error(e)

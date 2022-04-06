@@ -2,6 +2,7 @@ from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.db_functions import get_data_from_db
 from common.helpers import process_custom_message_sql
+from datetime import datetime
 
 log = LoggingMixin().log
 
@@ -20,7 +21,11 @@ def broadcast_doctor_patients():
         log.info(sql_query)
 
         message = str(Variable.get("broadcast_doctor_patients_msg", ''))
-        process_custom_message_sql(sql_query, message)
+
+        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "broadcast_doctor_patients " + date_string
+
+        process_custom_message_sql(sql_query, message, group_id)
 
     except Exception as e:
         print("Error Exception raised")

@@ -60,4 +60,8 @@ def broadcast_active_minus_preg():
         return
 
     message = str(Variable.get("broadcast_active_minus_preg_msg", ""))
-    process_custom_message(user_id_list, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_active_minus_preg " + date_string
+
+    process_custom_message(user_id_list, message, group_id)

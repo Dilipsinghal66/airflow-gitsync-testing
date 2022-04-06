@@ -1,6 +1,7 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.contrib.hooks.mongo_hook import MongoHook
+from datetime import datetime
 
 from common.db_functions import get_data_from_db
 from common.helpers import process_custom_message
@@ -48,4 +49,8 @@ def broadcast_covid():
         return
 
     message = str(Variable.get("broadcast_covid_msg", ""))
-    process_custom_message(user_ids, message)
+
+    date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    group_id = "broadcast_covid " + date_string
+
+    process_custom_message(user_ids, message, group_id)
