@@ -1,6 +1,6 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
-import datetime
+from datetime import datetime
 
 from common.db_functions import get_data_from_db
 from common.helpers import process_dynamic_message
