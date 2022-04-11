@@ -2,7 +2,7 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.helpers import patient_id_message_send
-import datetime
+from datetime import datetime
 
 log = LoggingMixin().log
 
