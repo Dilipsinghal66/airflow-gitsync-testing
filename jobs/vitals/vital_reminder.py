@@ -3,7 +3,7 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import patient_id_message_send
 from airflow.utils.log.logging_mixin import LoggingMixin
-import datetime
+from datetime import datetime
 
 log = LoggingMixin().log
 
@@ -59,6 +59,8 @@ def send_vital_reminder_func():
         for row in cursor.fetchall():
             param_grp_id_list.append(row[0])
 
+        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "broadcast_active_fm " + date_string
 
         for param_grp_id in param_grp_id_list:
 
@@ -129,7 +131,7 @@ def send_vital_reminder_func():
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
                 try:
-                    patient_id_message_send(key, message_to_send, action)
+                    patient_id_message_send(key, message_to_send, action, group_id)
                 except Exception as e:
                     print("Error Exception raised")
                     print(e)
@@ -139,7 +141,7 @@ def send_vital_reminder_func():
                 log.info("patient_id " + str(key))
                 log.info("Message " + message_to_send)
                 try:
-                    patient_id_message_send(key, message_to_send, action)
+                    patient_id_message_send(key, message_to_send, action, group_id)
                 except Exception as e:
                     print("Error Exception raised")
                     print(e)
