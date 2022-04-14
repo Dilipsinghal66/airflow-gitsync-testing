@@ -3,7 +3,7 @@ from airflow.models import Variable
 from common.db_functions import get_data_from_db
 from common.helpers import patient_id_message_send
 from airflow.utils.log.logging_mixin import LoggingMixin
-from datetime import datetime
+import datetime
 
 log = LoggingMixin().log
 
@@ -59,7 +59,7 @@ def send_vital_reminder_func():
         for row in cursor.fetchall():
             param_grp_id_list.append(row[0])
 
-        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        date_string = f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S%z}'
         group_id = "broadcast_active_fm " + date_string
 
         for param_grp_id in param_grp_id_list:
