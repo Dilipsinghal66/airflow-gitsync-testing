@@ -396,7 +396,7 @@ def patient_user_id_conv_msg_no_az(patient_id_list, message_replace_data,
                             message_replace_data, message, action, group_id)
 
 
-def process_dynamic_task_sql(sql_query, message, action):
+def process_dynamic_task_sql(sql_query, message, action, group_id):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
     patient_id_list = []
@@ -411,7 +411,8 @@ def process_dynamic_task_sql(sql_query, message, action):
     payload = {
         "action": action,
         "message": message,
-        "is_notification": False
+        "is_notification": False,
+        "groupId": group_id
     }
     for pid in patient_id_list:
         try:
