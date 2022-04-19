@@ -366,7 +366,7 @@ def get_pa_details(patient_id):
     return ret_value
 
 
-def process_dynamic_task_sql_no_az(sql_query, message, action):
+def process_dynamic_task_sql_no_az(sql_query, message, action, group_id):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
     patient_id_list = []
@@ -379,11 +379,11 @@ def process_dynamic_task_sql_no_az(sql_query, message, action):
 
     log.info(patient_id_list)
     patient_user_id_conv_msg_no_az(
-        patient_id_list, message_replace_data, message, action)
+        patient_id_list, message_replace_data, message, action, group_id)
 
 
 def patient_user_id_conv_msg_no_az(patient_id_list, message_replace_data,
-                                   message, action):
+                                   message, action, group_id):
     mongo_filter_field = "patientId"
     _filter = {
         mongo_filter_field: {"$in": patient_id_list},
@@ -393,7 +393,7 @@ def patient_user_id_conv_msg_no_az(patient_id_list, message_replace_data,
         "userId": 1, "patientId": 1, "_id": 0
     }
     process_dynamic_message(_filter, projection,
-                            message_replace_data, message, action)
+                            message_replace_data, message, action, group_id)
 
 
 def process_dynamic_task_sql(sql_query, message, action):
@@ -666,7 +666,7 @@ def process_custom_message_sql_patient(message, patient_phonenos, group_id):
 #                          message_replace_data, message, action)
 
 def patient_user_id_conv_msg(patient_id_list,
-                             message_replace_data, message, action):
+                             message_replace_data, message, action, group_id):
     mongo_filter_field = "patientId"
     _filter = {
         mongo_filter_field: {"$in": patient_id_list}
@@ -675,7 +675,7 @@ def patient_user_id_conv_msg(patient_id_list,
         "userId": 1, "patientId": 1, "_id": 0
     }
     process_dynamic_message(_filter, projection,
-                            message_replace_data, message, action)
+                            message_replace_data, message, action, group_id)
 
 
 def process_dynamic_message(_filter, projection,
