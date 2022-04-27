@@ -25,6 +25,9 @@ def vital_intense_managed():
         cursor.execute(sql_query)
         patient_id_distinct = []
 
+        date_string = f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "vital_intense_managed " + date_string
+
         for row in cursor.fetchall():
             patient_id_distinct.append(row[0])
 
@@ -89,7 +92,7 @@ def vital_intense_managed():
                       'Hence we will be recommending lesser sugar readings for next few days so that ' \
                       'you have to prick less!'
             try:
-                patient_id_message_send(patient_id, message, "dynamic_message")
+                patient_id_message_send(patient_id, message, "dynamic_message", group_id)
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")
@@ -99,7 +102,7 @@ def vital_intense_managed():
             message = 'Care team has noticed that your average blood sugars are slightly on the higher side, ' \
                       'so we will be requesting more frequent sugar testing next few days!'
             try:
-                patient_id_message_send(patient_id, message, "dynamic_message")
+                patient_id_message_send(patient_id, message, "dynamic_message", group_id)
                 print(patient_id)
             except Exception as e:
                 print("Error Exception raised")

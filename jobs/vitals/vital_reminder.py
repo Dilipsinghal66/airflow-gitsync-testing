@@ -60,7 +60,7 @@ def send_vital_reminder_func():
             param_grp_id_list.append(row[0])
 
         date_string = f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S%z}'
-        group_id = "broadcast_active_fm " + date_string
+        group_id = "vital_reminder " + date_string
 
         for param_grp_id in param_grp_id_list:
 
