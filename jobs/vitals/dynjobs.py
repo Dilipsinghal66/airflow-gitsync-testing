@@ -4,6 +4,7 @@ from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.db_functions import get_data_from_db
 from common.helpers import send_chat_message_patient_id
+from datetime import datetime
 
 log = LoggingMixin().log
 
@@ -31,6 +32,10 @@ def send_dyn_func():
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         # print(numberofPage)
         connection1.close()
+
+        date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+        group_id = "dyn " + date_string
+
         for i in range(numberofPage):
             engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
             # print("got db connection from environment")
@@ -80,7 +85,8 @@ def send_dyn_func():
                         payload = {
                             "action": "information_card",
                             "message": str(informationIdtobeSent),
-                            "is_notification": False
+                            "is_notification": False,
+                            "groupId": group_id
                         }
                         log.info("Before Message ")
                         send_chat_message_patient_id(patient_id=int(key), payload=payload)
