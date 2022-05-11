@@ -19,9 +19,9 @@ def fix_doc_profile_url():
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         print(numberofPage)
         for i in range(numberofPage):
-            docIdQuery = "select id from zylaapi.doc_profile where code not like '%ZH%' and id != 20 LIMIT " + str(  # noqa E303
+            docIdQuery = "select id from zylaapi.doc_profile where code like '%ZH%' or code like 'HH%' or code like 'AZ%' and id != 20 LIMIT " + str(  # noqa E303
                 i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
-            docCodeQuery  = "select code from zylaapi.doc_profile where code not like '%ZH%' and id != 20 LIMIT " + str(  # noqa E303
+            docCodeQuery  = "select code from zylaapi.doc_profile where code like '%ZH%' or code like 'HH%' or code like 'AZ%' and id != 20 LIMIT " + str(  # noqa E303
                 i * PAGE_SIZE) + ", " + str(PAGE_SIZE)
             cursor.execute(docIdQuery)
             docIdList = []
