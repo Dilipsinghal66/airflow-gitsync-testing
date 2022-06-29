@@ -218,6 +218,10 @@ def initializer(**kwargs):
             raise e
 
         try:
+            log.info("Data ...")
+            log.info(spreadsheet_data)
+            log.info("Fields ...")
+            log.info(db.fields)
             failed_doctor_codes_list = dump_data_in_db(
                             table_name=db.table_name,
                             spreadsheet_data=spreadsheet_data,
