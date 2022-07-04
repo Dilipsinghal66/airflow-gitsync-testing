@@ -7,7 +7,8 @@ from airflow.operators.python_operator import PythonOperator
 from config import local_tz, default_args
 from broadcaster.broadcast_city_jobs import broadcast_city
 
-broadcast_city_cron = str(Variable.get("broadcast_city_cron", '@once'))
+broadcast_city_cron = str(Variable.get(
+    "broadcast_city_cron", '@once'))
 
 broadcast_city_dag = DAG(
     dag_id="broadcast_city",
@@ -23,7 +24,7 @@ broadcast_city_task = PythonOperator(
     task_id="broadcast_city",
     task_concurrency=1,
     python_callable=broadcast_city,
-    dag=broadcast_city,
+    dag=broadcast_city_dag,
     op_kwargs={},
     pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
