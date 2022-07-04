@@ -25,11 +25,15 @@ def schema_validation(validator_obj, spreadsheet_row):
 
     if not validation_result:
         log.warning(validator_obj.errors)
-        list_of_errors = validator_obj.errors.get('row')[0]
-        list_of_keys = list_of_errors.keys()
+        try:
+            list_of_errors = validator_obj.errors.get('row')[0]
+            list_of_keys = list_of_errors.keys()
 
-        for param in list_of_keys:
-            spreadsheet_row[param] = list_of_errors.get(param)[0]
+            for param in list_of_keys:
+                spreadsheet_row[param] = list_of_errors.get(param)[0]
+        except Exception as e:
+            log.error(e, exc_info=True)
+
 
     return validation_result, spreadsheet_row
 
@@ -218,6 +222,10 @@ def initializer(**kwargs):
             raise e
 
         try:
+            log.info("Data ...")
+            log.info(spreadsheet_data)
+            log.info("Fields ...")
+            log.info(db.fields)
             failed_doctor_codes_list = dump_data_in_db(
                             table_name=db.table_name,
                             spreadsheet_data=spreadsheet_data,
