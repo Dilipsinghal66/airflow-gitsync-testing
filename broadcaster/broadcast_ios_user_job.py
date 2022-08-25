@@ -1,6 +1,6 @@
 from airflow.models import Variable
 from airflow.utils.log.logging_mixin import LoggingMixin
-from common.helpers import process_custom_message_sql
+from common.helpers import process_ios_message_sql
 from datetime import datetime
 
 log = LoggingMixin().log
@@ -31,7 +31,7 @@ def broadcast_ios_user():
         date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
         group_id = "broadcast_ios_user " + date_string
 
-        process_custom_message_sql(sql_query, message, group_id)
+        process_ios_message_sql(sql_query, message, group_id)
 
     except Exception as e:
         warning_message = "Query on mysql database unsuccessful"
