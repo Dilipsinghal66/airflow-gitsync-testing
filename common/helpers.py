@@ -421,6 +421,40 @@ def process_dynamic_task_sql(sql_query, message, action, group_id):
             log.error("User not found " + str(pid))
 
 
+def process_ios_message_sql(sql_query, message, group_id):
+    sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
+                                sql_query=sql_query, execute_query=True)
+    log.info(sql_query)
+    user_id_list = []
+    if sql_data:
+        for user in sql_data:
+            user_id = user[0]
+            user_id_list.append(user_id)
+
+    log.info(user_id_list)
+
+    payload_dynamic = {
+        "action": "dynamic_message",
+        "message": message,
+        "is_notification": False,
+        "groupId": group_id
+    }
+
+    for uid in user_id_list:
+        try:
+            endpoint = str(uid) + "/latest"
+            status, data = make_http_request(conn_id="http_device_url",
+                                             endpoint=endpoint, method="GET")
+            log.info(data["appVersion"])
+            log.info(data["device"])
+            if str(data["device"]).lower() == "android":
+                log.info("Skipping Uid")
+            else:
+                send_chat_message(user_id=uid, payload=payload_dynamic)
+        except:
+            log.error("User not found " + str(uid))
+
+
 def process_custom_message_sql(sql_query, message, group_id):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
