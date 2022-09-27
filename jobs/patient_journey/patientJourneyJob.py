@@ -19,7 +19,7 @@ def getPatientStatus():
 
         cursor.execute(
             "select patient_id,from_status,to_status,updated_on from zylaapi.patient_status_audit "
-            "WHERE patient_id not in (SELECT id FROM zylaapi.patient_profile where client_code = 'AB')")
+            "WHERE patient_id not in (SELECT id FROM zylaapi.patient_profile where client_code = \'AB\')")
         patientIds = {}
         patientToStatues = {}
         currentDate = datetime.now().date()

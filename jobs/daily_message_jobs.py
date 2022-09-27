@@ -17,7 +17,7 @@ def daily_message():
     sql_query = str(Variable.get("daily_message_sql_query",
                                  "SELECT id from zylaapi.auth where who = \'patient\' and phoneno in (select phoneno "
                                  "from zylaapi.patient_profile "
-                                 "where status = 4 and client_code != 'AB' and new_chat = 1 "
+                                 "where status = 4 and client_code != \'AB\' and new_chat = 1 "
                                  "and id not in (select patient_id from "
                                  "zylaapi.patient_status_audit "
                                  "where to_status = 4 and "

@@ -13,7 +13,8 @@ def broadcast_active_without_doccode():
 
     sql_query = str(Variable.get("broadcast_active_sql_query",
                                  'select id from zylaapi.auth where phoneno in (select phoneno from '
-                                 'zylaapi.patient_profile where status = 4 AND new_chat=1 and referred_by '
+                                 'zylaapi.patient_profile where status = 4 AND new_chat=1 '
+                                 'and client_code != \'AB\' and referred_by '
                                  'in (0, 138602, 20)) and who = \'patient\''))
 
     message = str(Variable.get("broadcast_active_without_doccode_msg", ''))

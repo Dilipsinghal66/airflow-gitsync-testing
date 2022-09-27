@@ -110,7 +110,7 @@ def freemium_journey():
                                                               "zylaapi.patient_profile where created_at <= "
                                                               "NOW() - INTERVAL 1 DAY AND created_at "
                                                               ">= NOW() - INTERVAL 31 DAY and status = 11 "
-                                                              "and client_code != 'AB'"))
+                                                              "and client_code != \'AB\'"))
     cursor.execute(sql_query)
     patient_id_dict = {}
 
