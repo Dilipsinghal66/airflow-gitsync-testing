@@ -20,7 +20,8 @@ def broadcast_cc_algo():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where status = 4 or status = 5")
+        cursor.execute("Select id,gender,lastName from zylaapi.patient_profile where status = 4 or status = 5 "
+                       "AND client_code != \'AB\'")
 
         date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
         group_id = "broadcast_cc_algo " + date_string

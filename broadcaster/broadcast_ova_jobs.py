@@ -20,7 +20,8 @@ def broadcast_ova():
     cursor = connection.cursor()
 
     sql_query = str(Variable.get("broadcast_ova_sql_query", 'select id, phoneno from zylaapi.patient_profile '
-                                                            'where status = 4 AND new_chat = 1'))
+                                                            'where status = 4 AND new_chat = 1 AND '
+                                                            'client_code != \'AB\''))
 
     message = str(Variable.get("broadcast_ova_msg", ''))
 
