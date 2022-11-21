@@ -25,7 +25,8 @@ def send_dyn_func():
         cursor1 = connection1.cursor()
         # print("created connection from engine")
 
-        cursor1.execute("select count(*) from zylaapi.patient_profile where client_code != 'AB' and new_chat = 1")
+        cursor1.execute("select count(*) from zylaapi.patient_profile where client_code != 'AB' and new_chat = 1 "
+                        "and status = 4")
         totalcount = cursor1.fetchone()[0]
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
@@ -43,7 +44,7 @@ def send_dyn_func():
             patientIdSqlQuerry = "select pp.id, pp.countDidYouKnow, pp.phoneno, pp.countrycode, auth.id as userId from " \
                                  "zylaapi.patient_profile pp left join zylaapi.auth auth on " \
                                  " pp.phoneno = auth.phoneno and pp.countrycode = auth.countrycode where " \
-                                 " auth.who = 'patient' and " \
+                                 " auth.who = 'patient' and pp.status = 4 " \
                                  " pp.new_chat = 1 and pp.client_code != 'AB' LIMIT " + str(i * PAGE_SIZE) + \
                                  ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
