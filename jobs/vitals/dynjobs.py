@@ -44,7 +44,7 @@ def send_dyn_func():
             patientIdSqlQuerry = "select pp.id, pp.countDidYouKnow, pp.phoneno, pp.countrycode, auth.id as userId from " \
                                  "zylaapi.patient_profile pp left join zylaapi.auth auth on " \
                                  " pp.phoneno = auth.phoneno and pp.countrycode = auth.countrycode where " \
-                                 " auth.who = 'patient' and pp.status = 4 " \
+                                 " auth.who = 'patient' and pp.status = 4 and " \
                                  " pp.new_chat = 1 and pp.client_code != 'AB' LIMIT " + str(i * PAGE_SIZE) + \
                                  ", " + str(PAGE_SIZE)
             cursor.execute(patientIdSqlQuerry)
