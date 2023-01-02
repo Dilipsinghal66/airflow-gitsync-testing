@@ -4,6 +4,10 @@ from datetime import datetime, date, timedelta
 from http import HTTPStatus
 from random import choice
 from time import sleep
+import pygsheets
+import pandas as pd
+
+
 
 from airflow.contrib.hooks.redis_hook import RedisHook
 from airflow.models import Variable
@@ -22,6 +26,17 @@ enable_message = bool(int(Variable.get("enable_message", "1")))
 
 log = LoggingMixin().log
 
+def get_values(id, range):
+    gc = pygsheets.authorize()
+    sheet = gc.open_by_key(id)
+    title = range.split("!")[0]
+    sheetRange = range.split("!")[1].split(":")
+
+    worksheet = sheet.worksheet_by_title(title)
+    wrk = worksheet.get_values(sheetRange[0], sheetRange[1])
+
+    df = pd.DataFrame(wrk[1:], columns=wrk[0])
+    return df
 
 def send_chat_message_log(user_id=None, payload=None):
     try:
