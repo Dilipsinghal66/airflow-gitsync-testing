@@ -27,7 +27,7 @@ enable_message = bool(int(Variable.get("enable_message", "1")))
 log = LoggingMixin().log
 
 def get_values(id, range):
-    gc = pygsheets.authorize()
+    gc = pygsheets.authorize(client_secret="/usr/local/airflow/dags/common/sheets.googleapis.com-python.json")
     sheet = gc.open_by_key(id)
     title = range.split("!")[0]
     sheetRange = range.split("!")[1].split(":")
