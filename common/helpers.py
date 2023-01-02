@@ -44,8 +44,7 @@ def get_values(id, range):
     worksheet = sheet.worksheet_by_title(title)
     wrk = worksheet.get_values(sheetRange[0], sheetRange[1])
 
-    df = pd.DataFrame(wrk[1:], columns=wrk[0])
-    return df
+    return wrk
 
 def send_chat_message_log(user_id=None, payload=None):
     try:
