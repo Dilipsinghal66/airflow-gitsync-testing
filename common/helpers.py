@@ -39,6 +39,8 @@ def get_values(id, range):
     title = range.split("!")[0]
     sheetRange = range.split("!")[1].split(":")
 
+    log.debug(sheet, title, sheetRange)
+
     worksheet = sheet.worksheet_by_title(title)
     wrk = worksheet.get_values(sheetRange[0], sheetRange[1])
 
