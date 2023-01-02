@@ -15,6 +15,8 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
 from dateutil import parser
 from twilio.base.exceptions import TwilioRestException
+from google.oauth2 import credentials
+
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
@@ -28,6 +30,10 @@ log = LoggingMixin().log
 
 def get_values(id, range):
     config_object = json.loads(Variable.get("pygsheets_config", ""))
+    _SCOPES = ('https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive')
+
+    config_object = credentials.Credentials.from_authorized_user_info(config_object, _SCOPES)
+
     gc = pygsheets.authorize(custom_credentials=config_object)
     sheet = gc.open_by_key(id)
     title = range.split("!")[0]
