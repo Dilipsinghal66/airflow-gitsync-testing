@@ -4,7 +4,7 @@ from datetime import datetime, date, timedelta
 from http import HTTPStatus
 from random import choice
 from time import sleep
-# import pygsheets
+import pygsheets
 import pandas as pd
 
 
@@ -29,21 +29,20 @@ enable_message = bool(int(Variable.get("enable_message", "1")))
 log = LoggingMixin().log
 
 def get_values(id, range):
-    # config_object = json.loads(Variable.get("pygsheets_config", ""))
-    # _SCOPES = ('https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive')
+    config_object = json.loads(Variable.get("pygsheets_config", ""))
+    _SCOPES = ('https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive')
 
-    # config_object = credentials.Credentials.from_authorized_user_info(config_object, _SCOPES)
+    config_object = credentials.Credentials.from_authorized_user_info(config_object, _SCOPES)
 
-    # gc = pygsheets.authorize(custom_credentials=config_object)
-    # sheet = gc.open_by_key(id)
-    # title = range.split("!")[0]
-    # sheetRange = range.split("!")[1].split(":")
+    gc = pygsheets.authorize(custom_credentials=config_object)
+    sheet = gc.open_by_key(id)
+    title = range.split("!")[0]
+    sheetRange = range.split("!")[1].split(":")
 
-    # log.debug(sheet, title, sheetRange)
+    log.debug(sheet, title, sheetRange)
 
-    # worksheet = sheet.worksheet_by_title(title)
-    # wrk = worksheet.get_values(sheetRange[0], sheetRange[1])
-    wrk = [[]]
+    worksheet = sheet.worksheet_by_title(title)
+    wrk = worksheet.get_values(sheetRange[0], sheetRange[1])
 
     return wrk
 
