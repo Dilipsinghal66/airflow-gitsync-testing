@@ -495,7 +495,11 @@ def process_custom_message_sql(sql_query, message, group_id):
 
     }
     for uid in user_id_list:
-        send_chat_message(user_id=uid, payload=payload_custom)
+        try:
+            send_chat_message(user_id=uid, payload=payload_custom)
+        except Exception as e:
+            print("Error Exception raised")
+            print(e)
 
 
 # patient_user_id_conv_msg(patient_id_list,
