@@ -6,7 +6,7 @@ from common.custom_hooks.google_sheets_hook import GSheetsHook
 from cerberus import Validator
 from airflow.utils.log.logging_mixin import LoggingMixin
 from common.pyjson import PyJSON
-
+from common.helpers import get_values 
 
 log = LoggingMixin().log
 
@@ -191,10 +191,12 @@ def initializer(**kwargs):
 
     try:
 
-        spreadsheet_data = sheet_hook.get_values(range_=sheet.column_range,
-                                                 major_dimension=sheet.
-                                                 major_dimensions).\
-                                                 get('values')
+        # spreadsheet_data = sheet_hook.get_values(range_=sheet.column_range,
+        #                                          major_dimension=sheet.
+        #                                          major_dimensions).\
+        #                                          get('values')
+        spreadsheet_data = get_values(id=sheet.id, range=sheet.column_range)
+        log.debug("values recieved from spreadsheet...", spreadsheet_data)
 
     except Exception as e:
         warning_message = "Data retrieval from Google Sheet failed"

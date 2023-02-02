@@ -4,6 +4,10 @@ from datetime import datetime, date, timedelta
 from http import HTTPStatus
 from random import choice
 from time import sleep
+import pygsheets
+import pandas as pd
+
+
 
 from airflow.contrib.hooks.redis_hook import RedisHook
 from airflow.models import Variable
@@ -11,6 +15,8 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from bson import ObjectId
 from dateutil import parser
 from twilio.base.exceptions import TwilioRestException
+from google.oauth2 import credentials
+
 
 from common.db_functions import get_data_from_db
 from common.http_functions import make_http_request
@@ -22,6 +28,23 @@ enable_message = bool(int(Variable.get("enable_message", "1")))
 
 log = LoggingMixin().log
 
+def get_values(id, range):
+    config_object = json.loads(Variable.get("pygsheets_config", ""))
+    _SCOPES = ('https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive')
+
+    config_object = credentials.Credentials.from_authorized_user_info(config_object, _SCOPES)
+
+    gc = pygsheets.authorize(custom_credentials=config_object)
+    sheet = gc.open_by_key(id)
+    title = range.split("!")[0]
+    sheetRange = range.split("!")[1].split(":")
+
+    log.debug(sheet, title, sheetRange)
+
+    worksheet = sheet.worksheet_by_title(title)
+    wrk = worksheet.get_values(sheetRange[0], sheetRange[1])
+
+    return wrk
 
 def send_chat_message_log(user_id=None, payload=None):
     try:
