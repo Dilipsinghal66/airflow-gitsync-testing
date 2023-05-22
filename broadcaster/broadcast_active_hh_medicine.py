@@ -8,7 +8,7 @@ from config import local_tz, default_args
 from broadcaster.broadcast_active_hh_medicine_jobs import broadcast_active_hh_medicine
 
 broadcast_active_hh_cron = str(Variable.get(
-    "broadcast_active_hh_medicine", '@weekly'))
+    "broadcast_active_hh_medicine", '@once'))
 
 broadcast_active_hh_dag = DAG(
     dag_id="broadcast_active_hh_medicine",
