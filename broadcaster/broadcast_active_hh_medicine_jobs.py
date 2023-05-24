@@ -20,7 +20,8 @@ def get_medicines():
         medicines = []
         for q in results:
             medicines.append(q['mCode'])
-
+        return medicines
+    
     except Exception as e:
         log.info("Error Exception raised")
         log.info(e)
@@ -35,7 +36,7 @@ def get_patient_ids():
         collection = mongo_conn.get_database("tracking").get_collection("md_tracking")
        
         results = collection.find(
-            {{"medicineDetails.medicine": {"$in": mCode}}})
+            {"medicineDetails.medicine": {"$in": mCode}})
         patientIds = []
         for q in results:
             patientIds.append(q['patientId'])
