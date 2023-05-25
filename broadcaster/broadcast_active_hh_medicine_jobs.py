@@ -44,7 +44,7 @@ def get_patient_ids():
         engine = get_data_from_db(db_type="mysql", conn_id="mysql_monolith")
         connection = engine.get_conn()
         cursor = connection.cursor()
-        filter_active_patient_query = "select id from patient_profile where status=4 and client_code in ('HH','AZ') and new_chat=1 and id in (" + ','.join(
+        filter_active_patient_query = "select id from zylaapi.patient_profile where status=4 and client_code in ('HH','AZ') and new_chat=1 and id in (" + ','.join(
             str(x) for x in patientIds) + ")"
 
         cursor.execute(filter_active_patient_query)
