@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 
 from config import local_tz, default_args
 from broadcaster.broadcast_active_jobs import broadcast_active
