@@ -26,6 +26,6 @@ switch_active_cm_task = PythonOperator(
     python_callable=create_reportings_func,
     dag=create_reportings_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

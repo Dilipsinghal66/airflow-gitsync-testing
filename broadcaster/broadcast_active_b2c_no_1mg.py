@@ -26,6 +26,6 @@ broadcast_active_noaz_task = PythonOperator(
     python_callable=broadcast_active_b2c_no_1mg,
     dag=broadcast_active_b2c_no_1mg_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

@@ -24,5 +24,5 @@ broadcast_active_no_profile_pic_task = PythonOperator(
     python_callable=broadcast_active_patients_no_profile_pic,
     dag=broadcast_active_no_profile_pic_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
 )

@@ -25,6 +25,6 @@ broadcast_newuser_otp_task = PythonOperator(
     python_callable=broadcast_newuser_otp,
     dag=broadcast_newuser_otp_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

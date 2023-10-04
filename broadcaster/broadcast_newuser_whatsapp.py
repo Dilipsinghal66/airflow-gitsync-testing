@@ -25,6 +25,6 @@ broadcast_newuser_whatsapp_task = PythonOperator(
     python_callable=broadcast_newuser_whatsapp,
     dag=broadcast_newuser_whatsapp_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

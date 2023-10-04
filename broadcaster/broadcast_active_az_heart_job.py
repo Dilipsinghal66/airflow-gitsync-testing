@@ -16,7 +16,8 @@ def broadcast_active_az_heart():
     mongo_conn = MongoHook(conn_id="mongo_prod").get_conn()
     collection = mongo_conn.get_database("plan-service").get_collection("plan_assignments")
 
-    results = collection.find({'planid': 63})
+    results = collection.find({'planid':91 })
+    log.info(results)
     patientIds = []
     for q in results:
         patientIds.append(q['patientid'])

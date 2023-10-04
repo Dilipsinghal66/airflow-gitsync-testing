@@ -26,6 +26,6 @@ broadcast_website_page_task = PythonOperator(
     python_callable=broadcast_website_page,
     dag=broadcast_website_page_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

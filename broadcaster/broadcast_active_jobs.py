@@ -12,8 +12,8 @@ def broadcast_active():
 
     sql_query = str(Variable.get("broadcast_active_sql_query", 'select id from zylaapi.auth where who = \'patient\' '
                                                                'and phoneno in (select '
-                                                               'phoneno from zylaapi.patient_profile where status = 4 '
-                                                               'AND new_chat = 1 AND id = 5397)'))
+                                                               'phoneno from zylaapi.patient_profile where status = 6 '
+                                                               'AND new_chat = 1 AND id = 10611)'))
 
     message = str(Variable.get("broadcast_active_msg", ''))
 

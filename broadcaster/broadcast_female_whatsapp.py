@@ -26,6 +26,6 @@ broadcast_female_whatsapp_task = PythonOperator(
     python_callable=broadcast_female_whatsapp,
     dag=broadcast_female_whatsapp_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

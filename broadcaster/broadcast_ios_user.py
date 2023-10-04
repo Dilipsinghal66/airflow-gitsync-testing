@@ -22,5 +22,5 @@ broadcast_ios_user_task = PythonOperator(
     python_callable=broadcast_ios_user,
     dag=broadcast_ios_user_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
 )

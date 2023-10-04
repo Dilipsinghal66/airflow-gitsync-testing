@@ -22,7 +22,7 @@ lab_whatsapp_task = PythonOperator(
     task_concurrency=1,
     python_callable=initializer,
     dag=lab_whatsapp_dag,
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )

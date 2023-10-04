@@ -26,6 +26,6 @@ broadcast_active_diabetes_d2c_task = PythonOperator(
     python_callable=broadcast_active_diabetes_d2c,
     dag=broadcast_active_diabetes_d2c_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

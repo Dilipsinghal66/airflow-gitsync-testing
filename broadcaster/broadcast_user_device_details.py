@@ -26,6 +26,6 @@ broadcast_device_detail_user = PythonOperator(
     python_callable=broadcast_user_device_detail,
     dag=broadcast_device_detail_user_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

@@ -25,6 +25,6 @@ freemium_journey_task = PythonOperator(
     python_callable=freemium_journey,
     dag=freemium_journey_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

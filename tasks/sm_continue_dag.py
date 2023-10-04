@@ -22,6 +22,6 @@ add_sales_cm_task = PythonOperator(
     python_callable=continue_statemachine,
     dag=sm_continue_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

@@ -22,7 +22,7 @@ active_to_redis_task = PythonOperator(
     python_callable=refresh_cm_type_user_redis,
     dag=users_to_redis_dag,
     op_kwargs={"cm_type": "active"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )
 
@@ -32,7 +32,7 @@ sales_to_redis_task = PythonOperator(
     python_callable=refresh_cm_type_user_redis,
     dag=users_to_redis_dag,
     op_kwargs={"cm_type": "sales"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )
 
@@ -42,6 +42,6 @@ az_to_redis_task = PythonOperator(
     python_callable=refresh_cm_type_user_redis,
     dag=users_to_redis_dag,
     op_kwargs={"cm_type": "az"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

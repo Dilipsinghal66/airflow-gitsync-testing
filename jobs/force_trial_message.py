@@ -25,6 +25,6 @@ force_trial_message_task = PythonOperator(
     python_callable=force_trial_message,
     dag=force_trial_message_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

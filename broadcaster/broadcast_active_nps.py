@@ -26,6 +26,6 @@ broadcast_active_nps_task = PythonOperator(
     python_callable=broadcast_active_nps,
     dag=broadcast_active_nps_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

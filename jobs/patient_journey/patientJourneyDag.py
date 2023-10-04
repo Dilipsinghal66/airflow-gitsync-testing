@@ -23,7 +23,7 @@ patient_journey_task_8_30 = PythonOperator(
     python_callable=initializer,
     dag=patient_journey_dag_8_30,
     op_kwargs={"time": "8:30 AM"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )
@@ -42,7 +42,7 @@ patient_journey_task_7_00 = PythonOperator(
     python_callable=initializer,
     dag=patient_journey_dag_7_00,
     op_kwargs={"time": "7:00 PM"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )
@@ -61,7 +61,7 @@ patient_journey_task_9_45 = PythonOperator(
     python_callable=initializer,
     dag=patient_journey_dag_9_45,
     op_kwargs={"time": "9:45 PM"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )
@@ -80,7 +80,7 @@ premium_patient_journey_task_9_45 = PythonOperator(
     python_callable=initializer,
     dag=premium_patient_journey_dag_9_45,
     op_kwargs={"time": "9:45 PM", "type": "premium"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )

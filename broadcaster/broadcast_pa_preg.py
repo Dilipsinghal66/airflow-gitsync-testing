@@ -26,6 +26,6 @@ broadcast_pa_preg_task = PythonOperator(
     python_callable=broadcast_pa_preg,
     dag=broadcast_pa_preg_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

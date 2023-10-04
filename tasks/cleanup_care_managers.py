@@ -22,6 +22,6 @@ get_distinct_cm = PythonOperator(
     python_callable=get_distinct_care_managers,
     dag=cleanup_care_managers_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

@@ -26,6 +26,6 @@ broadcast_inactive_task = PythonOperator(
     python_callable=broadcast_inactive,
     dag=broadcast_inactive_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

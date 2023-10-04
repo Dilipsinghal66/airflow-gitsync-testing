@@ -25,6 +25,6 @@ daily_msg_no_preg_ova_task = PythonOperator(
     python_callable=daily_msg_no_preg_ova,
     dag=daily_msg_no_preg_ova_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

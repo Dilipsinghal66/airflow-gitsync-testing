@@ -26,6 +26,6 @@ broadcast_single_offer_task = PythonOperator(
     python_callable=broadcast_single_offer,
     dag=broadcast_single_offer_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

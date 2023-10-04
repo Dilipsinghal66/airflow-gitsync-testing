@@ -25,5 +25,5 @@ broadcast_active_reporting_patients_task = PythonOperator(
     python_callable=broadcast_active_reporting_patients,
     dag=broadcast_active_reporting_patients_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
 )

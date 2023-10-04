@@ -26,6 +26,5 @@ broadcast_active_az_heart_task = PythonOperator(
     python_callable=broadcast_active_az_heart,
     dag=broadcast_active_az_heart_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
     retry_exponential_backoff=True
 )

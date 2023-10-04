@@ -25,6 +25,6 @@ broadcast_active_no_az_hh_task = PythonOperator(
     python_callable=broadcast_active_no_az_hh,
     dag=broadcast_active_no_az_hh_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

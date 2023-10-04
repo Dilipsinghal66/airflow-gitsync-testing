@@ -26,6 +26,6 @@ broadcast_pending_renewal_task = PythonOperator(
     python_callable=broadcast_pending_renewal,
     dag=broadcast_pending_renewal_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

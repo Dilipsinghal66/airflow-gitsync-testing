@@ -22,6 +22,6 @@ twilio_cleanup_task = PythonOperator(
     python_callable=twilio_cleanup,
     dag=twilio_cleanup_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

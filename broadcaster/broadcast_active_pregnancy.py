@@ -26,6 +26,6 @@ broadcast_active_pregnancy_task = PythonOperator(
     python_callable=broadcast_active_pregnancy,
     dag=broadcast_active_pregnancy_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

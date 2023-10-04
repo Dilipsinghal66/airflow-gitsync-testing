@@ -24,6 +24,6 @@ task_id="switch_week",
     python_callable=week_switch,
     dag=switch_week_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

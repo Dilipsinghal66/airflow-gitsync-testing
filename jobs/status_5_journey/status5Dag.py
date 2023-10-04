@@ -22,7 +22,7 @@ status_5_task = PythonOperator(
     task_concurrency=1,
     python_callable=initializer,
     dag=status_5_dag,
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )

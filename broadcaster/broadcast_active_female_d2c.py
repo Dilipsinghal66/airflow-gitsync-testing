@@ -22,5 +22,5 @@ broadcast_active_female_d2c_task = PythonOperator(
     python_callable=broadcast_active_female_d2c,
     dag=broadcast_active_female_d2c_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
 )

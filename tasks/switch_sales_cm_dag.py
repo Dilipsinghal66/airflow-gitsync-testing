@@ -22,7 +22,7 @@ add_sales_cm_task = PythonOperator(
     python_callable=add_sales_cm,
     dag=switch_sales_cm_dag,
     op_kwargs={"cm_type": "sales"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )
 
@@ -32,6 +32,6 @@ remove_sales_cm_task = PythonOperator(
     python_callable=remove_sales_cm,
     dag=switch_sales_cm_dag,
     op_kwargs={"cm_type": "sales"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

@@ -25,6 +25,6 @@ one_week_trial_task = PythonOperator(
     python_callable=one_week_trial,
     dag=one_week_trial_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

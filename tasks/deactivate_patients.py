@@ -22,7 +22,7 @@ deactivate_patients_task = PythonOperator(
     python_callable=deactivate_patients,
     dag=deactivate_patients_dag,
     op_kwargs={"userStatus": 5, "assignedCmType": "normal", "assignedCm": 0},
-    pool="scheduled_jobs_pool",
+    
     execution_timeout=timedelta(minutes=1),
     on_failure_callback=None
 )

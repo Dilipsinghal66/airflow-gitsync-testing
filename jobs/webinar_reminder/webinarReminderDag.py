@@ -23,7 +23,7 @@ webinar_reminder_task = PythonOperator(
     python_callable=initializer,
     dag=webinar_reminder_dag,
     op_kwargs={"rType": 1},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )
@@ -42,7 +42,7 @@ webinar_reminder_task_one_day_before = PythonOperator(
     python_callable=initializer,
     dag=webinar_reminder_dag_one_day_before,
     op_kwargs={"rType": 2},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )
@@ -61,7 +61,7 @@ webinar_reminder_interakt_task = PythonOperator(
     task_concurrency=1,
     python_callable=interaktJob,
     dag=webinar_reminder_interakt_dag,
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )
@@ -79,7 +79,7 @@ webinar_reminder_evening_interakt_task = PythonOperator(
     task_concurrency=1,
     python_callable=interaktJob,
     dag=webinar_reminder_evening_interakt_dag,
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )

@@ -25,6 +25,6 @@ broadcast_az_user_verified = PythonOperator(
     python_callable=broadcast_user_az_verified,
     dag=broadcast_az_user_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

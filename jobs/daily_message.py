@@ -25,6 +25,6 @@ daily_message_task = PythonOperator(
     python_callable=daily_message,
     dag=daily_message_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

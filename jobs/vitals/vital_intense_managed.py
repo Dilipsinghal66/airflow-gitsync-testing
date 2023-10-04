@@ -25,6 +25,6 @@ vital_intense_managed_task = PythonOperator(
     python_callable=vital_intense_managed,
     dag=vital_intense_managed_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

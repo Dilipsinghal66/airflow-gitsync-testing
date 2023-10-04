@@ -25,6 +25,6 @@ switch_active_cm_task = PythonOperator(
     python_callable=send_dyn_func,
     dag=send_dyn_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

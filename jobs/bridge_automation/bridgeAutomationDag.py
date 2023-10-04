@@ -24,7 +24,7 @@ bridge_automation_task = PythonOperator(
     python_callable=initializer,
     dag=bridge_automation_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True,
     provide_context=True
 )

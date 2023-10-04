@@ -25,6 +25,6 @@ broadcast_2020_task = PythonOperator(
     python_callable=broadcast_2020,
     dag=broadcast_2020_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

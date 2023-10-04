@@ -24,5 +24,5 @@ broadcast_active_no_meditation_task = PythonOperator(
     python_callable=broadcast_active_no_med,
     dag=broadcast_active_no_meditation_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
 )

@@ -26,6 +26,6 @@ broadcast_ova_task = PythonOperator(
     python_callable=broadcast_ova,
     dag=broadcast_ova_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

@@ -25,6 +25,6 @@ broadcast_patientids_task = PythonOperator(
     python_callable=broadcast_patientids,
     dag=broadcast_patientids_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

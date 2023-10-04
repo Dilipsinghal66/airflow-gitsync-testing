@@ -26,6 +26,6 @@ meditation_reminder_task = PythonOperator(
     python_callable=meditation_reminder_func,
     dag=meditation_reminder_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

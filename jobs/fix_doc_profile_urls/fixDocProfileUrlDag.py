@@ -28,6 +28,6 @@ fix_doc_image_task = PythonOperator(
         python_callable=fix_doc_profile_url,
         dag=dag,
         op_kwargs={},
-        pool="scheduled_jobs_pool",
+        
         retry_exponential_backoff=True
 )

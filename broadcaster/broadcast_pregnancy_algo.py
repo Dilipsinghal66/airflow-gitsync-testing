@@ -25,6 +25,6 @@ broadcast_newuser_whatsapp_task = PythonOperator(
     python_callable=broadcast_send_pregnancy_card,
     dag=broadcast_pregnancy_algo_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

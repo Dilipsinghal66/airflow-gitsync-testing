@@ -26,6 +26,6 @@ broadcast_zooper_task = PythonOperator(
     python_callable=broadcast_zooper,
     dag=broadcast_zooper_dag,
     op_kwargs={},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )

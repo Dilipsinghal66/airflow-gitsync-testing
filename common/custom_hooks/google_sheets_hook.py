@@ -48,7 +48,7 @@ class GSheetsHook(GoogleCloudBaseHook):
 
         return self._conn
 
-    @GoogleCloudBaseHook.catch_http_exception
+
     def get_values(
         self,
         range_: str,
@@ -78,18 +78,22 @@ class GSheetsHook(GoogleCloudBaseHook):
         :rtype: Dict
         """
         service = self.get_conn()
-        response = service.spreadsheets().values().get(
-            # pylint: disable=no-member
-            spreadsheetId=self.spreadsheet_id,
-            range=range_,
-            majorDimension=major_dimension,
-            valueRenderOption=value_render_option,
-            dateTimeRenderOption=date_time_render_option
-        ).execute(num_retries=self.num_retries)
+        try:
+            response = service.spreadsheets().values().get(
+                # pylint: disable=no-member
+                spreadsheetId=self.spreadsheet_id,
+                range=range_,
+                majorDimension=major_dimension,
+                valueRenderOption=value_render_option,
+                dateTimeRenderOption=date_time_render_option
+            ).execute(num_retries=self.num_retries)
+        except Exception as e:
+            raise AirflowException(f"Error getting values from Google Sheets: {str(e)}")
+                
 
         return response
 
-    @GoogleCloudBaseHook.catch_http_exception
+    
     def batch_get_values(
         self,
         ranges: List,
@@ -119,18 +123,22 @@ class GSheetsHook(GoogleCloudBaseHook):
         :rtype: Dict
         """
         service = self.get_conn()
-        response = service.spreadsheets().values().batchGet(
-            # pylint: disable=no-member
-            spreadsheetId=self.spreadsheet_id,
-            ranges=ranges,
-            majorDimension=major_dimension,
-            valueRenderOption=value_render_option,
-            dateTimeRenderOption=date_time_render_option
-        ).execute(num_retries=self.num_retries)
+        try:
+            response = service.spreadsheets().values().batchGet(
+                # pylint: disable=no-member
+                spreadsheetId=self.spreadsheet_id,
+                ranges=ranges,
+                majorDimension=major_dimension,
+                valueRenderOption=value_render_option,
+                dateTimeRenderOption=date_time_render_option
+            ).execute(num_retries=self.num_retries)
+        
+        except Exception as e:
+            raise AirflowException(f"Error getting values from Google Sheets: {str(e)}")
+            
 
         return response
 
-    @GoogleCloudBaseHook.catch_http_exception
     def update_values(
         self,
         range_: str,
@@ -190,7 +198,6 @@ class GSheetsHook(GoogleCloudBaseHook):
 
         return response
 
-    @GoogleCloudBaseHook.catch_http_exception
     def batch_update_values(
         self,
         ranges: List,
@@ -261,7 +268,6 @@ class GSheetsHook(GoogleCloudBaseHook):
 
         return response
 
-    @GoogleCloudBaseHook.catch_http_exception
     def append_values(
         self,
         range_: str,
@@ -327,7 +333,6 @@ class GSheetsHook(GoogleCloudBaseHook):
 
         return response
 
-    @GoogleCloudBaseHook.catch_http_exception
     def clear(self, range_: str) -> Dict:
         """
         Clear values from Google Sheet from a single range
@@ -347,7 +352,6 @@ class GSheetsHook(GoogleCloudBaseHook):
 
         return response
 
-    @GoogleCloudBaseHook.catch_http_exception
     def batch_clear(self, ranges: List) -> Dict:
         """
         Clear values from Google Sheet from a list of ranges

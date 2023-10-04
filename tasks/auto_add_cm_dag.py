@@ -22,7 +22,7 @@ add_normal_cm_task = PythonOperator(
     python_callable=add_care_manager,
     dag=populate_cm_dag,
     op_kwargs={"check_cm_type": "normal"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )
 
@@ -32,6 +32,6 @@ add_az_cm_task = PythonOperator(
     python_callable=add_care_manager,
     dag=populate_cm_dag,
     op_kwargs={"check_cm_type": "az"},
-    pool="scheduled_jobs_pool",
+    
     retry_exponential_backoff=True
 )
