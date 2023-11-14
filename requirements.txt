@@ -8,3 +8,5 @@ apache-airflow-providers-mongo
 apache-airflow-providers-mysql
 apache-airflow-providers-redis
 apache-airflow-providers-google
+cerberus
+
