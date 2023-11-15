@@ -23,8 +23,7 @@ sync_certificates_from_s3_task = BashOperator(
     task_concurrency=1,
     dag=certificate_renewal_dag,
     pool="infra_tasks_pool",
-    xcom_push=True,
-    bash_command="aws s3 sync " + s3_cert_bucket + " " + s3_sync_location
+    bash_command="aws s3 sync {} {} && echo ${{return_code}}".format(s3_cert_bucket, s3_sync_location),
 )
 
 certbot_renewal_task = ""
