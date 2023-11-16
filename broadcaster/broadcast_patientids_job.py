@@ -18,7 +18,7 @@ def broadcast_patientids():
     sql_query = str(Variable.get("broadcast_active_sql_query", 'select id from zylaapi.auth where who = \'patient\' '
                                                                'and phoneno in (' + sub_sql_query + ')'))
 
-    message = str(Variable.get("broadcast_patientid_array_msg", ''))
+    message = str(Variable.get("broadcast_patientids_msg", ''))
 
     date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
     group_id = "broadcast_patientids " + date_string
