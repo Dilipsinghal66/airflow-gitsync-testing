@@ -1,6 +1,10 @@
 import json
 
 from airflow.hooks.http_hook import HttpHook
+from airflow.utils.log.logging_mixin import LoggingMixin
+
+
+log = LoggingMixin().log
 
 from config import payload_required_methods, extra_http_options, \
     disable_response_check_methods
@@ -27,5 +31,6 @@ def make_http_request(conn_id=None, method=None, payload=None, endpoint=""):
     else:
         response = hook_obj.run(endpoint=endpoint,
                                 extra_options=extra_http_options)
+        log.info(response)
     if response:
         return response.status_code, response.json()
