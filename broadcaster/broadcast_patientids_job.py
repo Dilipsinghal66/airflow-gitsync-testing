@@ -18,10 +18,10 @@ def broadcast_patientids():
     sql_query = str(Variable.get("broadcast_active_sql_query", 'select id from zylaapi.auth where who = \'patient\' '
                                                                'and phoneno in (' + sub_sql_query + ')'))
 
-    message = str(Variable.get("broadcast_patientids_msg", ''))
+    message = str(Variable.get("broadcast_patientid_array_msg", ''))
 
     date_string = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
     group_id = "broadcast_patientids " + date_string
 
-    #process_custom_message_sql(sql_query, message, group_id)
+    process_custom_message_sql(sql_query, message, group_id)
 
