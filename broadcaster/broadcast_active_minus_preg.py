@@ -17,7 +17,7 @@ broadcast_active_minus_preg_dag = DAG(
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    dagrun_timeout=timedelta(minutes=10),
+    dagrun_timeout=timedelta(minutes=50),
 )
 
 broadcast_active_minus_preg_task = PythonOperator(
