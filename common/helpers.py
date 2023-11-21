@@ -551,7 +551,12 @@ def process_custom_message(user_id_list, message, group_id):
         "groupId": group_id
     }
     for uid in user_id_list:
-        send_chat_message(user_id=uid, payload=payload_custom)
+        try:
+            send_chat_message(user_id=uid, payload=payload_custom)
+        except Exception as e:
+            print("Error Exception raised")
+            print(e)
+
 
 
 def process_custom_message_user_id(uid, message, append_msg, group_id):
