@@ -17,7 +17,7 @@ send_vital_reminder_dag = DAG(
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    dagrun_timeout=timedelta(minutes=1),
+    dagrun_timeout=timedelta(minutes=50),
 )
 
 switch_active_cm_task = PythonOperator(

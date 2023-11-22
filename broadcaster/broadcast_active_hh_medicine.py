@@ -17,7 +17,7 @@ broadcast_active_hh_dag = DAG(
     catchup=False,
     start_date=datetime(year=2023, month=5, day=22, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    dagrun_timeout=timedelta(minutes=1),
+    dagrun_timeout=timedelta(minutes=50),
 )
 
 broadcast_active_hh_task = PythonOperator(

@@ -15,7 +15,7 @@ certificate_renewal_dag = DAG(
     catchup=False,
     start_date=datetime(year=2019, month=9, day=13, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    dagrun_timeout=timedelta(minutes=1),
+    dagrun_timeout=timedelta(minutes=50),
 )
 
 sync_certificates_from_s3_task = BashOperator(

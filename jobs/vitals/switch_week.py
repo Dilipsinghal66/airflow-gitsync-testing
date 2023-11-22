@@ -16,7 +16,7 @@ switch_week_dag = DAG(
     catchup=False,
     start_date=datetime(year=2019, month=3, day=31, hour=0, minute=0, second=0,
                         microsecond=0, tzinfo=local_tz),
-    dagrun_timeout=timedelta(minutes=1),
+    dagrun_timeout=timedelta(minutes=50),
 )
 switch_week_task = PythonOperator(
 task_id="switch_week",
