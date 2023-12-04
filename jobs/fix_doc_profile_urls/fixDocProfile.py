@@ -14,7 +14,7 @@ def fix_doc_profile_url():
         cursor = connection.cursor()
         # print("got the cursor")
 
-        cursor.execute("select count(*) from zylaapi.doc_profile where code like '%AZ%'")
+        cursor.execute("select count(*) from zylaapi.doc_profile where code like '%AZ%' or code like '%ZH%' or code like 'HH%' or code like 'NA%' or code like 'ND%'")
         totalcount = cursor.fetchone()[0]
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
