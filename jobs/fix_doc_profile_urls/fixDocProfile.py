@@ -1,9 +1,12 @@
 from common.db_functions import get_data_from_db
 from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
 
 PAGE_SIZE = 1000
 S3_URL = 'https://az-doc.s3.ap-south-1.amazonaws.com/'
 S3_URL_PFIZER = 'https://pfizer-pihu.s3.ap-south-1.amazonaws.com/images/'
+
+log = LoggingMixin().log
 
 def fix_doc_profile_url():
     try:
@@ -16,6 +19,7 @@ def fix_doc_profile_url():
 
         cursor.execute("select count(*) from zylaapi.doc_profile where code like '%AZ%' or code like '%ZH%' or code like 'HH%' or code like 'NA%' or code like 'ND%'")
         totalcount = cursor.fetchone()[0]
+        log.info("total count is: ", totalcount)
         # print(totalcount)
         numberofPage = int(totalcount / PAGE_SIZE) + 1
         print(numberofPage)
@@ -42,9 +46,11 @@ def fix_doc_profile_url():
                 if docCode[:2] == "NA" or docCode[:2] == "ND":
                     docUpdateQuery = "update zylaapi.doc_profile set profile_image='" + S3_URL_PFIZER + docCode + ".jpg'" + " where id=" + str(docId)
                     cursor.execute(docUpdateQuery)
+                    log.info("updated for: ", docCode)
                 else:
                     docUpdateQuery = "update zylaapi.doc_profile set profile_image='" + S3_URL + docCode + ".jpg'" + " where id=" + str(docId)
                     cursor.execute(docUpdateQuery)
+                    log.info("updated for: ", docCode)
 
             connection.commit()
     except Exception as e:
