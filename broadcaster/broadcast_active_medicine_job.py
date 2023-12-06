@@ -19,7 +19,7 @@ def broadcast_active_medicine():
 
     sql_query = str(Variable.get("broadcast_active_medicine_sql_query", 'SELECT id from zylaapi.patient_profile '
                                                                         'where (status = 4 or status = 5) and '
-                                                                        'client_code != \'AB\' and id in '
+                                                                        '(client_code NOT IN (\'AB\', \'NA\', \'ND\')) AND ' ' id in '
                                                                         '(select patient_id '
                                                                         'from zylaapi.patient_status_audit where (to_'
                                                                         'status = 4 or to_status = 5) and '

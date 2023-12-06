@@ -25,7 +25,7 @@ def send_dyn_func():
         cursor1 = connection1.cursor()
         # print("created connection from engine")
 
-        cursor1.execute("select count(*) from zylaapi.patient_profile where client_code != 'AB' and new_chat = 1 "
+        cursor1.execute("select count(*) from zylaapi.patient_profile where client_code NOT IN ('AB', 'NA', 'ND') and new_chat = 1 "
                         "and status = 4")
         totalcount = cursor1.fetchone()[0]
         # print(totalcount)

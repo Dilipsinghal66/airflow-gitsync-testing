@@ -33,7 +33,7 @@ sync_doctor_code_task = PythonOperator(
     python_callable=initializer,
     dag=sync_doctor_codes_hh_dag,
     op_kwargs={},
-    
+
     retry_exponential_backoff=True,
     provide_context=True,
     on_failure_callback=task_failure_email_alert
