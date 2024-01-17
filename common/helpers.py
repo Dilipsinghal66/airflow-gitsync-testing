@@ -481,7 +481,6 @@ def process_ios_message_sql(sql_query, message, group_id):
 def process_custom_message_sql(sql_query, message, group_id):
     sql_data = get_data_from_db(db_type="mysql", conn_id="mysql_monolith",
                                 sql_query=sql_query, execute_query=True)
-    log.info(sql_query)
     user_id_list = []
     if sql_data:
         for user in sql_data:
