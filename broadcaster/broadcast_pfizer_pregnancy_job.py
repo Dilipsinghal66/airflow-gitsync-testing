@@ -19,7 +19,7 @@ def broadcast_pfizer_pregnancy():
         "FROM zylaapi.patients_base_view AS pp "
         "LEFT JOIN (SELECT id, phoneno FROM zylaapi.auth) AS au ON au.phoneno = pp.phoneno "
         "LEFT JOIN (SELECT user_id, delivery_date FROM assessment.delivery_dates) AS DD ON DD.user_id = au.id "
-        "WHERE client_code IN ('NA', 'ND') AND (pid = 292050 OR pid = 284271)"
+        "WHERE client_code IN ('NA', 'ND')"
     )
 
     # Fetching data from the database
