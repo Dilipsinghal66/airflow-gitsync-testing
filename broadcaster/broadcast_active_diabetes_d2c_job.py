@@ -43,6 +43,7 @@ def get_user_ids():
 def broadcast_active_diabetes_d2c():
     user_id_list = get_user_ids()
     print(user_id_list)
+    print("oko")
     process_broadcast_active = int(Variable.get("process_broadcast_active_diabetes_d2c",
                                                 '1'))
     if process_broadcast_active == 1:
